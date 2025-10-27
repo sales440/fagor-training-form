@@ -1,4 +1,4 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, boolean } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +25,55 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Training request submissions table
+ */
+export const trainingRequests = mysqlTable("training_requests", {
+  id: int("id").autoincrement().primaryKey(),
+  
+  // Company Information
+  companyName: varchar("companyName", { length: 255 }).notNull(),
+  contactPerson: varchar("contactPerson", { length: 255 }).notNull(),
+  address: text("address").notNull(),
+  phone: varchar("phone", { length: 50 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  machineBrand: varchar("machineBrand", { length: 255 }),
+  machineModel: varchar("machineModel", { length: 255 }),
+  
+  // OEM Information (Optional)
+  oemName: varchar("oemName", { length: 255 }),
+  oemAddress: text("oemAddress"),
+  oemContact: varchar("oemContact", { length: 255 }),
+  oemEmail: varchar("oemEmail", { length: 320 }),
+  oemPhone: varchar("oemPhone", { length: 50 }),
+  
+  // Training Details
+  controllerModel: varchar("controllerModel", { length: 255 }),
+  machineType: varchar("machineType", { length: 100 }),
+  programmingType: varchar("programmingType", { length: 100 }),
+  trainingDays: int("trainingDays"),
+  trainees: int("trainees"),
+  knowledgeLevel: varchar("knowledgeLevel", { length: 100 }),
+  
+  // Signature and Acceptance
+  applicantName: varchar("applicantName", { length: 255 }),
+  applicationDate: timestamp("applicationDate"),
+  signatureData: text("signatureData"), // Base64 encoded signature
+  termsAccepted: boolean("termsAccepted").default(false).notNull(),
+  
+  // Quotation Details
+  trainingPrice: int("trainingPrice"),
+  travelTime: int("travelTime"),
+  travelExpenses: int("travelExpenses"),
+  totalPrice: int("totalPrice"),
+  
+  // Metadata
+  language: varchar("language", { length: 10 }).default("en"),
+  status: mysqlEnum("status", ["pending", "approved", "rejected", "completed"]).default("pending").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TrainingRequest = typeof trainingRequests.$inferSelect;
+export type InsertTrainingRequest = typeof trainingRequests.$inferInsert;
+
