@@ -818,6 +818,26 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* Route Map */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Travel Route</h3>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Route from {quotationData.travelExpenses.nearestAirport} Airport to your location
+                  </p>
+                  <div className="w-full h-64 rounded-lg overflow-hidden border border-gray-300">
+                    <iframe
+                      width="100%"
+                      height="100%"
+                      style={{ border: 0 }}
+                      loading="lazy"
+                      allowFullScreen
+                      referrerPolicy="no-referrer-when-downgrade"
+                      src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${quotationData.travelExpenses.nearestAirport}+Airport&destination=${encodeURIComponent(formData.address)}&mode=driving`}
+                    >
+                    </iframe>
+                  </div>
+                </div>
+
                 {/* Grand Total */}
                 <div className="bg-[#DC241F] text-white rounded-lg p-4">
                   <div className="flex justify-between items-center">

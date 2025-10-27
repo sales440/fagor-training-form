@@ -115,3 +115,6 @@
 - [x] Review flight cost logic for Illinois addresses (Confirmed: $0 for IL, calculated for other states)
 - [x] Verify email notification is sent to jcrobledolopez@gmail.com (Confirmed: configured correctly)
 
+
+- [x] Add interactive map showing route from nearest airport to customer address in quotation
+
