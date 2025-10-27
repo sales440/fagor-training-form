@@ -29,7 +29,7 @@ export const appRouter = router({
         trainingDays: z.number(),
       }))
       .mutation(async ({ input }) => {
-        const quotation = calculateQuotation(input.address, input.trainingDays);
+        const quotation = await calculateQuotation(input.address, input.trainingDays);
         return quotation;
       }),
 

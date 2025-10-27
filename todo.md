@@ -118,3 +118,9 @@
 
 - [x] Add interactive map showing route from nearest airport to customer address in quotation
 
+
+- [x] FIX CRITICAL: Texas addresses showing $0 flight cost instead of $734 (Fixed: await async calculateQuotation)
+- [x] FIX CRITICAL: Accept Quotation button throwing error and not submitting (Fixed: await async calculateQuotation)
+- [x] FIX CRITICAL: Email notifications not being sent to jcrobledolopez@gmail.com (Fixed: database query filter)
+- [x] Reduce signature canvas size (currently too large/amplified) (Fixed: 400x100 instead of 500x150)
+

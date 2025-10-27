@@ -1,0 +1,8 @@
+{
+  "query": "SELECT id, email, is_active FROM notification_emails;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 385B8cqVvDyKYq8.0dd908e03316 --database fnckYwCtTAYRJhbGQZKYQz --execute SELECT id, email, is_active FROM notification_emails;",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'is_active' in 'field list'"
+  ]
+}

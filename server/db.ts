@@ -132,7 +132,9 @@ export async function getActiveNotificationEmails(): Promise<NotificationEmail[]
     throw new Error("Database not available");
   }
 
-  return await db.select().from(notificationEmails).where(eq(notificationEmails.isActive, true));
+  const results = await db.select().from(notificationEmails);
+  // Filter for active emails
+  return results.filter(email => email.isActive);
 }
 
 export async function addNotificationEmail(email: string): Promise<NotificationEmail> {
