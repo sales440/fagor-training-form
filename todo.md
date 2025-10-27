@@ -124,3 +124,9 @@
 - [x] FIX CRITICAL: Email notifications not being sent to jcrobledolopez@gmail.com (Fixed: database query filter)
 - [x] Reduce signature canvas size (currently too large/amplified) (Fixed: 400x100 instead of 500x150)
 
+
+- [ ] FIX CRITICAL: Excel file not loading in production (__dirname error), causing all addresses to default to Illinois with $0 flight
+
+
+- [x] FIX CRITICAL: Excel file not loading (__dirname error in ES modules), all 50 states defaulting to Illinois with $0 flight (Fixed: dual mapping by state name and 2-letter code)
+
