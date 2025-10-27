@@ -99,3 +99,8 @@
 - [ ] Apply seasonal factors based on travel date (future enhancement)
 - [ ] Update quotation display with detailed travel expense breakdown
 
+
+- [x] Integrate Google Maps Distance Matrix API for accurate driving time calculations
+- [x] Calculate real driving time from airport to customer address
+- [x] Update travel time calculation to use actual Google Maps data
+

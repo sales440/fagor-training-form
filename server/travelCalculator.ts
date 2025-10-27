@@ -123,13 +123,103 @@ function extractStateFromAddress(address: string): string | null {
 }
 
 /**
- * Estimate driving time from airport to destination (in hours)
- * Based on distance estimation from major city
+ * Calculate actual driving time from airport to destination using Google Maps API
  */
-function estimateDrivingTime(address: string): number {
-  // Simple heuristic: assume 1 hour average driving time
-  // In a real implementation, you could use Google Maps API
-  return 1.0;
+async function calculateDrivingTime(airportCode: string, destinationAddress: string): Promise<number> {
+  try {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn('[Travel Calculator] Google Maps API key not configured, using default 1 hour');
+      return 1.0;
+    }
+
+    // Get airport coordinates (approximate)
+    const airportCoords = getAirportCoordinates(airportCode);
+    if (!airportCoords) {
+      console.warn(`[Travel Calculator] Airport ${airportCode} coordinates not found, using default 1 hour`);
+      return 1.0;
+    }
+
+    const origin = `${airportCoords.lat},${airportCoords.lng}`;
+    const destination = encodeURIComponent(destinationAddress);
+    
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${apiKey}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status === 'OK' && data.rows[0]?.elements[0]?.status === 'OK') {
+      const durationSeconds = data.rows[0].elements[0].duration.value;
+      const durationHours = durationSeconds / 3600;
+      console.log(`[Travel Calculator] Driving time from ${airportCode} to destination: ${durationHours.toFixed(2)} hours`);
+      return durationHours;
+    } else {
+      console.warn(`[Travel Calculator] Google Maps API error: ${data.status}, using default 1 hour`);
+      return 1.0;
+    }
+  } catch (error) {
+    console.error('[Travel Calculator] Error calling Google Maps API:', error);
+    return 1.0; // Default fallback
+  }
+}
+
+/**
+ * Get approximate airport coordinates
+ */
+function getAirportCoordinates(code: string): { lat: number; lng: number } | null {
+  const airports: Record<string, { lat: number; lng: number }> = {
+    'ORD': { lat: 41.9742, lng: -87.9073 }, // Chicago O'Hare
+    'BHM': { lat: 33.5629, lng: -86.7535 }, // Birmingham
+    'ANC': { lat: 61.1743, lng: -149.9962 }, // Anchorage
+    'PHX': { lat: 33.4352, lng: -112.0101 }, // Phoenix
+    'LIT': { lat: 34.7294, lng: -92.2243 }, // Little Rock
+    'LAX': { lat: 33.9416, lng: -118.4085 }, // Los Angeles
+    'DEN': { lat: 39.8561, lng: -104.6737 }, // Denver
+    'BDL': { lat: 41.9389, lng: -72.6832 }, // Hartford
+    'ILG': { lat: 39.6787, lng: -75.6065 }, // Wilmington
+    'MIA': { lat: 25.7959, lng: -80.2870 }, // Miami
+    'ATL': { lat: 33.6407, lng: -84.4277 }, // Atlanta
+    'HNL': { lat: 21.3187, lng: -157.9225 }, // Honolulu
+    'BOI': { lat: 43.5644, lng: -116.2228 }, // Boise
+    'IND': { lat: 39.7173, lng: -86.2944 }, // Indianapolis
+    'DSM': { lat: 41.5340, lng: -93.6631 }, // Des Moines
+    'ICT': { lat: 37.6499, lng: -97.4331 }, // Wichita
+    'SDF': { lat: 38.1744, lng: -85.7364 }, // Louisville
+    'MSY': { lat: 29.9934, lng: -90.2580 }, // New Orleans
+    'PWM': { lat: 43.6456, lng: -70.3092 }, // Portland ME
+    'BWI': { lat: 39.1774, lng: -76.6684 }, // Baltimore
+    'BOS': { lat: 42.3656, lng: -71.0096 }, // Boston
+    'DTW': { lat: 42.2162, lng: -83.3554 }, // Detroit
+    'MSP': { lat: 44.8848, lng: -93.2223 }, // Minneapolis
+    'JAN': { lat: 32.3112, lng: -90.0759 }, // Jackson
+    'MCI': { lat: 39.2976, lng: -94.7139 }, // Kansas City
+    'BIL': { lat: 45.8077, lng: -108.5430 }, // Billings
+    'OMA': { lat: 41.3032, lng: -95.8941 }, // Omaha
+    'LAS': { lat: 36.0840, lng: -115.1537 }, // Las Vegas
+    'MHT': { lat: 42.9326, lng: -71.4357 }, // Manchester
+    'EWR': { lat: 40.6895, lng: -74.1745 }, // Newark
+    'ABQ': { lat: 35.0402, lng: -106.6092 }, // Albuquerque
+    'LGA': { lat: 40.7769, lng: -73.8740 }, // New York LaGuardia
+    'JFK': { lat: 40.6413, lng: -73.7781 }, // New York JFK
+    'CLT': { lat: 35.2144, lng: -80.9473 }, // Charlotte
+    'FAR': { lat: 46.9207, lng: -96.8158 }, // Fargo
+    'CLE': { lat: 41.4117, lng: -81.8498 }, // Cleveland
+    'OKC': { lat: 35.3931, lng: -97.6007 }, // Oklahoma City
+    'PDX': { lat: 45.5898, lng: -122.5951 }, // Portland OR
+    'PHL': { lat: 39.8744, lng: -75.2424 }, // Philadelphia
+    'PVD': { lat: 41.7240, lng: -71.4281 }, // Providence
+    'CHS': { lat: 32.8986, lng: -80.0405 }, // Charleston
+    'FSD': { lat: 43.5820, lng: -96.7420 }, // Sioux Falls
+    'BNA': { lat: 36.1245, lng: -86.6782 }, // Nashville
+    'DFW': { lat: 32.8998, lng: -97.0403 }, // Dallas
+    'SLC': { lat: 40.7899, lng: -111.9791 }, // Salt Lake City
+    'BTV': { lat: 44.4719, lng: -73.1533 }, // Burlington
+    'RIC': { lat: 37.5052, lng: -77.3197 }, // Richmond
+    'SEA': { lat: 47.4502, lng: -122.3088 }, // Seattle
+    'CRW': { lat: 38.3731, lng: -81.5932 }, // Charleston WV
+  };
+  
+  return airports[code] || null;
 }
 
 /**
@@ -144,10 +234,10 @@ function estimateFlightTime(distanceMiles: number): number {
 /**
  * Calculate travel expenses based on client address and training days
  */
-export function calculateTravelExpenses(
+export async function calculateTravelExpenses(
   address: string,
   trainingDays: number
-): TravelCalculation {
+): Promise<TravelCalculation> {
   const stateData = loadStateData();
   const stateCode = extractStateFromAddress(address);
 
@@ -175,8 +265,8 @@ export function calculateTravelExpenses(
   // Calculate flight time from distance
   const flightTimeOneWay = estimateFlightTime(state.distancia_millas);
   
-  // Estimate driving time from airport to client location
-  const drivingTimeOneWay = estimateDrivingTime(address);
+  // Calculate actual driving time from airport to client location using Google Maps
+  const drivingTimeOneWay = await calculateDrivingTime(state.codigo_aeropuerto, address);
   
   // Total travel time: (flight + driving) × 2 for round trip
   const travelTimeHours = (flightTimeOneWay + drivingTimeOneWay) * 2;
@@ -206,16 +296,16 @@ export function calculateTravelExpenses(
 /**
  * Calculate total quotation
  */
-export function calculateQuotation(
+export async function calculateQuotation(
   address: string,
   trainingDays: number
-): {
+): Promise<{
   trainingPrice: number;
   travelExpenses: TravelCalculation;
   totalPrice: number;
-} {
+}> {
   const trainingPrice = TRAINING_PRICE_PER_DAY * trainingDays;
-  const travelExpenses = calculateTravelExpenses(address, trainingDays);
+  const travelExpenses = await calculateTravelExpenses(address, trainingDays);
   const totalPrice = trainingPrice + travelExpenses.totalTravelExpenses + travelExpenses.travelTimeCost;
   
   return {
