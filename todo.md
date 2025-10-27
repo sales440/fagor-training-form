@@ -81,3 +81,6 @@
 - [x] Remove engineer assignment logic
 - [x] Simplify form submission to only save to database and send email notification
 
+
+- [x] Revert Programming Type from "ISO" back to "G-Code" (correcting unauthorized change)
+

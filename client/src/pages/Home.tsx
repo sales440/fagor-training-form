@@ -497,7 +497,7 @@ export default function Home() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="conversational">{t("conversational")}</SelectItem>
-                        <SelectItem value="iso">ISO</SelectItem>
+                        <SelectItem value="gcode">G-Code</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
