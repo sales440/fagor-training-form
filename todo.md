@@ -75,3 +75,9 @@
 - [x] Make Google Calendar integration non-blocking (optional)
 - [x] Add proper error handling for notification failures
 
+
+- [x] Change "G-Code" back to "ISO" in Programming Type dropdown
+- [x] Remove all Google Calendar integration code
+- [x] Remove engineer assignment logic
+- [x] Simplify form submission to only save to database and send email notification
+

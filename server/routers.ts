@@ -2,7 +2,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
-import { assignEngineer } from "./googleCalendar";
+
 import { notifyOwner } from "./_core/notification";
 import { z } from "zod";
 import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById } from "./db";
@@ -83,14 +83,6 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const request = await createTrainingRequest(input);
         
-        // Assign engineer based on location (non-blocking)
-        let assignedEngineer = 'JOSEPH HAINLEY - ANAHEIM CA Office';
-        try {
-          assignedEngineer = assignEngineer(input.address);
-        } catch (error) {
-          console.error('Error assigning engineer:', error);
-        }
-        
         // Notify owner about new training request (non-blocking)
         try {
           await notifyOwner({
@@ -110,12 +102,9 @@ Training Days: ${input.trainingDays}
 Programming Type: ${input.programmingType}
 Knowledge Level: ${input.knowledgeLevel}
 
-Assigned Engineer: ${assignedEngineer}
-
 Quotation Total: $${input.totalPrice || 0}
 
-Please review the calendar and confirm available dates with the client.
-Calendar: https://docs.google.com/spreadsheets/d/13TeZSbxsP8it3VhnySoHygE5td0Z1gcp/edit
+Please review and contact the client to schedule training dates.
             `.trim(),
           });
         } catch (error) {
@@ -123,7 +112,7 @@ Calendar: https://docs.google.com/spreadsheets/d/13TeZSbxsP8it3VhnySoHygE5td0Z1g
           // Continue anyway - notification failure shouldn't block form submission
         }
         
-        return { ...request, assignedEngineer };
+        return request;
       }),
 
     list: protectedProcedure.query(async () => {
