@@ -750,38 +750,82 @@ export default function Home() {
                 </div>
               </div>
 
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-2 text-left">{t("serviceDescHeader") || "Service Description"}</th>
-                    <th className="border p-2 text-right">{t("quantityHeader") || "Quantity"}</th>
-                    <th className="border p-2 text-right">{t("unitPriceHeader") || "Unit Price (USD)"}</th>
-                    <th className="border p-2 text-right">{t("subtotalHeader") || "Subtotal (USD)"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border p-2">{t("trainingServiceDesc") || "FAGOR CNC Training Course"}</td>
-                    <td className="border p-2 text-right">{formData.trainingDays} {t("trainingDaysLabel") || "days"}</td>
-                    <td className="border p-2 text-right">$1,200</td>
-                    <td className="border p-2 text-right">${quotationData.trainingPrice.toLocaleString()}</td>
-                  </tr>
-                  <tr>
-                    <td className="border p-2">{t("travelTimeDesc") || "Travel Time"}</td>
-                    <td className="border p-2 text-right">{quotationData.travelExpenses.travelTimeHours} hrs</td>
-                    <td className="border p-2 text-right">$110</td>
-                    <td className="border p-2 text-right">${quotationData.travelExpenses.travelTimeCost.toLocaleString()}</td>
-                  </tr>
-                  <tr>
-                    <td className="border p-2" colSpan={3}>{t("travelExpensesDesc") || "Travel Expenses"} (Flight: ${quotationData.travelExpenses.flightCost}, Hotel: ${quotationData.travelExpenses.hotelCost}, Food: ${quotationData.travelExpenses.foodCost}, Car: ${quotationData.travelExpenses.carRentalCost})</td>
-                    <td className="border p-2 text-right">${quotationData.travelExpenses.totalTravelExpenses.toLocaleString()}</td>
-                  </tr>
-                  <tr className="bg-gray-100 font-bold">
-                    <td className="border p-2" colSpan={3}>{t("totalLabel") || "TOTAL"}</td>
-                    <td className="border p-2 text-right">${quotationData.totalPrice.toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
+              <div className="space-y-3">
+                {/* Training Costs */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("trainingCostsHeader") || "Training Costs"}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("firstDayTraining") || "First Day Training"}</span>
+                      <span className="font-semibold">$1,400.00</span>
+                    </div>
+                    {parseInt(formData.trainingDays) > 1 && (
+                      <div className="flex justify-between items-center py-2 border-b">
+                        <span className="font-medium">{t("additionalDays") || "Additional Days"} ({parseInt(formData.trainingDays) - 1} × $1,000)</span>
+                        <span className="font-semibold">${((parseInt(formData.trainingDays) - 1) * 1000).toLocaleString()}.00</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
+                      <span>{t("trainingSubtotal") || "Training Subtotal"}</span>
+                      <span>${quotationData.trainingPrice.toLocaleString()}.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Travel Time */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("travelTimeHeader") || "Travel Time"}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("travelHours") || "Travel Hours"}</span>
+                      <span>{quotationData.travelExpenses.travelTimeHours} hrs</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("hourlyRate") || "Hourly Rate"}</span>
+                      <span>$110.00/hr</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
+                      <span>{t("travelTimeSubtotal") || "Travel Time Subtotal"}</span>
+                      <span>${quotationData.travelExpenses.travelTimeCost.toLocaleString()}.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Travel Expenses */}
+                <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("travelExpensesHeader") || "Travel Expenses"}</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("flightCost") || "Flight"} (Round Trip to {quotationData.travelExpenses.nearestAirport})</span>
+                      <span>${quotationData.travelExpenses.flightCost.toLocaleString()}.00</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("hotelCost") || "Hotel"} ({formData.trainingDays} nights)</span>
+                      <span>${quotationData.travelExpenses.hotelCost.toLocaleString()}.00</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("carRentalCost") || "Car Rental"} ({parseInt(formData.trainingDays) + 1} days)</span>
+                      <span>${quotationData.travelExpenses.carRentalCost.toLocaleString()}.00</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b">
+                      <span className="font-medium">{t("foodCost") || "Meals & Incidentals"} ({parseInt(formData.trainingDays) + 1} days)</span>
+                      <span>${quotationData.travelExpenses.foodCost.toLocaleString()}.00</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
+                      <span>{t("travelExpensesSubtotal") || "Travel Expenses Subtotal"}</span>
+                      <span>${quotationData.travelExpenses.totalTravelExpenses.toLocaleString()}.00</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Grand Total */}
+                <div className="bg-[#DC241F] text-white rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xl font-bold">{t("grandTotal") || "GRAND TOTAL"}</span>
+                    <span className="text-2xl font-bold">${quotationData.totalPrice.toLocaleString()}.00</span>
+                  </div>
+                </div>
+              </div>
 
               <div className="bg-blue-50 p-4 rounded-lg text-sm space-y-1">
                 <p><strong>{t("quotationTermsTitle") || "TERMS AND CONDITIONS"}</strong></p>

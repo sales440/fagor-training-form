@@ -104,3 +104,9 @@
 - [x] Calculate real driving time from airport to customer address
 - [x] Update travel time calculation to use actual Google Maps data
 
+
+- [x] Correct training pricing: $1,400/day (first day), $1,000/day (additional days)
+- [x] Fix travel expense calculation logic
+- [x] Display quotation breakdown vertically instead of horizontally
+- [x] Show detailed line items: training days, travel time, flight, hotel, car, food
+

@@ -32,7 +32,8 @@ interface StateData {
 }
 
 // Base prices for training (per day, 6 hours, max 4 participants)
-export const TRAINING_PRICE_PER_DAY = 1200; // USD
+export const TRAINING_PRICE_FIRST_DAY = 1400; // USD - First day
+export const TRAINING_PRICE_ADDITIONAL_DAY = 1000; // USD - Additional days during same visit
 export const TRAVEL_TIME_HOURLY_RATE = 110; // USD per hour
 export const FOOD_COST_PER_DAY = 68; // GSA M&IE standard rate
 
@@ -304,7 +305,10 @@ export async function calculateQuotation(
   travelExpenses: TravelCalculation;
   totalPrice: number;
 }> {
-  const trainingPrice = TRAINING_PRICE_PER_DAY * trainingDays;
+  // Training pricing: $1,400 first day + $1,000 for each additional day
+  const trainingPrice = trainingDays > 0 
+    ? TRAINING_PRICE_FIRST_DAY + (TRAINING_PRICE_ADDITIONAL_DAY * Math.max(0, trainingDays - 1))
+    : 0;
   const travelExpenses = await calculateTravelExpenses(address, trainingDays);
   const totalPrice = trainingPrice + travelExpenses.totalTravelExpenses + travelExpenses.travelTimeCost;
   
