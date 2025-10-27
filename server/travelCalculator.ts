@@ -1,7 +1,10 @@
 /**
  * Travel Calculator Service
- * Calculates travel expenses based on client location
+ * Calculates travel expenses based on client location using real data from Excel
  */
+
+import * as XLSX from 'xlsx';
+import * as path from 'path';
 
 interface TravelCalculation {
   nearestAirport: string;
@@ -12,101 +15,130 @@ interface TravelCalculation {
   travelTimeHours: number;
   travelTimeCost: number;
   totalTravelExpenses: number;
+  stateName?: string;
+}
+
+interface StateData {
+  estado: string;
+  ciudad_principal: string;
+  codigo_aeropuerto: string;
+  precio_vuelo_economia: number;
+  precio_vuelo_business: number;
+  distancia_millas: number;
+  hampton_inn_promedio: number;
+  compact_dia: number;
+  midsize_dia: number;
+  fullsize_dia: number;
 }
 
 // Base prices for training (per day, 6 hours, max 4 participants)
 export const TRAINING_PRICE_PER_DAY = 1200; // USD
 export const TRAVEL_TIME_HOURLY_RATE = 110; // USD per hour
+export const FOOD_COST_PER_DAY = 68; // GSA M&IE standard rate
 
-// Average travel costs (these would be updated weekly from external APIs)
-const AVERAGE_COSTS = {
-  hotel: 150, // per night
-  food: 75, // per day
-  carRental: 60, // per day
-  flightBase: 400, // base flight cost from Chicago O'Hare
-};
-
-// Major US airports with approximate flight times from Chicago O'Hare (in hours)
-const AIRPORT_DATA: Record<string, { code: string; flightTime: number; flightCost: number }> = {
-  // East Coast
-  "new york": { code: "JFK", flightTime: 2.5, flightCost: 250 },
-  "boston": { code: "BOS", flightTime: 2.5, flightCost: 280 },
-  "washington": { code: "DCA", flightTime: 2, flightCost: 240 },
-  "atlanta": { code: "ATL", flightTime: 2, flightCost: 220 },
-  "miami": { code: "MIA", flightTime: 3, flightCost: 300 },
-  "philadelphia": { code: "PHL", flightTime: 2, flightCost: 240 },
-  
-  // West Coast
-  "los angeles": { code: "LAX", flightTime: 4, flightCost: 350 },
-  "san francisco": { code: "SFO", flightTime: 4.5, flightCost: 380 },
-  "seattle": { code: "SEA", flightTime: 4, flightCost: 360 },
-  "san diego": { code: "SAN", flightTime: 4, flightCost: 340 },
-  "portland": { code: "PDX", flightTime: 4, flightCost: 350 },
-  
-  // Central
-  "dallas": { code: "DFW", flightTime: 2.5, flightCost: 260 },
-  "houston": { code: "IAH", flightTime: 2.5, flightCost: 270 },
-  "denver": { code: "DEN", flightTime: 2.5, flightCost: 280 },
-  "phoenix": { code: "PHX", flightTime: 3.5, flightCost: 300 },
-  "las vegas": { code: "LAS", flightTime: 3.5, flightCost: 290 },
-  "minneapolis": { code: "MSP", flightTime: 1.5, flightCost: 200 },
-  "detroit": { code: "DTW", flightTime: 1, flightCost: 180 },
-  "st louis": { code: "STL", flightTime: 1, flightCost: 180 },
-  
-  // South
-  "orlando": { code: "MCO", flightTime: 3, flightCost: 290 },
-  "tampa": { code: "TPA", flightTime: 3, flightCost: 280 },
-  "charlotte": { code: "CLT", flightTime: 2, flightCost: 230 },
-  "nashville": { code: "BNA", flightTime: 1.5, flightCost: 210 },
-  "new orleans": { code: "MSY", flightTime: 2.5, flightCost: 270 },
-};
+// Cache for Excel data
+let stateDataCache: Map<string, StateData> | null = null;
 
 /**
- * Find nearest airport based on address
+ * Load state data from Excel file
  */
-function findNearestAirport(address: string): { code: string; flightTime: number; flightCost: number } {
-  const addressLower = address.toLowerCase();
-  
-  // Try to match city names in the address
-  for (const [city, data] of Object.entries(AIRPORT_DATA)) {
-    if (addressLower.includes(city)) {
-      return data;
-    }
+function loadStateData(): Map<string, StateData> {
+  if (stateDataCache) {
+    return stateDataCache;
   }
-  
-  // Extract state abbreviations
+
+  try {
+    const excelPath = path.join(__dirname, 'travel-calculator-data.xlsx');
+    const workbook = XLSX.readFile(excelPath);
+    const sheetName = 'Base Datos USA';
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+    stateDataCache = new Map();
+
+    // Skip header rows (first 3 rows)
+    for (let i = 3; i < data.length; i++) {
+      const row = data[i] as any[];
+      if (!row[0]) continue; // Skip empty rows
+
+      const stateData: StateData = {
+        estado: row[0],
+        ciudad_principal: row[1],
+        codigo_aeropuerto: row[2],
+        precio_vuelo_economia: Number(row[3]) || 0,
+        precio_vuelo_business: Number(row[4]) || 0,
+        distancia_millas: Number(row[5]) || 0,
+        hampton_inn_promedio: Number(row[7]) || 125,
+        compact_dia: Number(row[10]) || 42,
+        midsize_dia: Number(row[11]) || 48,
+        fullsize_dia: Number(row[12]) || 55,
+      };
+
+      stateDataCache.set(stateData.estado.toUpperCase(), stateData);
+    }
+
+    return stateDataCache;
+  } catch (error) {
+    console.error('Error loading state data from Excel:', error);
+    // Return empty map if file cannot be loaded
+    return new Map();
+  }
+}
+
+/**
+ * Extract state from address
+ */
+function extractStateFromAddress(address: string): string | null {
+  // Try to find 2-letter state code
   const stateMatch = address.match(/\b([A-Z]{2})\b/);
   if (stateMatch) {
-    const state = stateMatch[1];
-    const stateAirports: Record<string, string> = {
-      "NY": "new york",
-      "CA": "los angeles",
-      "TX": "dallas",
-      "FL": "miami",
-      "IL": "chicago",
-      "PA": "philadelphia",
-      "OH": "detroit",
-      "GA": "atlanta",
-      "NC": "charlotte",
-      "MI": "detroit",
-      "WA": "seattle",
-      "AZ": "phoenix",
-      "MA": "boston",
-      "TN": "nashville",
-      "CO": "denver",
-      "MN": "minneapolis",
-      "MO": "st louis",
-      "OR": "portland",
-      "NV": "las vegas",
-    };
-    
-    if (stateAirports[state] && AIRPORT_DATA[stateAirports[state]]) {
-      return AIRPORT_DATA[stateAirports[state]];
+    return stateMatch[1].toUpperCase();
+  }
+
+  // Try to match full state names
+  const stateNames: Record<string, string> = {
+    'ALABAMA': 'AL', 'ALASKA': 'AK', 'ARIZONA': 'AZ', 'ARKANSAS': 'AR',
+    'CALIFORNIA': 'CA', 'COLORADO': 'CO', 'CONNECTICUT': 'CT', 'DELAWARE': 'DE',
+    'FLORIDA': 'FL', 'GEORGIA': 'GA', 'HAWAII': 'HI', 'IDAHO': 'ID',
+    'ILLINOIS': 'IL', 'INDIANA': 'IN', 'IOWA': 'IA', 'KANSAS': 'KS',
+    'KENTUCKY': 'KY', 'LOUISIANA': 'LA', 'MAINE': 'ME', 'MARYLAND': 'MD',
+    'MASSACHUSETTS': 'MA', 'MICHIGAN': 'MI', 'MINNESOTA': 'MN', 'MISSISSIPPI': 'MS',
+    'MISSOURI': 'MO', 'MONTANA': 'MT', 'NEBRASKA': 'NE', 'NEVADA': 'NV',
+    'NEW HAMPSHIRE': 'NH', 'NEW JERSEY': 'NJ', 'NEW MEXICO': 'NM', 'NEW YORK': 'NY',
+    'NORTH CAROLINA': 'NC', 'NORTH DAKOTA': 'ND', 'OHIO': 'OH', 'OKLAHOMA': 'OK',
+    'OREGON': 'OR', 'PENNSYLVANIA': 'PA', 'RHODE ISLAND': 'RI', 'SOUTH CAROLINA': 'SC',
+    'SOUTH DAKOTA': 'SD', 'TENNESSEE': 'TN', 'TEXAS': 'TX', 'UTAH': 'UT',
+    'VERMONT': 'VT', 'VIRGINIA': 'VA', 'WASHINGTON': 'WA', 'WEST VIRGINIA': 'WV',
+    'WISCONSIN': 'WI', 'WYOMING': 'WY'
+  };
+
+  const addressUpper = address.toUpperCase();
+  for (const [fullName, code] of Object.entries(stateNames)) {
+    if (addressUpper.includes(fullName)) {
+      return code;
     }
   }
-  
-  // Default to Chicago (local training)
-  return { code: "ORD", flightTime: 0.5, flightCost: 100 };
+
+  return null;
+}
+
+/**
+ * Estimate driving time from airport to destination (in hours)
+ * Based on distance estimation from major city
+ */
+function estimateDrivingTime(address: string): number {
+  // Simple heuristic: assume 1 hour average driving time
+  // In a real implementation, you could use Google Maps API
+  return 1.0;
+}
+
+/**
+ * Estimate flight time based on distance
+ * Average commercial flight speed: ~500 mph
+ */
+function estimateFlightTime(distanceMiles: number): number {
+  if (distanceMiles === 0) return 0.5; // Local, minimal travel
+  return (distanceMiles / 500) + 0.5; // Add 0.5 hours for taxi/takeoff/landing
 }
 
 /**
@@ -116,25 +148,50 @@ export function calculateTravelExpenses(
   address: string,
   trainingDays: number
 ): TravelCalculation {
-  const airport = findNearestAirport(address);
+  const stateData = loadStateData();
+  const stateCode = extractStateFromAddress(address);
+
+  let state: StateData | undefined;
+  if (stateCode) {
+    state = stateData.get(stateCode);
+  }
+
+  // Default values if state not found (Illinois/Chicago)
+  if (!state) {
+    state = {
+      estado: 'Illinois',
+      ciudad_principal: 'Chicago',
+      codigo_aeropuerto: 'ORD',
+      precio_vuelo_economia: 0,
+      precio_vuelo_business: 0,
+      distancia_millas: 0,
+      hampton_inn_promedio: 180,
+      compact_dia: 35,
+      midsize_dia: 42,
+      fullsize_dia: 48,
+    };
+  }
+
+  // Calculate flight time from distance
+  const flightTimeOneWay = estimateFlightTime(state.distancia_millas);
   
-  // Estimate driving time from airport to client location (average 1 hour)
-  const drivingTimeOneWay = 1;
+  // Estimate driving time from airport to client location
+  const drivingTimeOneWay = estimateDrivingTime(address);
   
-  // Total travel time: flight + driving (round trip)
-  const travelTimeHours = (airport.flightTime + drivingTimeOneWay) * 2;
+  // Total travel time: (flight + driving) × 2 for round trip
+  const travelTimeHours = (flightTimeOneWay + drivingTimeOneWay) * 2;
   
   // Calculate costs
-  const flightCost = airport.flightCost * 2; // Round trip
-  const hotelCost = AVERAGE_COSTS.hotel * trainingDays; // Hotel for training days
-  const foodCost = AVERAGE_COSTS.food * (trainingDays + 1); // Food for training days + travel day
-  const carRentalCost = AVERAGE_COSTS.carRental * (trainingDays + 1); // Car rental for all days
+  const flightCost = state.precio_vuelo_economia * 2; // Round trip
+  const hotelCost = state.hampton_inn_promedio * trainingDays; // Hotel for training days
+  const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day
+  const carRentalCost = state.midsize_dia * (trainingDays + 1); // Midsize car for all days
   const travelTimeCost = Math.ceil(travelTimeHours) * TRAVEL_TIME_HOURLY_RATE;
   
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
   
   return {
-    nearestAirport: airport.code,
+    nearestAirport: state.codigo_aeropuerto,
     flightCost,
     hotelCost,
     foodCost,
@@ -142,6 +199,7 @@ export function calculateTravelExpenses(
     travelTimeHours: Math.ceil(travelTimeHours),
     travelTimeCost,
     totalTravelExpenses,
+    stateName: state.estado,
   };
 }
 

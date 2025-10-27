@@ -89,3 +89,13 @@
 - [x] Add configuration system to manage multiple notification email addresses
 - [x] Create email template with all training request details
 
+
+- [x] Integrate travel expense calculator using Excel data
+- [x] Calculate flight costs based on customer state
+- [x] Calculate hotel costs based on training days
+- [x] Calculate car rental costs based on training days
+- [x] Calculate travel hours: (flight hours + driving hours from airport to address) × 2
+- [x] Apply travel hour rate of $110/hour
+- [ ] Apply seasonal factors based on travel date (future enhancement)
+- [ ] Update quotation display with detailed travel expense breakdown
+

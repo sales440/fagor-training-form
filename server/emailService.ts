@@ -158,7 +158,7 @@ service@fagor-automation.com
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Fagor Training Forms <notifications@fagor-automation.com>',
+        from: 'Fagor Training Forms <onboarding@resend.dev>',
         to: emailAddresses,
         subject: subject,
         html: htmlContent,
