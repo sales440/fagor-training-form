@@ -122,3 +122,47 @@ export async function getTrainingRequestById(id: number): Promise<TrainingReques
   return result.length > 0 ? result[0] : undefined;
 }
 
+
+// Notification email helpers
+import { notificationEmails, InsertNotificationEmail, NotificationEmail } from "../drizzle/schema";
+
+export async function getActiveNotificationEmails(): Promise<NotificationEmail[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(notificationEmails).where(eq(notificationEmails.isActive, true));
+}
+
+export async function addNotificationEmail(email: string): Promise<NotificationEmail> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.insert(notificationEmails).values({ email, isActive: true });
+  const insertedId = Number(result[0].insertId);
+  
+  const inserted = await db.select().from(notificationEmails).where(eq(notificationEmails.id, insertedId)).limit(1);
+  return inserted[0];
+}
+
+export async function removeNotificationEmail(id: number): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  await db.delete(notificationEmails).where(eq(notificationEmails.id, id));
+}
+
+export async function getAllNotificationEmails(): Promise<NotificationEmail[]> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  return await db.select().from(notificationEmails);
+}
+

@@ -83,3 +83,18 @@ export const trainingRequests = mysqlTable("training_requests", {
 export type TrainingRequest = typeof trainingRequests.$inferSelect;
 export type InsertTrainingRequest = typeof trainingRequests.$inferInsert;
 
+
+/**
+ * Notification email addresses configuration table
+ */
+export const notificationEmails = mysqlTable("notification_emails", {
+  id: int("id").autoincrement().primaryKey(),
+  email: varchar("email", { length: 320 }).notNull().unique(),
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationEmail = typeof notificationEmails.$inferSelect;
+export type InsertNotificationEmail = typeof notificationEmails.$inferInsert;
+

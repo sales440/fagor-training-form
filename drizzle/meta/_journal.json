@@ -22,6 +22,13 @@
       "when": 1761528514087,
       "tag": "0002_slippery_doctor_doom",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1761539732333,
+      "tag": "0003_confused_wasp",
+      "breakpoints": true
     }
   ]
 }

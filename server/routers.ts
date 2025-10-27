@@ -3,10 +3,10 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 
-import { notifyOwner } from "./_core/notification";
 import { z } from "zod";
-import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById } from "./db";
+import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById, getAllNotificationEmails, addNotificationEmail, removeNotificationEmail } from "./db";
 import { calculateQuotation } from "./travelCalculator";
+import { sendTrainingRequestEmail } from "./emailService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -83,33 +83,29 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const request = await createTrainingRequest(input);
         
-        // Notify owner about new training request (non-blocking)
+        // Send email notification about new training request (non-blocking)
         try {
-          await notifyOwner({
-            title: `New Training Request from ${input.companyName}`,
-            content: `
-Company: ${input.companyName}
-Contact: ${input.contactPerson}
-Email: ${input.email}
-Phone: ${input.phone}
-Address: ${input.address}
-
-Machine: ${input.machineBrand} ${input.machineModel}
-CNC Model: ${input.controllerModel}
-Machine Type: ${input.machineType}
-
-Training Days: ${input.trainingDays}
-Programming Type: ${input.programmingType}
-Knowledge Level: ${input.knowledgeLevel}
-
-Quotation Total: $${input.totalPrice || 0}
-
-Please review and contact the client to schedule training dates.
-            `.trim(),
+          await sendTrainingRequestEmail({
+            companyName: input.companyName,
+            contactPerson: input.contactPerson,
+            email: input.email,
+            phone: input.phone,
+            address: input.address,
+            machineBrand: input.machineBrand,
+            machineModel: input.machineModel,
+            controllerModel: input.controllerModel,
+            machineType: input.machineType,
+            programmingType: input.programmingType,
+            trainingDays: input.trainingDays,
+            knowledgeLevel: input.knowledgeLevel,
+            totalPrice: input.totalPrice,
+            oemName: input.oemName,
+            oemContact: input.oemContact,
+            oemEmail: input.oemEmail,
           });
         } catch (error) {
-          console.error('Error sending notification:', error);
-          // Continue anyway - notification failure shouldn't block form submission
+          console.error('Error sending email notification:', error);
+          // Continue anyway - email failure shouldn't block form submission
         }
         
         return request;
@@ -123,6 +119,25 @@ Please review and contact the client to schedule training dates.
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await getTrainingRequestById(input.id);
+      }),
+  }),
+
+  notificationEmails: router({
+    list: protectedProcedure.query(async () => {
+      return await getAllNotificationEmails();
+    }),
+
+    add: protectedProcedure
+      .input(z.object({ email: z.string().email() }))
+      .mutation(async ({ input }) => {
+        return await addNotificationEmail(input.email);
+      }),
+
+    remove: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await removeNotificationEmail(input.id);
+        return { success: true };
       }),
   }),
 });

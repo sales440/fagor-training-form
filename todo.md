@@ -84,3 +84,8 @@
 
 - [x] Revert Programming Type from "ISO" back to "G-Code" (correcting unauthorized change)
 
+
+- [x] Implement email notifications to service@fagor-automation.com when quotation is accepted
+- [x] Add configuration system to manage multiple notification email addresses
+- [x] Create email template with all training request details
+
