@@ -40,3 +40,23 @@
 
 - [x] Move Fagor address to right side of header at same level as logo
 
+
+- [ ] Add detailed training description text area in Training Details section
+- [ ] Move language selector icon above Company Information section (centered)
+- [ ] Adjust Fagor address position further to the right for better alignment with logo
+
+
+- [ ] Change programming type options from ISO to G-Code (keep Conversational)
+
+
+- [x] Make "FAGOR AUTOMATION" text red in address header
+- [ ] Center language globe icon between gray subtitle and Company Information section
+- [ ] Change "ISO" to "G-CODE" in Programming Type dropdown
+- [ ] Add "Training Details" text area field in Training Details section
+- [x] Reduce signature canvas size to fit within signature box
+- [x] Add Fagor logo and address to quotation dialog header
+- [x] Include end-user data, OEM data, CNC model, and machine model in quotation
+- [ ] Integrate Google Calendar API to check engineer availability
+- [ ] Implement automatic engineer assignment based on client location (West Coast/TX/Denver/Midwest: Joseph Hainley, East Coast: Waiky Lau/Yarek Gugulsky/Khatereh Mohammadi)
+- [ ] Connect "ACCEPT QUOTATION" button to Google Calendar scheduling
+

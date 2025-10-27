@@ -45,6 +45,7 @@ export default function Home() {
     trainingDays: "",
     trainees: "",
     knowledgeLevel: "",
+    trainingDetails: "",
     applicantName: "",
     applicationDate: new Date().toISOString().split('T')[0],
   });
@@ -84,6 +85,7 @@ export default function Home() {
         trainingDays: "",
         trainees: "",
         knowledgeLevel: "",
+        trainingDetails: "",
         applicantName: "",
         applicationDate: new Date().toISOString().split('T')[0],
       });
@@ -218,48 +220,53 @@ export default function Home() {
               <img src="/fagor-logo-official.jpg" alt="Fagor Automation" className="h-16 object-contain" />
             </div>
 
-            {/* Address and Language Selector */}
-            <div className="flex items-center gap-6">
-              <div className="text-sm text-gray-700 text-right">
-                <p className="font-semibold">Fagor Automation Corp.</p>
-                <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
-                <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
-                <p>service@fagor-automation.com</p>
-              </div>
-              
-              {/* Language Selector */}
-              <div className="relative">
-                <button
-                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700"
-              >
-                <Globe className="w-6 h-6" />
-              </button>
+            {/* Spacer */}
+            <div className="flex-1"></div>
 
-              {showLanguageMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 overflow-hidden">
-                  {languages.map((lang) => (
-                    <button
-                      key={lang.code}
-                      onClick={() => {
-                        setLanguage(lang.code);
-                        setShowLanguageMenu(false);
-                      }}
-                      className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors flex items-center gap-2 ${
-                        language === lang.code ? "bg-red-50 text-[#DC241F] font-semibold" : "text-gray-700"
-                      }`}
-                    >
-                      <span>{lang.flag}</span>
-                      <span>{lang.name}</span>
-                    </button>
-                  ))}
-                </div>
-               )}
-              </div>
+            {/* Address */}
+            <div className="text-sm text-gray-700 text-right mr-4">
+              <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
+              <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
+              <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+              <p>service@fagor-automation.com</p>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Language Selector - Centered above form */}
+      <div className="container py-6">
+        <div className="flex justify-center">
+          <div className="relative">
+            <button
+              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+              className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700 border-2 border-gray-300 rounded-full"
+            >
+              <Globe className="w-6 h-6" />
+            </button>
+
+            {showLanguageMenu && (
+              <div className="absolute left-1/2 transform -translate-x-1/2 mt-2 w-48 bg-white rounded-lg shadow-xl z-50 overflow-hidden">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      setLanguage(lang.code);
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors flex items-center gap-2 ${
+                      language === lang.code ? "bg-red-50 text-[#DC241F] font-semibold" : "text-gray-700"
+                    }`}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="container py-8">
@@ -470,6 +477,17 @@ export default function Home() {
                   </div>
                 </div>
 
+                <div>
+                  <Label htmlFor="trainingDetails">Training Details / Special Requirements</Label>
+                  <textarea
+                    id="trainingDetails"
+                    value={formData.trainingDetails}
+                    onChange={(e) => handleInputChange("trainingDetails", e.target.value)}
+                    className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F]"
+                    placeholder="Please describe the type of training you would like to receive in detail..."
+                  />
+                </div>
+
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="programmingType">{t("programmingTypeLabel")}</Label>
@@ -479,7 +497,7 @@ export default function Home() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="conversational">{t("conversational")}</SelectItem>
-                        <SelectItem value="iso">{t("iso")}</SelectItem>
+                        <SelectItem value="gcode">G-Code</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -600,8 +618,8 @@ export default function Home() {
                   <div className="border-2 border-gray-300 rounded-lg p-2 bg-white">
                     <canvas
                       ref={canvasRef}
-                      width={600}
-                      height={200}
+                      width={500}
+                      height={150}
                       className="w-full border border-gray-200 rounded"
                     />
                   </div>
@@ -659,22 +677,76 @@ export default function Home() {
 
       {/* Quotation Dialog */}
       <Dialog open={showQuotation} onOpenChange={setShowQuotation}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#DC241F] text-center">
+            {/* Fagor Header in Quotation */}
+            <div className="flex justify-between items-start mb-4 pb-4 border-b-2">
+              <img src="/fagor-logo-official.jpg" alt="Fagor Automation" className="h-12 object-contain" />
+              <div className="text-xs text-gray-700 text-right">
+                <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
+                <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
+                <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+                <p>service@fagor-automation.com</p>
+              </div>
+            </div>
+            <DialogTitle className="text-2xl text-[#DC241F] text-center mb-4">
               {t("quotationTitle") || "TRAINING QUOTATION"}
             </DialogTitle>
           </DialogHeader>
           {quotationData && (
             <div className="space-y-4">
+              {/* Customer Information */}
               <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="font-bold text-[#DC241F] mb-2">End User Information</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div><strong>{t("quotationDate") || "Date"}:</strong></div>
                   <div>{new Date().toLocaleDateString()}</div>
                   <div><strong>{t("companyInfo") || "Company"}:</strong></div>
                   <div>{formData.companyName}</div>
+                  <div><strong>{t("contactPersonLabel") || "Contact"}:</strong></div>
+                  <div>{formData.contactPerson}</div>
                   <div><strong>{t("locationInfo") || "Location"}:</strong></div>
                   <div>{formData.address}</div>
+                  <div><strong>{t("phoneLabel") || "Phone"}:</strong></div>
+                  <div>{formData.phone}</div>
+                  <div><strong>{t("emailLabel") || "Email"}:</strong></div>
+                  <div>{formData.email}</div>
+                </div>
+              </div>
+
+              {/* OEM Information (if provided) */}
+              {formData.oemName && (
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-[#DC241F] mb-2">OEM Information</h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div><strong>OEM Name:</strong></div>
+                    <div>{formData.oemName}</div>
+                    <div><strong>OEM Contact:</strong></div>
+                    <div>{formData.oemContact}</div>
+                    <div><strong>OEM Address:</strong></div>
+                    <div>{formData.oemAddress}</div>
+                    <div><strong>OEM Phone:</strong></div>
+                    <div>{formData.oemPhone}</div>
+                    <div><strong>OEM Email:</strong></div>
+                    <div>{formData.oemEmail}</div>
+                  </div>
+                </div>
+              )}
+
+              {/* Machine Information */}
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h3 className="font-bold text-[#DC241F] mb-2">Machine & CNC Information</h3>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div><strong>CNC Model:</strong></div>
+                  <div>{formData.controllerModel}</div>
+                  <div><strong>Machine Brand:</strong></div>
+                  <div>{formData.machineBrand}</div>
+                  <div><strong>Machine Model:</strong></div>
+                  <div>{formData.machineModel}</div>
+                  <div><strong>Machine Type:</strong></div>
+                  <div>{formData.machineType}</div>
+                  <div><strong>Programming Type:</strong></div>
+                  <div>{formData.programmingType}</div>
                 </div>
               </div>
 
