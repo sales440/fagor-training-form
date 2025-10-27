@@ -60,3 +60,18 @@
 - [ ] Implement automatic engineer assignment based on client location (West Coast/TX/Denver/Midwest: Joseph Hainley, East Coast: Waiky Lau/Yarek Gugulsky/Khatereh Mohammadi)
 - [ ] Connect "ACCEPT QUOTATION" button to Google Calendar scheduling
 
+
+- [x] Add Google Service Account credentials to project
+- [x] Implement Google Sheets API integration to read calendar
+- [x] Create engineer assignment logic based on client location
+- [ ] Implement date availability checking (avoid red/green/orange dates)
+- [ ] Add date suggestion system after quotation acceptance
+- [x] Send notification to owner when quotation is accepted
+- [ ] Allow manual confirmation before updating calendar
+- [ ] Update Google Sheet with yellow color for pending confirmations
+
+
+- [x] Fix form submission error when accepting quotation
+- [x] Make Google Calendar integration non-blocking (optional)
+- [x] Add proper error handling for notification failures
+
