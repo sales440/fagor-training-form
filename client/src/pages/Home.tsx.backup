@@ -4,11 +4,11 @@ import { Language } from "@/lib/translations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Globe, Loader2, AlertCircle } from "lucide-react";
+import { Globe, Loader2 } from "lucide-react";
 import SignaturePad from "signature_pad";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -17,12 +17,6 @@ export default function Home() {
   const { language, setLanguage, t } = useLanguage();
   const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
-  const [showQuotation, setShowQuotation] = useState(false);
-  const [showWarning, setShowWarning] = useState(false);
-  const [warningMessage, setWarningMessage] = useState("");
-  const [quotationData, setQuotationData] = useState<any>(null);
-  const [oemFieldsEnabled, setOemFieldsEnabled] = useState(false);
-  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
 
@@ -40,7 +34,6 @@ export default function Home() {
     oemEmail: "",
     oemPhone: "",
     controllerModel: "",
-    controller8055: false,
     machineType: "",
     programmingType: "",
     trainingDays: "",
@@ -50,21 +43,9 @@ export default function Home() {
     applicationDate: new Date().toISOString().split('T')[0],
   });
 
-  const calculateQuotationMutation = trpc.trainingRequest.calculateQuotation.useMutation({
-    onSuccess: (data) => {
-      setQuotationData(data);
-      setShowQuotation(true);
-    },
-    onError: (error) => {
-      toast.error(t("errorMessage"));
-      console.error("Error calculating quotation:", error);
-    },
-  });
-
   const createRequestMutation = trpc.trainingRequest.create.useMutation({
     onSuccess: () => {
       toast.success(t("successMessage"));
-      setShowQuotation(false);
       // Reset form
       setFormData({
         companyName: "",
@@ -80,7 +61,6 @@ export default function Home() {
         oemEmail: "",
         oemPhone: "",
         controllerModel: "",
-        controller8055: false,
         machineType: "",
         programmingType: "",
         trainingDays: "",
@@ -108,12 +88,7 @@ export default function Home() {
     }
   }, []);
 
-  // Enable OEM fields when OEM name is filled
-  useEffect(() => {
-    setOemFieldsEnabled(formData.oemName.trim().length > 0);
-  }, [formData.oemName]);
-
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -123,57 +98,13 @@ export default function Home() {
     }
   };
 
-  const validateForm = (): boolean => {
-    // Required fields
-    const requiredFields = [
-      { field: formData.companyName, name: t("companyNameLabel") },
-      { field: formData.contactPerson, name: t("contactPersonLabel") },
-      { field: formData.address, name: t("addressLabel") },
-      { field: formData.phone, name: t("phoneLabel") },
-      { field: formData.email, name: t("emailLabel") },
-      { field: formData.trainingDays, name: t("trainingDaysLabel") },
-    ];
-
-    for (const { field, name } of requiredFields) {
-      if (!field || field.toString().trim() === "") {
-        setWarningMessage(`${t("validationMessage")}: ${name}`);
-        setShowWarning(true);
-        return false;
-      }
-    }
-
-    if (!termsAccepted) {
-      setWarningMessage(t("warningMessage"));
-      setShowWarning(true);
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {
+    if (!termsAccepted) {
+      toast.error(t("acceptTermsLabel"));
       return;
     }
-
-    // Calculate quotation
-    const trainingDays = parseInt(formData.trainingDays);
-    if (isNaN(trainingDays) || trainingDays <= 0) {
-      setWarningMessage(t("validationMessage"));
-      setShowWarning(true);
-      return;
-    }
-
-    calculateQuotationMutation.mutate({
-      address: formData.address,
-      trainingDays,
-    });
-  };
-
-  const handleAcceptQuotation = () => {
-    if (!quotationData) return;
 
     const signatureData = signaturePadRef.current?.toDataURL() || "";
 
@@ -185,16 +116,6 @@ export default function Home() {
       signatureData,
       termsAccepted,
       language,
-      trainingPrice: quotationData.trainingPrice,
-      travelTimeHours: quotationData.travelExpenses.travelTimeHours,
-      travelTime: quotationData.travelExpenses.travelTimeCost,
-      hotelCost: quotationData.travelExpenses.hotelCost,
-      foodCost: quotationData.travelExpenses.foodCost,
-      carRentalCost: quotationData.travelExpenses.carRentalCost,
-      flightCost: quotationData.travelExpenses.flightCost,
-      travelExpenses: quotationData.travelExpenses.totalTravelExpenses,
-      totalPrice: quotationData.totalPrice,
-      nearestAirport: quotationData.travelExpenses.nearestAirport,
     });
   };
 
@@ -383,7 +304,6 @@ export default function Home() {
                       id="oemContact"
                       value={formData.oemContact}
                       onChange={(e) => handleInputChange("oemContact", e.target.value)}
-                      disabled={!oemFieldsEnabled}
                     />
                   </div>
                 </div>
@@ -394,7 +314,6 @@ export default function Home() {
                     id="oemAddress"
                     value={formData.oemAddress}
                     onChange={(e) => handleInputChange("oemAddress", e.target.value)}
-                    disabled={!oemFieldsEnabled}
                   />
                 </div>
 
@@ -406,7 +325,6 @@ export default function Home() {
                       type="email"
                       value={formData.oemEmail}
                       onChange={(e) => handleInputChange("oemEmail", e.target.value)}
-                      disabled={!oemFieldsEnabled}
                     />
                   </div>
                   <div>
@@ -416,7 +334,6 @@ export default function Home() {
                       type="tel"
                       value={formData.oemPhone}
                       onChange={(e) => handleInputChange("oemPhone", e.target.value)}
-                      disabled={!oemFieldsEnabled}
                     />
                   </div>
                 </div>
@@ -455,25 +372,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="controller8055"
-                    checked={formData.controller8055}
-                    onCheckedChange={(checked) => {
-                      handleInputChange("controller8055", checked as boolean);
-                      if (checked) {
-                        handleInputChange("controllerModel", "8055");
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="controller8055"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    CNC Model 8055
-                  </label>
-                </div>
-
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="programmingType">{t("programmingTypeLabel")}</Label>
@@ -488,14 +386,13 @@ export default function Home() {
                     </Select>
                   </div>
                   <div>
-                    <Label htmlFor="trainingDays" className="required">{t("trainingDaysLabel")}</Label>
+                    <Label htmlFor="trainingDays">{t("trainingDaysLabel")}</Label>
                     <Input
                       id="trainingDays"
                       type="number"
                       min="1"
                       value={formData.trainingDays}
                       onChange={(e) => handleInputChange("trainingDays", e.target.value)}
-                      required
                     />
                   </div>
                 </div>
@@ -507,7 +404,6 @@ export default function Home() {
                       id="trainees"
                       type="number"
                       min="1"
-                      max="4"
                       value={formData.trainees}
                       onChange={(e) => handleInputChange("trainees", e.target.value)}
                     />
@@ -525,47 +421,6 @@ export default function Home() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Terms and Conditions */}
-            <Card className="mb-6">
-              <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
-                  {t("termsTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto mb-4">
-                  <h3 className="font-bold text-center mb-4">{t("termsMainTitle")}</h3>
-                  <div className="space-y-2 text-sm">
-                    <p>{t("term1")}</p>
-                    <p>{t("term2")}</p>
-                    <p>{t("term3")}</p>
-                    <p>{t("term4")}</p>
-                    <p>{t("term5")}</p>
-                    <p>{t("term6")}</p>
-                    <p>{t("term7")}</p>
-                    <p>{t("term8")}</p>
-                    <p>{t("term9")}</p>
-                    <p>{t("term10")}</p>
-                  </div>
-                </div>
-
-                <div className={`flex items-center space-x-2 p-3 rounded ${!termsAccepted && showWarning ? 'bg-red-50 border-2 border-red-500' : ''}`}>
-                  <Checkbox
-                    id="terms"
-                    checked={termsAccepted}
-                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {t("acceptTermsLabel")}
-                  </label>
                 </div>
               </CardContent>
             </Card>
@@ -621,15 +476,56 @@ export default function Home() {
               </CardContent>
             </Card>
 
+            {/* Terms and Conditions */}
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="text-[#0055a4] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                  {t("termsTitle")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 max-h-64 overflow-y-auto mb-4">
+                  <h3 className="font-bold text-center mb-4">{t("termsMainTitle")}</h3>
+                  <div className="space-y-2 text-sm">
+                    <p>{t("term1")}</p>
+                    <p>{t("term2")}</p>
+                    <p>{t("term3")}</p>
+                    <p>{t("term4")}</p>
+                    <p>{t("term5")}</p>
+                    <p>{t("term6")}</p>
+                    <p>{t("term7")}</p>
+                    <p>{t("term8")}</p>
+                    <p>{t("term9")}</p>
+                    <p>{t("term10")}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="terms"
+                    checked={termsAccepted}
+                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  />
+                  <label
+                    htmlFor="terms"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {t("acceptTermsLabel")}
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Submit Button */}
             <div className="text-center">
               <Button
                 type="submit"
                 size="lg"
-                disabled={calculateQuotationMutation.isPending}
+                disabled={!termsAccepted || createRequestMutation.isPending}
                 className="bg-[#0055a4] hover:bg-[#004085] text-white px-12 py-6 text-lg font-semibold shadow-lg"
               >
-                {calculateQuotationMutation.isPending ? (
+                {createRequestMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     {t("submitBtn")}
@@ -642,111 +538,6 @@ export default function Home() {
           </form>
         </div>
       </main>
-
-      {/* Warning Dialog */}
-      <Dialog open={showWarning} onOpenChange={setShowWarning}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              {t("warningTitle")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-gray-700">{warningMessage}</p>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowWarning(false)}>OK</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Quotation Dialog */}
-      <Dialog open={showQuotation} onOpenChange={setShowQuotation}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-[#0055a4] text-center">
-              {t("quotationTitle") || "TRAINING QUOTATION"}
-            </DialogTitle>
-          </DialogHeader>
-          {quotationData && (
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><strong>{t("quotationDate") || "Date"}:</strong></div>
-                  <div>{new Date().toLocaleDateString()}</div>
-                  <div><strong>{t("companyInfo") || "Company"}:</strong></div>
-                  <div>{formData.companyName}</div>
-                  <div><strong>{t("locationInfo") || "Location"}:</strong></div>
-                  <div>{formData.address}</div>
-                </div>
-              </div>
-
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-2 text-left">{t("serviceDescHeader") || "Service Description"}</th>
-                    <th className="border p-2 text-right">{t("quantityHeader") || "Quantity"}</th>
-                    <th className="border p-2 text-right">{t("unitPriceHeader") || "Unit Price (USD)"}</th>
-                    <th className="border p-2 text-right">{t("subtotalHeader") || "Subtotal (USD)"}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border p-2">{t("trainingServiceDesc") || "FAGOR CNC Training Course"}</td>
-                    <td className="border p-2 text-right">{formData.trainingDays} {t("trainingDaysLabel") || "days"}</td>
-                    <td className="border p-2 text-right">$1,200</td>
-                    <td className="border p-2 text-right">${quotationData.trainingPrice.toLocaleString()}</td>
-                  </tr>
-                  <tr>
-                    <td className="border p-2">{t("travelTimeDesc") || "Travel Time"}</td>
-                    <td className="border p-2 text-right">{quotationData.travelExpenses.travelTimeHours} hrs</td>
-                    <td className="border p-2 text-right">$110</td>
-                    <td className="border p-2 text-right">${quotationData.travelExpenses.travelTimeCost.toLocaleString()}</td>
-                  </tr>
-                  <tr>
-                    <td className="border p-2" colSpan={3}>{t("travelExpensesDesc") || "Travel Expenses"} (Flight: ${quotationData.travelExpenses.flightCost}, Hotel: ${quotationData.travelExpenses.hotelCost}, Food: ${quotationData.travelExpenses.foodCost}, Car: ${quotationData.travelExpenses.carRentalCost})</td>
-                    <td className="border p-2 text-right">${quotationData.travelExpenses.totalTravelExpenses.toLocaleString()}</td>
-                  </tr>
-                  <tr className="bg-gray-100 font-bold">
-                    <td className="border p-2" colSpan={3}>{t("totalLabel") || "TOTAL"}</td>
-                    <td className="border p-2 text-right">${quotationData.totalPrice.toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              <div className="bg-blue-50 p-4 rounded-lg text-sm space-y-1">
-                <p><strong>{t("quotationTermsTitle") || "TERMS AND CONDITIONS"}</strong></p>
-                <p>{t("quotationTerm1") || "Prices in USD without taxes"}</p>
-                <p>{t("quotationTerm2") || "This offer includes 6 hours of on-site training for a maximum of 4 participants."}</p>
-                <p>{t("quotationTerm3") || "The total hours and actual travel expenses will be adjusted at the end of the service."}</p>
-                <p>{t("quotationTerm4") || "NOTE: The FAGOR application engineer will not carry out any mechanical and/or electrical assembly work."}</p>
-                <p>{t("quotationTerm5") || "The date available to be at facilities must be confirmed."}</p>
-              </div>
-
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowQuotation(false)}>
-                  {t("calendarCancel") || "Cancel"}
-                </Button>
-                <Button
-                  onClick={handleAcceptQuotation}
-                  disabled={createRequestMutation.isPending}
-                  className="bg-[#0055a4] hover:bg-[#004085]"
-                >
-                  {createRequestMutation.isPending ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {t("acceptQuotationBtn") || "ACCEPT QUOTATION"}
-                    </>
-                  ) : (
-                    t("acceptQuotationBtn") || "ACCEPT QUOTATION"
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-6">

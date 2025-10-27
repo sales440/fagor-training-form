@@ -4,6 +4,7 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById } from "./db";
+import { calculateQuotation } from "./travelCalculator";
 
 export const appRouter = router({
   system: systemRouter,
@@ -20,6 +21,16 @@ export const appRouter = router({
   }),
 
   trainingRequest: router({
+    calculateQuotation: publicProcedure
+      .input(z.object({
+        address: z.string(),
+        trainingDays: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const quotation = calculateQuotation(input.address, input.trainingDays);
+        return quotation;
+      }),
+
     create: publicProcedure
       .input(z.object({
         // Company Information
@@ -55,8 +66,14 @@ export const appRouter = router({
         // Quotation Details
         trainingPrice: z.number().optional(),
         travelTime: z.number().optional(),
+        travelTimeHours: z.number().optional(),
         travelExpenses: z.number().optional(),
+        hotelCost: z.number().optional(),
+        foodCost: z.number().optional(),
+        carRentalCost: z.number().optional(),
+        flightCost: z.number().optional(),
         totalPrice: z.number().optional(),
+        nearestAirport: z.string().optional(),
         
         // Metadata
         language: z.string().optional(),

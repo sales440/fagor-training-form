@@ -64,8 +64,14 @@ export const trainingRequests = mysqlTable("training_requests", {
   // Quotation Details
   trainingPrice: int("trainingPrice"),
   travelTime: int("travelTime"),
+  travelTimeHours: int("travelTimeHours"),
   travelExpenses: int("travelExpenses"),
+  hotelCost: int("hotelCost"),
+  foodCost: int("foodCost"),
+  carRentalCost: int("carRentalCost"),
+  flightCost: int("flightCost"),
   totalPrice: int("totalPrice"),
+  nearestAirport: varchar("nearestAirport", { length: 100 }),
   
   // Metadata
   language: varchar("language", { length: 10 }).default("en"),

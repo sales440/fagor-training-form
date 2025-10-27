@@ -15,6 +15,13 @@
       "when": 1761527941818,
       "tag": "0001_friendly_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1761528514087,
+      "tag": "0002_slippery_doctor_doom",
+      "breakpoints": true
     }
   ]
 }
