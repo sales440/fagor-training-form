@@ -753,20 +753,20 @@ export default function Home() {
               <div className="space-y-3">
                 {/* Training Costs */}
                 <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
-                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("trainingCostsHeader") || "Training Costs"}</h3>
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Training Costs</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("firstDayTraining") || "First Day Training"}</span>
+                      <span className="font-medium">First Day Training</span>
                       <span className="font-semibold">$1,400.00</span>
                     </div>
                     {parseInt(formData.trainingDays) > 1 && (
                       <div className="flex justify-between items-center py-2 border-b">
-                        <span className="font-medium">{t("additionalDays") || "Additional Days"} ({parseInt(formData.trainingDays) - 1} × $1,000)</span>
+                        <span className="font-medium">Additional Days ({parseInt(formData.trainingDays) - 1} × $1,000)</span>
                         <span className="font-semibold">${((parseInt(formData.trainingDays) - 1) * 1000).toLocaleString()}.00</span>
                       </div>
                     )}
                     <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
-                      <span>{t("trainingSubtotal") || "Training Subtotal"}</span>
+                      <span>Training Subtotal</span>
                       <span>${quotationData.trainingPrice.toLocaleString()}.00</span>
                     </div>
                   </div>
@@ -774,18 +774,18 @@ export default function Home() {
 
                 {/* Travel Time */}
                 <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
-                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("travelTimeHeader") || "Travel Time"}</h3>
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Travel Time</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("travelHours") || "Travel Hours"}</span>
+                      <span className="font-medium">Travel Hours</span>
                       <span>{quotationData.travelExpenses.travelTimeHours} hrs</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("hourlyRate") || "Hourly Rate"}</span>
+                      <span className="font-medium">Hourly Rate</span>
                       <span>$110.00/hr</span>
                     </div>
                     <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
-                      <span>{t("travelTimeSubtotal") || "Travel Time Subtotal"}</span>
+                      <span>Travel Time Subtotal</span>
                       <span>${quotationData.travelExpenses.travelTimeCost.toLocaleString()}.00</span>
                     </div>
                   </div>
@@ -793,26 +793,26 @@ export default function Home() {
 
                 {/* Travel Expenses */}
                 <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
-                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">{t("travelExpensesHeader") || "Travel Expenses"}</h3>
+                  <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Travel Expenses</h3>
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("flightCost") || "Flight"} (Round Trip to {quotationData.travelExpenses.nearestAirport})</span>
+                      <span className="font-medium">Flight (Round Trip to {quotationData.travelExpenses.nearestAirport})</span>
                       <span>${quotationData.travelExpenses.flightCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("hotelCost") || "Hotel"} ({formData.trainingDays} nights)</span>
+                      <span className="font-medium">Hotel ({formData.trainingDays} nights)</span>
                       <span>${quotationData.travelExpenses.hotelCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("carRentalCost") || "Car Rental"} ({parseInt(formData.trainingDays) + 1} days)</span>
+                      <span className="font-medium">Car Rental ({parseInt(formData.trainingDays) + 1} days)</span>
                       <span>${quotationData.travelExpenses.carRentalCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">{t("foodCost") || "Meals & Incidentals"} ({parseInt(formData.trainingDays) + 1} days)</span>
+                      <span className="font-medium">Meals & Incidentals ({parseInt(formData.trainingDays) + 1} days)</span>
                       <span>${quotationData.travelExpenses.foodCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
-                      <span>{t("travelExpensesSubtotal") || "Travel Expenses Subtotal"}</span>
+                      <span>Travel Expenses Subtotal</span>
                       <span>${quotationData.travelExpenses.totalTravelExpenses.toLocaleString()}.00</span>
                     </div>
                   </div>
@@ -821,7 +821,7 @@ export default function Home() {
                 {/* Grand Total */}
                 <div className="bg-[#DC241F] text-white rounded-lg p-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-xl font-bold">{t("grandTotal") || "GRAND TOTAL"}</span>
+                    <span className="text-xl font-bold">GRAND TOTAL</span>
                     <span className="text-2xl font-bold">${quotationData.totalPrice.toLocaleString()}.00</span>
                   </div>
                 </div>

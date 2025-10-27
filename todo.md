@@ -110,3 +110,8 @@
 - [x] Display quotation breakdown vertically instead of horizontally
 - [x] Show detailed line items: training days, travel time, flight, hotel, car, food
 
+
+- [x] Fix all quotation titles to proper capitalization with spaces
+- [x] Review flight cost logic for Illinois addresses (Confirmed: $0 for IL, calculated for other states)
+- [x] Verify email notification is sent to jcrobledolopez@gmail.com (Confirmed: configured correctly)
+

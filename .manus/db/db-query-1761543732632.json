@@ -1,0 +1,17 @@
+{
+  "query": "SELECT * FROM notification_emails;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 385B8cqVvDyKYq8.0dd908e03316 --database fnckYwCtTAYRJhbGQZKYQz --execute SELECT * FROM notification_emails;",
+  "rows": [
+    {
+      "id": "1",
+      "email": "jcrobledolopez@gmail.com",
+      "isActive": "1",
+      "createdAt": "2025-10-27 04:36:50",
+      "updatedAt": "2025-10-27 04:54:12"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tisActive\tcreatedAt\tupdatedAt\n1\tjcrobledolopez@gmail.com\t1\t2025-10-27 04:36:50\t2025-10-27 04:54:12\n",
+  "stderr": "",
+  "execution_time_ms": 742
+}
