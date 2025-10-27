@@ -28,3 +28,15 @@
 - [x] Implement complete validation before showing quotation
 - [x] Enable OEM fields dynamically when OEM name is filled
 
+
+- [x] Remove blue background from header and make it white
+- [x] Add Fagor address information next to logo in header
+- [x] Change all blue text colors to Fagor red (#DC241F)
+
+
+- [x] Change CNC Model field to dropdown selector with models: 8055, 8058, 8060, 8065, 8070
+- [x] Remove 8055 checkbox
+
+
+- [x] Move Fagor address to right side of header at same level as logo
+

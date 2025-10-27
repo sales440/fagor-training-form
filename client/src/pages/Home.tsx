@@ -40,7 +40,6 @@ export default function Home() {
     oemEmail: "",
     oemPhone: "",
     controllerModel: "",
-    controller8055: false,
     machineType: "",
     programmingType: "",
     trainingDays: "",
@@ -80,7 +79,6 @@ export default function Home() {
         oemEmail: "",
         oemPhone: "",
         controllerModel: "",
-        controller8055: false,
         machineType: "",
         programmingType: "",
         trainingDays: "",
@@ -212,19 +210,28 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-gradient-to-r from-[#0055a4] to-[#003a75] text-white shadow-lg">
+      <header className="bg-white border-b-2 border-gray-200 shadow-md">
         <div className="container py-4">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center">
               <img src="/fagor-logo-official.jpg" alt="Fagor Automation" className="h-16 object-contain" />
             </div>
 
-            {/* Language Selector */}
-            <div className="relative">
-              <button
+            {/* Address and Language Selector */}
+            <div className="flex items-center gap-6">
+              <div className="text-sm text-gray-700 text-right">
+                <p className="font-semibold">Fagor Automation Corp.</p>
+                <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
+                <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+                <p>service@fagor-automation.com</p>
+              </div>
+              
+              {/* Language Selector */}
+              <div className="relative">
+                <button
                 onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors"
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-700"
               >
                 <Globe className="w-6 h-6" />
               </button>
@@ -239,7 +246,7 @@ export default function Home() {
                         setShowLanguageMenu(false);
                       }}
                       className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors flex items-center gap-2 ${
-                        language === lang.code ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-700"
+                        language === lang.code ? "bg-red-50 text-[#DC241F] font-semibold" : "text-gray-700"
                       }`}
                     >
                       <span>{lang.flag}</span>
@@ -247,7 +254,8 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
-              )}
+               )}
+              </div>
             </div>
           </div>
         </div>
@@ -256,7 +264,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container py-8">
         <div className="max-w-5xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold text-[#0055a4] text-center mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#DC241F] text-center mb-4">
             {t("mainTitle")}
           </h1>
           <p className="text-gray-600 text-center mb-8 max-w-3xl mx-auto">
@@ -267,8 +275,8 @@ export default function Home() {
             {/* Company Information */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                <CardTitle className="text-[#DC241F] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#DC241F] rounded-full"></div>
                   {t("companyInfoTitle")}
                 </CardTitle>
               </CardHeader>
@@ -361,8 +369,8 @@ export default function Home() {
             {/* OEM Information */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                <CardTitle className="text-[#DC241F] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#DC241F] rounded-full"></div>
                   {t("oemInfoTitle")}
                 </CardTitle>
                 <p className="text-sm text-gray-600 mt-2">{t("oemNote")}</p>
@@ -426,8 +434,8 @@ export default function Home() {
             {/* Training Details */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                <CardTitle className="text-[#DC241F] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#DC241F] rounded-full"></div>
                   {t("trainingDetailsTitle")}
                 </CardTitle>
               </CardHeader>
@@ -435,11 +443,18 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="controllerModel">{t("controllerModelLabel")}</Label>
-                    <Input
-                      id="controllerModel"
-                      value={formData.controllerModel}
-                      onChange={(e) => handleInputChange("controllerModel", e.target.value)}
-                    />
+                    <Select value={formData.controllerModel} onValueChange={(value) => handleInputChange("controllerModel", value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select CNC Model" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="8055">8055</SelectItem>
+                        <SelectItem value="8058">8058</SelectItem>
+                        <SelectItem value="8060">8060</SelectItem>
+                        <SelectItem value="8065">8065</SelectItem>
+                        <SelectItem value="8070">8070</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label htmlFor="machineType">{t("machineTypeLabel")}</Label>
@@ -453,25 +468,6 @@ export default function Home() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="controller8055"
-                    checked={formData.controller8055}
-                    onCheckedChange={(checked) => {
-                      handleInputChange("controller8055", checked as boolean);
-                      if (checked) {
-                        handleInputChange("controllerModel", "8055");
-                      }
-                    }}
-                  />
-                  <label
-                    htmlFor="controller8055"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    CNC Model 8055
-                  </label>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
@@ -532,8 +528,8 @@ export default function Home() {
             {/* Terms and Conditions */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                <CardTitle className="text-[#DC241F] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#DC241F] rounded-full"></div>
                   {t("termsTitle")}
                 </CardTitle>
               </CardHeader>
@@ -573,8 +569,8 @@ export default function Home() {
             {/* Signature and Acceptance */}
             <Card className="mb-6">
               <CardHeader>
-                <CardTitle className="text-[#0055a4] flex items-center gap-2">
-                  <div className="w-2 h-2 bg-[#0055a4] rounded-full"></div>
+                <CardTitle className="text-[#DC241F] flex items-center gap-2">
+                  <div className="w-2 h-2 bg-[#DC241F] rounded-full"></div>
                   {t("signatureTitle")}
                 </CardTitle>
               </CardHeader>
@@ -627,7 +623,7 @@ export default function Home() {
                 type="submit"
                 size="lg"
                 disabled={calculateQuotationMutation.isPending}
-                className="bg-[#0055a4] hover:bg-[#004085] text-white px-12 py-6 text-lg font-semibold shadow-lg"
+                className="bg-[#DC241F] hover:bg-[#B01D1A] text-white px-12 py-6 text-lg font-semibold shadow-lg"
               >
                 {calculateQuotationMutation.isPending ? (
                   <>
@@ -665,7 +661,7 @@ export default function Home() {
       <Dialog open={showQuotation} onOpenChange={setShowQuotation}>
         <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl text-[#0055a4] text-center">
+            <DialogTitle className="text-2xl text-[#DC241F] text-center">
               {t("quotationTitle") || "TRAINING QUOTATION"}
             </DialogTitle>
           </DialogHeader>
@@ -731,7 +727,7 @@ export default function Home() {
                 <Button
                   onClick={handleAcceptQuotation}
                   disabled={createRequestMutation.isPending}
-                  className="bg-[#0055a4] hover:bg-[#004085]"
+                  className="bg-[#DC241F] hover:bg-[#B01D1A]"
                 >
                   {createRequestMutation.isPending ? (
                     <>
