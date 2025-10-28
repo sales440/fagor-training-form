@@ -158,3 +158,17 @@
 
 - [x] FIX CRITICAL: Flight prices in Excel are ONE-WAY only ($367 for Texas), but system needs ROUND TRIP prices. Must multiply by 2 to get correct round trip cost ($734 for Texas)
 
+
+
+
+- [x] FIX: Car rental calculation should be (training days) not (training days + 1) - rent car for number of nights only
+- [x] FIX: Hotel price should be fixed at $130 USD per night instead of variable from Excel
+- [x] FIX: Signature canvas zoom is too high - reduce zoom so signature is visible at normal size
+
+
+
+
+- [x] FIX: Car rental calculation should be (training days) not (training days + 1) - rent car for number of nights only
+- [x] FIX: Hotel price should be fixed at $130 USD per night instead of variable from Excel
+- [x] FIX: Signature canvas zoom is too high - reduce zoom so signature is visible at normal size
+

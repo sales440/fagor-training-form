@@ -690,9 +690,10 @@ export default function Home() {
                   <div className="border-2 border-gray-300 rounded-lg p-2 bg-white">
                     <canvas
                       ref={canvasRef}
-                      width={400}
-                      height={100}
+                      width={600}
+                      height={150}
                       className="w-full border border-gray-200 rounded"
+                      style={{ maxWidth: '600px', height: '150px' }}
                     />
                   </div>
                   <Button

@@ -357,9 +357,9 @@ export async function calculateTravelExpenses(
   const travelTimeHours = (flightTimeOneWay + drivingTimeOneWay) * 2;
   
   // Calculate costs (flightCost already calculated above based on office)
-  const hotelCost = state.hampton_inn_promedio * trainingDays; // Hotel for training days
+  const hotelCost = 130 * trainingDays; // Fixed hotel rate: $130 per night
   const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day
-  const carRentalCost = state.midsize_dia * (trainingDays + 1); // Midsize car for all days
+  const carRentalCost = state.midsize_dia * trainingDays; // Car rental for training days (nights) only
   const travelTimeCost = Math.ceil(travelTimeHours) * TRAVEL_TIME_HOURLY_RATE;
   
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
