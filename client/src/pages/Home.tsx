@@ -964,3 +964,7 @@ export default function Home() {
   );
 }
 
+
+
+// Force rebuild to load environment variables - 2025-10-28
+
