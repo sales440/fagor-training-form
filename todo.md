@@ -147,3 +147,14 @@
 
 - [ ] FIX CRITICAL: ACCEPT QUOTATION button showing "Error submitting request" - email not being sent to jcrobledolopez@gmail.com
 
+
+
+
+- [ ] FIX CRITICAL: Production showing %VITE_APP_TITLE% instead of actual title - environment variables not loading in Railway build
+- [ ] Force Railway rebuild to properly compile frontend with environment variables
+
+
+
+
+- [x] FIX CRITICAL: Flight prices in Excel are ONE-WAY only ($367 for Texas), but system needs ROUND TRIP prices. Must multiply by 2 to get correct round trip cost ($734 for Texas)
+

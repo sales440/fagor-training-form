@@ -329,7 +329,8 @@ export async function calculateTravelExpenses(
   if (isWestCoast) {
     // West coast: use Anaheim office and LAX flight prices
     nearestAirport = state.codigo_aeropuerto;
-    flightCost = ANAHEIM_FLIGHT_PRICES[nearestAirport] || 200; // Default if not in list
+    // ANAHEIM_FLIGHT_PRICES already contains round trip prices
+    flightCost = ANAHEIM_FLIGHT_PRICES[nearestAirport] || 400; // Default round trip if not in list
     // For California, no flight cost
     if (stateCode === 'CA') {
       flightCost = 0;
@@ -341,7 +342,8 @@ export async function calculateTravelExpenses(
     if (stateCode === 'IL') {
       flightCost = 0;
     } else {
-      flightCost = state.precio_vuelo_economia;
+      // Excel prices are ONE-WAY, multiply by 2 for ROUND TRIP
+      flightCost = state.precio_vuelo_economia * 2;
     }
   }
 
