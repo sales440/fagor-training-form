@@ -178,3 +178,13 @@
 - [x] FIX: Car rental should be (training days + 1) not just training days
 - [x] FIX: Car rental label in quotation should show detailed calculation: "Car Rental ($XX per day × Y days)"
 
+
+
+
+- [ ] FIX: Add detailed breakdown for Travel Hours showing: "X hrs flight + Y hrs driving × 2 (round trip) = Z total hrs"
+
+
+
+
+- [x] FIX: Modify "Travel Hours" line to show detailed breakdown: "X hrs flight + Y hrs driving × 2 (round trip) = Z total hrs"
+

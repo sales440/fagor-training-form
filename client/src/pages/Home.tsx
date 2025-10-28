@@ -851,7 +851,14 @@ export default function Home() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center py-2 border-b">
                       <span className="font-medium">Travel Hours</span>
-                      <span>{quotationData.travelExpenses.travelTimeHours} hrs</span>
+                      <span className="text-right">
+                        <div className="text-sm text-gray-600">
+                          {quotationData.travelExpenses.flightTimeOneWay} hrs flight + {quotationData.travelExpenses.drivingTimeOneWay} hrs driving × 2 (round trip)
+                        </div>
+                        <div className="font-semibold">
+                          {quotationData.travelExpenses.travelTimeHours} hrs total
+                        </div>
+                      </span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <span className="font-medium">Hourly Rate</span>

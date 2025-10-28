@@ -19,6 +19,8 @@ interface TravelCalculation {
   carRentalCost: number;
   carRentalDailyRate: number;
   carRentalDays: number;
+  flightTimeOneWay: number;
+  drivingTimeOneWay: number;
   travelTimeHours: number;
   travelTimeCost: number;
   totalTravelExpenses: number;
@@ -374,6 +376,8 @@ export async function calculateTravelExpenses(
     carRentalCost,
     carRentalDailyRate: state.midsize_dia,
     carRentalDays: trainingDays + 1,
+    flightTimeOneWay: Math.round(flightTimeOneWay * 10) / 10,
+    drivingTimeOneWay: Math.round(drivingTimeOneWay * 10) / 10,
     travelTimeHours: Math.ceil(travelTimeHours),
     travelTimeCost,
     totalTravelExpenses,
