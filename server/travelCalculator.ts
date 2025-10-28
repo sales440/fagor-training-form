@@ -17,6 +17,8 @@ interface TravelCalculation {
   hotelCost: number;
   foodCost: number;
   carRentalCost: number;
+  carRentalDailyRate: number;
+  carRentalDays: number;
   travelTimeHours: number;
   travelTimeCost: number;
   totalTravelExpenses: number;
@@ -359,7 +361,7 @@ export async function calculateTravelExpenses(
   // Calculate costs (flightCost already calculated above based on office)
   const hotelCost = 130 * trainingDays; // Fixed hotel rate: $130 per night
   const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day
-  const carRentalCost = state.midsize_dia * trainingDays; // Car rental for training days (nights) only
+  const carRentalCost = state.midsize_dia * (trainingDays + 1); // Car rental: training days + 1 travel day
   const travelTimeCost = Math.ceil(travelTimeHours) * TRAVEL_TIME_HOURLY_RATE;
   
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
@@ -370,6 +372,8 @@ export async function calculateTravelExpenses(
     hotelCost,
     foodCost,
     carRentalCost,
+    carRentalDailyRate: state.midsize_dia,
+    carRentalDays: trainingDays + 1,
     travelTimeHours: Math.ceil(travelTimeHours),
     travelTimeCost,
     totalTravelExpenses,

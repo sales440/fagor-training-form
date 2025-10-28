@@ -172,3 +172,9 @@
 - [x] FIX: Hotel price should be fixed at $130 USD per night instead of variable from Excel
 - [x] FIX: Signature canvas zoom is too high - reduce zoom so signature is visible at normal size
 
+
+
+
+- [x] FIX: Car rental should be (training days + 1) not just training days
+- [x] FIX: Car rental label in quotation should show detailed calculation: "Car Rental ($XX per day × Y days)"
+

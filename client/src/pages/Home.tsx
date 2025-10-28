@@ -877,7 +877,7 @@ export default function Home() {
                       <span>${quotationData.travelExpenses.hotelCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">Car Rental ({parseInt(formData.trainingDays) + 1} days)</span>
+                      <span className="font-medium">Car Rental (${quotationData.travelExpenses.carRentalDailyRate}/day × {quotationData.travelExpenses.carRentalDays} days)</span>
                       <span>${quotationData.travelExpenses.carRentalCost.toLocaleString()}.00</span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
