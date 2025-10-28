@@ -42,6 +42,32 @@ export const TRAINING_PRICE_ADDITIONAL_DAY = 1000; // USD - Additional days duri
 export const TRAVEL_TIME_HOURLY_RATE = 110; // USD per hour
 export const FOOD_COST_PER_DAY = 68; // GSA M&IE standard rate
 
+// FAGOR offices
+const OFFICE_ROLLING_MEADOWS = { city: 'Rolling Meadows', state: 'IL', airport: 'ORD' };
+const OFFICE_ANAHEIM = { city: 'Anaheim', state: 'CA', airport: 'LAX' };
+
+// West coast states served by Anaheim office
+const WEST_COAST_STATES = ['CA', 'OR', 'WA', 'NV', 'AZ', 'ID', 'UT', 'MT', 'WY', 'CO', 'NM', 'AK', 'HI'];
+
+// Flight prices from Anaheim/LAX to west coast airports (round trip)
+const ANAHEIM_FLIGHT_PRICES: Record<string, number> = {
+  'PHX': 126,  // Phoenix
+  'PDX': 180,  // Portland
+  'SEA': 140,  // Seattle
+  'LAS': 170,  // Las Vegas
+  'BOI': 230,  // Boise
+  'SFO': 120,  // San Francisco
+  'SAN': 100,  // San Diego
+  'SLC': 150,  // Salt Lake City
+  'DEN': 160,  // Denver
+  'ABQ': 140,  // Albuquerque
+  'ANC': 450,  // Anchorage
+  'HNL': 350,  // Honolulu
+  'BIL': 280,  // Billings
+  'LAX': 0,    // Los Angeles (local)
+  'SNA': 0,    // Santa Ana (local)
+};
+
 // Cache for Excel data
 let stateDataCache: Map<string, StateData> | null = null;
 
@@ -291,17 +317,44 @@ export async function calculateTravelExpenses(
     };
   }
 
+  // Determine which office to use based on state
+  const isWestCoast = WEST_COAST_STATES.includes(stateCode || '');
+  const office = isWestCoast ? OFFICE_ANAHEIM : OFFICE_ROLLING_MEADOWS;
+  
+  // Determine flight cost and airport
+  let flightCost = 0;
+  let nearestAirport = state.codigo_aeropuerto;
+  let flightDistance = state.distancia_millas;
+  
+  if (isWestCoast) {
+    // West coast: use Anaheim office and LAX flight prices
+    nearestAirport = state.codigo_aeropuerto;
+    flightCost = ANAHEIM_FLIGHT_PRICES[nearestAirport] || 200; // Default if not in list
+    // For California, no flight cost
+    if (stateCode === 'CA') {
+      flightCost = 0;
+    }
+  } else {
+    // East/Central: use Rolling Meadows office and ORD flight prices from Excel
+    nearestAirport = state.codigo_aeropuerto;
+    // Only Illinois has $0 flight cost
+    if (stateCode === 'IL') {
+      flightCost = 0;
+    } else {
+      flightCost = state.precio_vuelo_economia;
+    }
+  }
+
   // Calculate flight time from distance
-  const flightTimeOneWay = estimateFlightTime(state.distancia_millas);
+  const flightTimeOneWay = estimateFlightTime(flightDistance);
   
   // Calculate actual driving time from airport to client location using Google Maps
-  const drivingTimeOneWay = await calculateDrivingTime(state.codigo_aeropuerto, address);
+  const drivingTimeOneWay = await calculateDrivingTime(nearestAirport, address);
   
   // Total travel time: (flight + driving) × 2 for round trip
   const travelTimeHours = (flightTimeOneWay + drivingTimeOneWay) * 2;
   
-  // Calculate costs
-  const flightCost = state.precio_vuelo_economia * 2; // Round trip
+  // Calculate costs (flightCost already calculated above based on office)
   const hotelCost = state.hampton_inn_promedio * trainingDays; // Hotel for training days
   const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day
   const carRentalCost = state.midsize_dia * (trainingDays + 1); // Midsize car for all days
@@ -310,7 +363,7 @@ export async function calculateTravelExpenses(
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
   
   return {
-    nearestAirport: state.codigo_aeropuerto,
+    nearestAirport,
     flightCost,
     hotelCost,
     foodCost,
@@ -327,7 +380,9 @@ export async function calculateTravelExpenses(
  */
 export async function calculateQuotation(
   address: string,
-  trainingDays: number
+  trainingDays: number,
+  city?: string,
+  state?: string
 ): Promise<{
   trainingPrice: number;
   travelExpenses: TravelCalculation;

@@ -34,7 +34,12 @@ export const trainingRequests = mysqlTable("training_requests", {
   // Company Information
   companyName: varchar("companyName", { length: 255 }).notNull(),
   contactPerson: varchar("contactPerson", { length: 255 }).notNull(),
-  address: text("address").notNull(),
+  address: text("address").notNull(), // Combined full address for backward compatibility
+  address1: varchar("address1", { length: 255 }),
+  address2: varchar("address2", { length: 255 }),
+  city: varchar("city", { length: 100 }),
+  state: varchar("state", { length: 2 }),
+  zipCode: varchar("zipCode", { length: 10 }),
   phone: varchar("phone", { length: 50 }).notNull(),
   email: varchar("email", { length: 320 }).notNull(),
   machineBrand: varchar("machineBrand", { length: 255 }),

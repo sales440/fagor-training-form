@@ -29,7 +29,11 @@ export default function Home() {
   const [formData, setFormData] = useState({
     companyName: "",
     contactPerson: "",
-    address: "",
+    address1: "",
+    address2: "",
+    city: "",
+    state: "",
+    zipCode: "",
     phone: "",
     email: "",
     machineBrand: "",
@@ -69,7 +73,11 @@ export default function Home() {
       setFormData({
         companyName: "",
         contactPerson: "",
-        address: "",
+        address1: "",
+        address2: "",
+        city: "",
+        state: "",
+        zipCode: "",
         phone: "",
         email: "",
         machineBrand: "",
@@ -128,7 +136,10 @@ export default function Home() {
     const requiredFields = [
       { field: formData.companyName, name: t("companyNameLabel") },
       { field: formData.contactPerson, name: t("contactPersonLabel") },
-      { field: formData.address, name: t("addressLabel") },
+      { field: formData.address1, name: "Address 1" },
+      { field: formData.city, name: "City" },
+      { field: formData.state, name: "State" },
+      { field: formData.zipCode, name: "Zip Code" },
       { field: formData.phone, name: t("phoneLabel") },
       { field: formData.email, name: t("emailLabel") },
       { field: formData.trainingDays, name: t("trainingDaysLabel") },
@@ -166,8 +177,13 @@ export default function Home() {
       return;
     }
 
+    // Combine address fields
+    const fullAddress = `${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
+    
     calculateQuotationMutation.mutate({
-      address: formData.address,
+      address: fullAddress,
+      city: formData.city,
+      state: formData.state,
       trainingDays,
     });
   };
@@ -177,8 +193,11 @@ export default function Home() {
 
     const signatureData = signaturePadRef.current?.toDataURL() || "";
 
+    const fullAddress = `${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
+    
     createRequestMutation.mutate({
       ...formData,
+      address: fullAddress, // Combined address for backward compatibility
       trainingDays: formData.trainingDays ? parseInt(formData.trainingDays) : undefined,
       trainees: formData.trainees ? parseInt(formData.trainees) : undefined,
       applicationDate: new Date(formData.applicationDate),
@@ -315,16 +334,70 @@ export default function Home() {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="address" className="required">
-                      {t("addressLabel")}
+                    <Label htmlFor="address1" className="required">
+                      Address 1
                     </Label>
                     <Input
-                      id="address"
-                      value={formData.address}
-                      onChange={(e) => handleInputChange("address", e.target.value)}
+                      id="address1"
+                      value={formData.address1}
+                      onChange={(e) => handleInputChange("address1", e.target.value)}
+                      placeholder="Street address"
                       required
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="address2">
+                      Address 2
+                    </Label>
+                    <Input
+                      id="address2"
+                      value={formData.address2}
+                      onChange={(e) => handleInputChange("address2", e.target.value)}
+                      placeholder="Apt, suite, unit, etc. (optional)"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="city" className="required">
+                      City
+                    </Label>
+                    <Input
+                      id="city"
+                      value={formData.city}
+                      onChange={(e) => handleInputChange("city", e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="state" className="required">
+                      State
+                    </Label>
+                    <Input
+                      id="state"
+                      value={formData.state}
+                      onChange={(e) => handleInputChange("state", e.target.value)}
+                      placeholder="IL"
+                      maxLength={2}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="zipCode" className="required">
+                      Zip Code
+                    </Label>
+                    <Input
+                      id="zipCode"
+                      value={formData.zipCode}
+                      onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                      placeholder="60008"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="phone" className="required">
                       {t("phoneLabel")}
@@ -337,9 +410,6 @@ export default function Home() {
                       required
                     />
                   </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="email" className="required">
                       {t("emailLabel")}
@@ -352,6 +422,9 @@ export default function Home() {
                       required
                     />
                   </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="machineBrand">{t("machineBrandLabel")}</Label>
                     <Input
@@ -360,15 +433,14 @@ export default function Home() {
                       onChange={(e) => handleInputChange("machineBrand", e.target.value)}
                     />
                   </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="machineModel">{t("machineModelLabel")}</Label>
-                  <Input
-                    id="machineModel"
-                    value={formData.machineModel}
-                    onChange={(e) => handleInputChange("machineModel", e.target.value)}
-                  />
+                  <div>
+                    <Label htmlFor="machineModel">{t("machineModelLabel")}</Label>
+                    <Input
+                      id="machineModel"
+                      value={formData.machineModel}
+                      onChange={(e) => handleInputChange("machineModel", e.target.value)}
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -706,7 +778,7 @@ export default function Home() {
                   <div><strong>{t("contactPersonLabel") || "Contact"}:</strong></div>
                   <div>{formData.contactPerson}</div>
                   <div><strong>{t("locationInfo") || "Location"}:</strong></div>
-                  <div>{formData.address}</div>
+                  <div>{`${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`}</div>
                   <div><strong>{t("phoneLabel") || "Phone"}:</strong></div>
                   <div>{formData.phone}</div>
                   <div><strong>{t("emailLabel") || "Email"}:</strong></div>
@@ -832,7 +904,7 @@ export default function Home() {
                       loading="lazy"
                       allowFullScreen
                       referrerPolicy="no-referrer-when-downgrade"
-                      src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${quotationData.travelExpenses.nearestAirport}+Airport&destination=${encodeURIComponent(formData.address)}&mode=driving`}
+                      src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${quotationData.travelExpenses.nearestAirport}+Airport&destination=${encodeURIComponent(`${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`)}&mode=driving`}
                     >
                     </iframe>
                   </div>

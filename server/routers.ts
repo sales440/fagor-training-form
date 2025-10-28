@@ -26,10 +26,12 @@ export const appRouter = router({
     calculateQuotation: publicProcedure
       .input(z.object({
         address: z.string(),
+        city: z.string().optional(),
+        state: z.string().optional(),
         trainingDays: z.number(),
       }))
       .mutation(async ({ input }) => {
-        const quotation = await calculateQuotation(input.address, input.trainingDays);
+        const quotation = await calculateQuotation(input.address, input.trainingDays, input.city, input.state);
         return quotation;
       }),
 
@@ -39,6 +41,11 @@ export const appRouter = router({
         companyName: z.string(),
         contactPerson: z.string(),
         address: z.string(),
+        address1: z.string().optional(),
+        address2: z.string().optional(),
+        city: z.string().optional(),
+        state: z.string().optional(),
+        zipCode: z.string().optional(),
         phone: z.string(),
         email: z.string().email(),
         machineBrand: z.string().optional(),

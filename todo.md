@@ -130,3 +130,13 @@
 
 - [x] FIX CRITICAL: Excel file not loading (__dirname error in ES modules), all 50 states defaulting to Illinois with $0 flight (Fixed: dual mapping by state name and 2-letter code)
 
+
+- [x] Split address field into: Address 1, Address 2, City, State, Zip Code
+- [x] Update flight logic: Only Illinois (state) = $0 flight, California = $0 flight, all others require flight
+- [x] Implement two-office system: Rolling Meadows IL and Anaheim CA
+- [x] Calculate travel from nearest office to client location
+- [x] Determine which office based on client location (West coast states → Anaheim, East/Central → Rolling Meadows)
+
+
+- [x] Research and add flight prices from Anaheim (SNA/LAX) to west coast airports (CA, OR, WA, NV, AZ, etc.)
+

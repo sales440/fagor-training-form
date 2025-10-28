@@ -29,6 +29,13 @@
       "when": 1761539732333,
       "tag": "0003_confused_wasp",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1761610099572,
+      "tag": "0004_awesome_psynapse",
+      "breakpoints": true
     }
   ]
 }
