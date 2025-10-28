@@ -140,3 +140,8 @@
 
 - [x] Research and add flight prices from Anaheim (SNA/LAX) to west coast airports (CA, OR, WA, NV, AZ, etc.)
 
+
+- [x] FIX CRITICAL: Texas address (Mansfield TX 76063) showing $0 flight instead of $734 in production (Fixed: Excel file not being copied to dist folder)
+- [ ] FIX CRITICAL: Google Maps embed showing API key error instead of route map
+- [ ] FIX CRITICAL: Frontend not passing city and state to calculateQuotation mutation
+
