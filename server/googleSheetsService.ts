@@ -1,10 +1,4 @@
 import { google } from 'googleapis';
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 // Google Sheets configuration
 const SPREADSHEET_ID = '13TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
@@ -90,8 +84,12 @@ async function getAuthClient(): Promise<GoogleSheetsAuth> {
   }
 
   try {
-    const credentialsPath = join(__dirname, '..', 'google-credentials.json');
-    const credentials = JSON.parse(readFileSync(credentialsPath, 'utf8'));
+    // Get credentials from environment variable
+    const credsEnv = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
+    if (!credsEnv) {
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set');
+    }
+    const credentials = JSON.parse(credsEnv);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
