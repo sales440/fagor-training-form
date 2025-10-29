@@ -80,7 +80,19 @@ export const trainingRequests = mysqlTable("training_requests", {
   
   // Metadata
   language: varchar("language", { length: 10 }).default("en"),
-  status: mysqlEnum("status", ["pending", "approved", "rejected", "completed"]).default("pending").notNull(),
+  
+  // Calendar and Scheduling
+  referenceCode: varchar("referenceCode", { length: 50 }).unique(), // 290903-4020-XXXX
+  assignedTechnician: varchar("assignedTechnician", { length: 255 }),
+  requestedStartDate: timestamp("requestedStartDate"),
+  requestedEndDate: timestamp("requestedEndDate"),
+  confirmedStartDate: timestamp("confirmedStartDate"),
+  confirmedEndDate: timestamp("confirmedEndDate"),
+  googleSheetRow: int("googleSheetRow"),
+  googleSheetColumn: varchar("googleSheetColumn", { length: 10 }),
+  confirmationEmailSent: boolean("confirmationEmailSent").default(false),
+  
+  status: mysqlEnum("status", ["pending", "dates_selected", "tentative", "confirmed", "approved", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

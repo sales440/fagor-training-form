@@ -4,9 +4,13 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 
 import { z } from "zod";
-import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById, getAllNotificationEmails, addNotificationEmail, removeNotificationEmail } from "./db";
+import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById, getAllNotificationEmails, addNotificationEmail, removeNotificationEmail, generateReferenceCode, getTrainingRequestByReferenceCode } from "./db";
 import { calculateQuotation } from "./travelCalculator";
 import { sendTrainingRequestEmail } from "./emailService";
+import { getAssignedTechnician, getTechnicianAvailability, writeTrainingRequest } from "./googleSheetsService";
+import { getDb } from "./db";
+import { trainingRequests } from "../drizzle/schema";
+import { eq } from "drizzle-orm";
 
 export const appRouter = router({
   system: systemRouter,
@@ -33,6 +37,85 @@ export const appRouter = router({
       .mutation(async ({ input }) => {
         const quotation = await calculateQuotation(input.address, input.trainingDays, input.city, input.state);
         return quotation;
+      }),
+
+    // Generate reference code and assign technician
+    initializeRequest: publicProcedure
+      .input(z.object({
+        state: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const referenceCode = await generateReferenceCode();
+        const assignedTechnician = getAssignedTechnician(input.state);
+        
+        return {
+          referenceCode,
+          assignedTechnician,
+        };
+      }),
+
+    // Get technician availability for calendar
+    getAvailability: publicProcedure
+      .input(z.object({
+        referenceCode: z.string(),
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const request = await getTrainingRequestByReferenceCode(input.referenceCode);
+        if (!request || !request.assignedTechnician) {
+          throw new Error('Training request not found');
+        }
+        
+        const availability = await getTechnicianAvailability(
+          request.assignedTechnician,
+          new Date(input.startDate),
+          new Date(input.endDate)
+        );
+        
+        return {
+          technician: request.assignedTechnician,
+          availability,
+        };
+      }),
+
+    // Select training dates and write to Google Sheets
+    selectDates: publicProcedure
+      .input(z.object({
+        referenceCode: z.string(),
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .mutation(async ({ input }) => {
+        const request = await getTrainingRequestByReferenceCode(input.referenceCode);
+        if (!request) {
+          throw new Error('Training request not found');
+        }
+        
+        // Write to Google Sheets with yellow background
+        await writeTrainingRequest(
+          request.assignedTechnician!,
+          input.startDate,
+          request.companyName,
+          request.trainingDays || 1,
+          'PENDING CONFIRMATION'
+        );
+        
+        // Update database
+        const db = await getDb();
+        if (db) {
+          await db
+            .update(trainingRequests)
+            .set({
+              requestedStartDate: new Date(input.startDate),
+              requestedEndDate: new Date(input.endDate),
+              status: 'dates_selected',
+              updatedAt: new Date(),
+            })
+            .where(eq(trainingRequests.referenceCode, input.referenceCode));
+        }
+        
+        return { success: true };
       }),
 
     create: publicProcedure
@@ -88,7 +171,15 @@ export const appRouter = router({
         language: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const request = await createTrainingRequest(input);
+        // Generate reference code and assign technician
+        const referenceCode = await generateReferenceCode();
+        const assignedTechnician = getAssignedTechnician(input.state || '');
+        
+        const request = await createTrainingRequest({
+          ...input,
+          referenceCode,
+          assignedTechnician,
+        });
         
         // Send email notification about new training request (non-blocking)
         try {
