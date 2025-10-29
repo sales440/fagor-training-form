@@ -14,6 +14,10 @@ build/
 .env.test.local
 .env.production.local
 
+# Google API credentials
+google-credentials.json
+*-credentials.json
+
 # IDE and editor files
 .vscode/
 .idea/
