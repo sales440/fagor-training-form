@@ -225,3 +225,8 @@
 
 - [x] FIX: Ensure entire project is fully responsive for mobile devices (forms, quotation, calendar, dialogs)
 
+
+
+- [x] FIX CRITICAL: Terms and conditions checkbox not working in production - replaced shadcn/ui Checkbox with native HTML input
+
+

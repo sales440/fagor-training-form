@@ -656,14 +656,16 @@ export default function Home() {
                 </div>
 
                 <div className={`flex items-center space-x-2 p-3 rounded ${!termsAccepted && showWarning ? 'bg-red-50 border-2 border-red-500' : ''}`}>
-                  <Checkbox
+                  <input
+                    type="checkbox"
                     id="terms"
                     checked={termsAccepted}
-                    onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                   />
                   <label
                     htmlFor="terms"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm font-medium leading-none cursor-pointer"
                   >
                     {t("acceptTermsLabel")}
                   </label>
