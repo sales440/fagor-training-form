@@ -283,3 +283,13 @@
 - [x] Integrated airportFinder with travelCalculator for consistent airport selection
 
 
+
+
+## CRITICAL BUG - Form Submission Failing
+
+- [x] FIX CRITICAL: Form submission failing with "Error al enviar la solicitud" - fixed undefined city variable by extracting city from address
+- [x] Ensure city and state are properly extracted from address before calling findNearestInternationalAirport
+- [x] Add proper error handling and fallback when airport finder fails
+- [x] FIX: Update application date field to sync with user's device clock (PC/mobile/tablet) - added useEffect to update date on mount and when user returns to page
+
+

@@ -27,6 +27,30 @@ export default function Home() {
   const [assignedTechnician, setAssignedTechnician] = useState<string>("");
   const [oemFieldsEnabled, setOemFieldsEnabled] = useState(false);
   
+  // Update application date when component mounts or user returns to page
+  useEffect(() => {
+    const updateDate = () => {
+      const currentDate = new Date().toISOString().split('T')[0];
+      setFormData(prev => ({ ...prev, applicationDate: currentDate }));
+    };
+    
+    // Update date on mount
+    updateDate();
+    
+    // Update date when user returns to page (visibility change)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        updateDate();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+  
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
 

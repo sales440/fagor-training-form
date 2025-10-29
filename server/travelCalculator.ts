@@ -326,6 +326,16 @@ export async function calculateTravelExpenses(
   const isWestCoast = WEST_COAST_STATES.includes(stateCode || '');
   const office = isWestCoast ? OFFICE_ANAHEIM : OFFICE_ROLLING_MEADOWS;
   
+  // Extract city from address (format: "City, State Zip" or "Address, City, State Zip")
+  let city = state.ciudad_principal; // Default to principal city from Excel
+  const addressParts = address.split(',');
+  if (addressParts.length >= 2) {
+    // Get the second-to-last part which is usually the city
+    const cityPart = addressParts[addressParts.length - 2].trim();
+    // Remove any numbers (zip codes) from city name
+    city = cityPart.replace(/\d+/g, '').trim();
+  }
+  
   // Find nearest international airport using improved algorithm
   let nearestAirportFull = state.codigo_aeropuerto;
   if (city && stateCode) {
