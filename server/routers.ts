@@ -80,7 +80,31 @@ export const appRouter = router({
         };
       }),
 
-    // Select training dates and write to Google Sheets
+    // Check date availability
+    checkDateAvailability: publicProcedure
+      .input(z.object({
+        startDate: z.string(),
+        endDate: z.string(),
+      }))
+      .query(async ({ input }) => {
+        const { checkDateAvailability } = await import('./googleCalendar');
+        const result = await checkDateAvailability(input.startDate, input.endDate);
+        return result;
+      }),
+
+    // Get alternative date suggestions
+    suggestAlternativeDates: publicProcedure
+      .input(z.object({
+        requestedStartDate: z.string(),
+        trainingDays: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const { suggestAlternativeDates } = await import('./googleCalendar');
+        const suggestions = await suggestAlternativeDates(input.requestedStartDate, input.trainingDays, 3);
+        return { suggestions };
+      }),
+
+    // Select training dates and write to Google Sheets + Google Calendar
     selectDates: publicProcedure
       .input(z.object({
         referenceCode: z.string(),
@@ -92,6 +116,14 @@ export const appRouter = router({
         if (!request) {
           throw new Error('Training request not found');
         }
+
+        // Check date availability first
+        const { checkDateAvailability, createPendingEvent } = await import('./googleCalendar');
+        const { available, conflicts } = await checkDateAvailability(input.startDate, input.endDate);
+        
+        if (!available) {
+          throw new Error(`Selected dates are not available. Conflicts found: ${conflicts.length}`);
+        }
         
         // Write to Google Sheets with yellow background
         await writeTrainingRequest(
@@ -100,6 +132,16 @@ export const appRouter = router({
           request.companyName,
           request.trainingDays || 1,
           'PENDING CONFIRMATION'
+        );
+
+        // Create Google Calendar event with YELLOW color (Pending)
+        const eventId = await createPendingEvent(
+          input.referenceCode,
+          input.startDate,
+          input.endDate,
+          request.companyName,
+          request.assignedTechnician || 'TBD',
+          `${request.controllerModel || 'N/A'} - ${request.trainingDays} day(s)`
         );
         
         // Update database
@@ -110,13 +152,15 @@ export const appRouter = router({
             .set({
               requestedStartDate: new Date(input.startDate),
               requestedEndDate: new Date(input.endDate),
+              googleCalendarEventId: eventId,
+              calendarStatus: 'pending',
               status: 'dates_selected',
               updatedAt: new Date(),
             })
             .where(eq(trainingRequests.referenceCode, input.referenceCode));
         }
         
-        return { success: true };
+        return { success: true, eventId };
       }),
 
     create: publicProcedure

@@ -59,6 +59,13 @@ async function startServer() {
 
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
+    
+    // Start calendar monitor for automatic date confirmations
+    import('../calendarMonitor').then(({ startCalendarMonitor }) => {
+      startCalendarMonitor();
+    }).catch((error) => {
+      console.error('[Server] Failed to start calendar monitor:', error);
+    });
   });
 }
 

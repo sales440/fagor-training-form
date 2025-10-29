@@ -92,6 +92,11 @@ export const trainingRequests = mysqlTable("training_requests", {
   googleSheetColumn: varchar("googleSheetColumn", { length: 10 }),
   confirmationEmailSent: boolean("confirmationEmailSent").default(false),
   
+  // Google Calendar Integration
+  googleCalendarEventId: varchar("googleCalendarEventId", { length: 255 }), // Event ID in Google Calendar
+  calendarStatus: mysqlEnum("calendarStatus", ["none", "pending", "confirmed"]).default("none"), // none = no event, pending = yellow, confirmed = green
+  lastCalendarCheck: timestamp("lastCalendarCheck"), // Last time we checked calendar status
+  
   status: mysqlEnum("status", ["pending", "dates_selected", "tentative", "confirmed", "approved", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
