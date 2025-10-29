@@ -204,3 +204,155 @@ service@fagor-automation.com
   }
 }
 
+
+
+
+/**
+ * Send email notification when training dates are changed
+ */
+export async function sendDateChangeNotification(data: {
+  companyName: string;
+  contactPerson: string;
+  email: string;
+  referenceCode: string;
+  oldStartDate: Date;
+  oldEndDate: Date;
+  newStartDate: Date;
+  newEndDate: Date;
+  assignedTechnician: string;
+  briefingUrl: string;
+}): Promise<boolean> {
+  try {
+    const resendApiKey = process.env.RESEND_API_KEY;
+    
+    if (!resendApiKey) {
+      console.error("[Email] RESEND_API_KEY not configured");
+      return false;
+    }
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background-color: #dc2626; color: white; padding: 20px; text-align: center; }
+    .content { background-color: #f9fafb; padding: 30px; border: 1px solid #e5e7eb; }
+    .alert { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; }
+    .date-comparison { display: flex; justify-content: space-between; margin: 20px 0; }
+    .date-box { flex: 1; padding: 15px; margin: 0 10px; border-radius: 8px; }
+    .old-date { background-color: #fee2e2; border: 2px solid #ef4444; }
+    .new-date { background-color: #d1fae5; border: 2px solid: #10b981; }
+    .button { display: inline-block; background-color: #dc2626; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
+    .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Training Dates Updated</h1>
+    </div>
+    <div class="content">
+      <div class="alert">
+        <strong>⚠️ Important Update</strong><br>
+        The training dates for your course have been modified. Please review the new dates below.
+      </div>
+      
+      <p><strong>Reference Code:</strong> ${data.referenceCode}</p>
+      <p><strong>Company:</strong> ${data.companyName}</p>
+      <p><strong>Contact:</strong> ${data.contactPerson}</p>
+      <p><strong>Assigned Technician:</strong> ${data.assignedTechnician}</p>
+      
+      <h3>Date Changes:</h3>
+      <div class="date-comparison">
+        <div class="date-box old-date">
+          <h4 style="margin-top: 0; color: #dc2626;">Previous Dates</h4>
+          <p><strong>Start:</strong> ${data.oldStartDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p><strong>End:</strong> ${data.oldEndDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+        <div class="date-box new-date">
+          <h4 style="margin-top: 0; color: #059669;">New Dates</h4>
+          <p><strong>Start:</strong> ${data.newStartDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p><strong>End:</strong> ${data.newEndDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+      </div>
+      
+      <p style="margin-top: 30px;">Please click the button below to review the updated training details and confirm your acceptance of the new dates:</p>
+      
+      <div style="text-align: center;">
+        <a href="${data.briefingUrl}" class="button">Review & Accept New Dates</a>
+      </div>
+      
+      <p style="margin-top: 30px; font-size: 14px; color: #6b7280;">
+        If you have any questions or concerns about these changes, please contact us immediately at service@fagor-automation.com or call 847-981-1500.
+      </p>
+    </div>
+    <div class="footer">
+      <p>FAGOR AUTOMATION Corp.<br>
+      4020 Winnetta Ave, Rolling Meadows, IL 60008<br>
+      Tel: 847-981-1500 | Fax: 847-981-1311<br>
+      service@fagor-automation.com</p>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    const textContent = `
+TRAINING DATES UPDATED
+
+Reference Code: ${data.referenceCode}
+Company: ${data.companyName}
+Contact: ${data.contactPerson}
+Assigned Technician: ${data.assignedTechnician}
+
+PREVIOUS DATES:
+Start: ${data.oldStartDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+End: ${data.oldEndDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+
+NEW DATES:
+Start: ${data.newStartDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+End: ${data.newEndDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+
+Please review the updated training details and confirm your acceptance of the new dates:
+${data.briefingUrl}
+
+If you have any questions or concerns, please contact us at service@fagor-automation.com or call 847-981-1500.
+
+---
+FAGOR AUTOMATION Corp.
+4020 Winnetta Ave, Rolling Meadows, IL 60008
+Tel: 847-981-1500 | Fax: 847-981-1311
+service@fagor-automation.com
+    `;
+
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${resendApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: "FAGOR Training <training@fagor-automation.com>",
+        to: [data.email],
+        subject: `Training Dates Updated - ${data.referenceCode}`,
+        html: htmlContent,
+        text: textContent,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("[Email] Failed to send date change notification:", errorText);
+      return false;
+    }
+
+    console.log("[Email] Date change notification sent successfully to:", data.email);
+    return true;
+  } catch (error) {
+    console.error("[Email] Error sending date change notification:", error);
+    return false;
+  }
+}
+

@@ -242,3 +242,24 @@
 - [x] FEATURE: Add technician email addresses to notification system based on region assignment (East/Central: Waiky Lau, Khatereh Mohammadi, Yarek Gugulski; West: Joseph Hainley)
 
 
+
+
+## New Features - Professional Technician Briefing Document
+
+- [x] Deploy current changes to Railway production
+- [x] Create professional high-end technician briefing document (PDF/printable format)
+- [x] Add FAGOR logo in top left corner of technician document
+- [x] Add FAGOR USA address in top right corner of technician document
+- [x] Include end user information (company, contact, location, phone, email)
+- [x] Include OEM information (if applicable)
+- [x] Include training course details (CNC model, machine type, training days, trainees, knowledge level, special requirements)
+- [x] Include reference code (same as accepted quotation)
+- [x] Include confirmed dates from Google Calendar (only when status is green/confirmed)
+- [x] Include map from nearest international airport to client location
+- [x] Implement automatic airport selection (nearest with international arrivals)
+- [x] Remove all pricing information from technician document
+- [x] Implement email notification system when training dates are updated
+- [x] Add checkbox for client to accept new/updated dates
+- [x] Generate technician briefing automatically after quotation acceptance
+
+

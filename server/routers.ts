@@ -11,6 +11,7 @@ import { getAssignedTechnician, getTechnicianAvailability, writeTrainingRequest 
 import { getDb } from "./db";
 import { trainingRequests } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
+import { findNearestInternationalAirport } from "./airportFinder";
 
 export const appRouter = router({
   system: systemRouter,
@@ -219,6 +220,91 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .query(async ({ input }) => {
         return await getTrainingRequestById(input.id);
+      }),
+
+    // Get technician briefing document
+    getTechnicianBriefing: publicProcedure
+      .input(z.object({
+        requestId: z.number(),
+      }))
+      .query(async ({ input }) => {
+        const db = getDb();
+        const request = await db.select().from(trainingRequests).where(eq(trainingRequests.id, input.requestId)).limit(1);
+        
+        if (!request || request.length === 0) {
+          throw new Error('Training request not found');
+        }
+
+        const data = request[0];
+        
+        // Find nearest international airport
+        const nearestAirport = await findNearestInternationalAirport(data.city || '', data.state || '');
+        
+        // Generate map URL from airport to customer location
+        const customerAddress = `${data.address}, ${data.city}, ${data.state} ${data.zipCode}`;
+        const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?size=800x400&markers=color:red%7Clabel:A%7C${encodeURIComponent(nearestAirport)}&markers=color:blue%7Clabel:B%7C${encodeURIComponent(customerAddress)}&path=color:0x0000ff%7Cweight:3%7C${encodeURIComponent(nearestAirport)}%7C${encodeURIComponent(customerAddress)}&key=${process.env.GOOGLE_MAPS_API_KEY}`;
+        
+        return {
+          // End User Information
+          companyName: data.companyName,
+          contactPerson: data.contactPerson,
+          address: data.address1 || data.address,
+          city: data.city || '',
+          state: data.state || '',
+          zipCode: data.zipCode || '',
+          phone: data.phone,
+          email: data.email,
+          machineBrand: data.machineBrand,
+          machineModel: data.machineModel,
+          
+          // OEM Information
+          oemName: data.oemName,
+          oemContact: data.oemContact,
+          oemAddress: data.oemAddress,
+          oemEmail: data.oemEmail,
+          oemPhone: data.oemPhone,
+          
+          // Training Details
+          controllerModel: data.controllerModel || '',
+          machineType: data.machineType,
+          programmingType: data.programmingType,
+          trainingDays: data.trainingDays || 0,
+          trainees: data.trainees || 0,
+          knowledgeLevel: data.knowledgeLevel,
+          trainingDetails: '', // TODO: Add this field to schema if needed
+          
+          // Scheduling
+          referenceCode: data.referenceCode || '',
+          assignedTechnician: data.assignedTechnician || '',
+          confirmedStartDate: data.confirmedStartDate?.toISOString(),
+          confirmedEndDate: data.confirmedEndDate?.toISOString(),
+          status: data.status,
+          
+          // Travel Information
+          nearestAirport,
+          mapUrl,
+          
+          // Check if dates were recently updated (within last 24 hours)
+          datesRecentlyUpdated: data.updatedAt && (Date.now() - data.updatedAt.getTime()) < 24 * 60 * 60 * 1000 && data.status === 'confirmed',
+        };
+      }),
+
+    // Accept date change
+    acceptDateChange: publicProcedure
+      .input(z.object({
+        requestId: z.number(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = getDb();
+        
+        // Update the request to mark that date change was accepted
+        await db.update(trainingRequests)
+          .set({ 
+            updatedAt: new Date(),
+          })
+          .where(eq(trainingRequests.id, input.requestId));
+        
+        return { success: true };
       }),
   }),
 
