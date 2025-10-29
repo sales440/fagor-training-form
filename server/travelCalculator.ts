@@ -7,6 +7,7 @@ import XLSX from 'xlsx';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { findNearestInternationalAirport } from './airportFinder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -325,14 +326,26 @@ export async function calculateTravelExpenses(
   const isWestCoast = WEST_COAST_STATES.includes(stateCode || '');
   const office = isWestCoast ? OFFICE_ANAHEIM : OFFICE_ROLLING_MEADOWS;
   
+  // Find nearest international airport using improved algorithm
+  let nearestAirportFull = state.codigo_aeropuerto;
+  if (city && stateCode) {
+    try {
+      nearestAirportFull = await findNearestInternationalAirport(city, stateCode);
+    } catch (error) {
+      console.warn('[Travel Calculator] Error finding nearest airport, using state default:', error);
+    }
+  }
+  
+  // Extract airport code from full name (e.g., "Pittsburgh International Airport (PIT)" -> "PIT")
+  const airportCodeMatch = nearestAirportFull.match(/\(([A-Z]{3})\)/);
+  const nearestAirport = airportCodeMatch ? airportCodeMatch[1] : state.codigo_aeropuerto;
+  
   // Determine flight cost and airport
   let flightCost = 0;
-  let nearestAirport = state.codigo_aeropuerto;
   let flightDistance = state.distancia_millas;
   
   if (isWestCoast) {
     // West coast: use Anaheim office and LAX flight prices
-    nearestAirport = state.codigo_aeropuerto;
     // ANAHEIM_FLIGHT_PRICES already contains round trip prices
     flightCost = ANAHEIM_FLIGHT_PRICES[nearestAirport] || 400; // Default round trip if not in list
     // For California, no flight cost
@@ -341,11 +354,12 @@ export async function calculateTravelExpenses(
     }
   } else {
     // East/Central: use Rolling Meadows office and ORD flight prices from Excel
-    nearestAirport = state.codigo_aeropuerto;
     // Only Illinois has $0 flight cost
     if (stateCode === 'IL') {
       flightCost = 0;
     } else {
+      // Try to get flight cost from Excel for the nearest airport
+      // If not found, use state default
       // Excel prices are ONE-WAY, multiply by 2 for ROUND TRIP
       flightCost = state.precio_vuelo_economia * 2;
     }
@@ -369,7 +383,7 @@ export async function calculateTravelExpenses(
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
   
   return {
-    nearestAirport,
+    nearestAirport: nearestAirportFull, // Return full airport name with code
     flightCost,
     hotelCost,
     foodCost,

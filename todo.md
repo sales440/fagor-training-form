@@ -273,3 +273,13 @@
 - [x] Optimized to check only top 5 closest airports by straight-line distance to reduce API calls
 
 
+
+
+## FIX - Travel Time Calculation
+
+- [x] FIX: Update travel time calculation to use real driving time from Google Distance Matrix API
+- [x] Ensure travel hours formula uses actual driving time: (flight hours + driving hours) × 2 = Total travel hours
+- [x] Update quotation display to show accurate driving time based on nearest airport selection
+- [x] Integrated airportFinder with travelCalculator for consistent airport selection
+
+
