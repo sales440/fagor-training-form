@@ -9,9 +9,9 @@
 - [x] Add quotation generation functionality
 - [x] Implement signature pad functionality
 - [x] Add terms and conditions section
-- [ ] Create GitHub repository integration
-- [ ] Set up Railway deployment configuration
-- [ ] Test complete workflow from form submission to database storage
+- [x] Create GitHub repository integration
+- [x] Set up Railway deployment configuration
+- [x] Test complete workflow from form submission to database storage
 
 
 - [x] Replace logo with official Fagor Automation logo (with red symbol and claim)
