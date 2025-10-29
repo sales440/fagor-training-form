@@ -293,3 +293,16 @@
 - [x] FIX: Update application date field to sync with user's device clock (PC/mobile/tablet) - added useEffect to update date on mount and when user returns to page
 
 
+
+
+## New Features - Error Handling & Client Confirmation PDF
+
+- [x] Test form end-to-end after backend changes to ensure quotation generation works
+- [x] FIX CRITICAL: Pittsburgh International Airport (PIT) missing from airport list - added to enable correct selection for PA locations
+- [ ] Add comprehensive error handling and fallbacks for Google Maps API calls
+- [ ] Create professional PDF confirmation document for client (similar to quotation but with prices)
+- [ ] Include in client PDF: logo, address, client info, course details, confirmed dates, reference code, technician, map, pricing, terms
+- [ ] Add PDF generation endpoint for client confirmation
+- [ ] Add download/email PDF functionality after quotation acceptance
+
+

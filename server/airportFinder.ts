@@ -19,6 +19,7 @@ const INTERNATIONAL_AIRPORTS: Airport[] = [
   { code: 'EWR', name: 'Newark Liberty International Airport', city: 'Newark', state: 'NJ', lat: 40.6895, lng: -74.1745 },
   { code: 'BOS', name: 'Boston Logan International Airport', city: 'Boston', state: 'MA', lat: 42.3656, lng: -71.0096 },
   { code: 'PHL', name: 'Philadelphia International Airport', city: 'Philadelphia', state: 'PA', lat: 39.8729, lng: -75.2437 },
+  { code: 'PIT', name: 'Pittsburgh International Airport', city: 'Pittsburgh', state: 'PA', lat: 40.4915, lng: -80.2329 },
   { code: 'IAD', name: 'Washington Dulles International Airport', city: 'Washington', state: 'DC', lat: 38.9531, lng: -77.4565 },
   { code: 'BWI', name: 'Baltimore/Washington International Airport', city: 'Baltimore', state: 'MD', lat: 39.1774, lng: -76.6684 },
   { code: 'CLT', name: 'Charlotte Douglas International Airport', city: 'Charlotte', state: 'NC', lat: 35.2140, lng: -80.9431 },
