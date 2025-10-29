@@ -98,3 +98,12 @@ These should be fixed separately.
 
 **Status**: ✅ Implementation Complete - Ready for Configuration and Testing
 **Date**: October 29, 2025
+
+
+## 📖 Documentation Tasks
+
+- [x] Create professional workflow guide in Spanish and English
+- [x] Include FAGOR logo and address in header
+- [x] Design high-end professional format
+- [x] Make procedure clear, simple, and easy to understand
+- [x] Generate PDF version of workflow guide
