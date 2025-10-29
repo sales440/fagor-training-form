@@ -230,3 +230,8 @@
 - [x] FIX CRITICAL: Terms and conditions checkbox not working in production - replaced shadcn/ui Checkbox with native HTML input
 
 
+
+
+- [x] FIX CRITICAL: Railway build failing - moved drizzle-kit migrate from build script to start script (migrations need database connection at runtime, not build time)
+
+
