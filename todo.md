@@ -263,3 +263,13 @@
 - [x] Generate technician briefing automatically after quotation acceptance
 
 
+
+
+## CRITICAL FIX - Airport Selection Algorithm
+
+- [x] FIX CRITICAL: Airport finder selecting wrong airport - using straight-line distance instead of driving time (e.g., Philadelphia 6hrs instead of Pittsburgh 42min for Zelienople, PA)
+- [x] Replace Haversine distance calculation with Google Maps Distance Matrix API for accurate driving time
+- [x] Select nearest airport based on driving time, not straight-line distance
+- [x] Optimized to check only top 5 closest airports by straight-line distance to reduce API calls
+
+

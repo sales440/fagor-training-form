@@ -104,30 +104,67 @@ async function getCoordinates(city: string, state: string): Promise<{ lat: numbe
 }
 
 /**
- * Find the nearest international airport to a given city/state
+ * Find the nearest international airport to a given city/state using Google Distance Matrix API
+ * This provides accurate driving time instead of straight-line distance
  */
 export async function findNearestInternationalAirport(city: string, state: string): Promise<string> {
-  // Get coordinates for the target city
-  const coords = await getCoordinates(city, state);
-  
-  if (!coords) {
+  try {
+    const customerAddress = `${city}, ${state}, USA`;
+    
+    // Get top 5 closest airports by straight-line distance as candidates
+    const coords = await getCoordinates(city, state);
+    
+    if (!coords) {
+      // Fallback: return airport based on state
+      return getAirportByState(state);
+    }
+    
+    // Calculate straight-line distances and get top 5 candidates
+    const airportDistances = INTERNATIONAL_AIRPORTS.map(airport => ({
+      airport,
+      distance: calculateDistance(coords.lat, coords.lng, airport.lat, airport.lng)
+    })).sort((a, b) => a.distance - b.distance).slice(0, 5);
+    
+    // Get driving times for top 5 candidates using Distance Matrix API
+    const airportAddresses = airportDistances.map(ad => 
+      `${ad.airport.name}, ${ad.airport.city}, ${ad.airport.state}, USA`
+    ).join('|');
+    
+    const response = await fetch(
+      `https://maps.googleapis.com/maps/api/distancematrix/json?origins=${encodeURIComponent(customerAddress)}&destinations=${encodeURIComponent(airportAddresses)}&mode=driving&key=${process.env.GOOGLE_MAPS_API_KEY}`
+    );
+    
+    const data = await response.json();
+    
+    if (data.status === 'OK' && data.rows && data.rows[0] && data.rows[0].elements) {
+      const elements = data.rows[0].elements;
+      
+      // Find airport with shortest driving time
+      let nearestAirport = airportDistances[0].airport;
+      let minDuration = Infinity;
+      
+      for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+        if (element.status === 'OK' && element.duration) {
+          if (element.duration.value < minDuration) {
+            minDuration = element.duration.value;
+            nearestAirport = airportDistances[i].airport;
+          }
+        }
+      }
+      
+      return `${nearestAirport.name} (${nearestAirport.code})`;
+    }
+    
+    // Fallback to closest by straight-line distance if API fails
+    const fallbackAirport = airportDistances[0].airport;
+    return `${fallbackAirport.name} (${fallbackAirport.code})`;
+    
+  } catch (error) {
+    console.error('Error finding nearest airport:', error);
     // Fallback: return airport based on state
     return getAirportByState(state);
   }
-  
-  // Find nearest airport
-  let nearestAirport = INTERNATIONAL_AIRPORTS[0];
-  let minDistance = calculateDistance(coords.lat, coords.lng, nearestAirport.lat, nearestAirport.lng);
-  
-  for (const airport of INTERNATIONAL_AIRPORTS) {
-    const distance = calculateDistance(coords.lat, coords.lng, airport.lat, airport.lng);
-    if (distance < minDistance) {
-      minDistance = distance;
-      nearestAirport = airport;
-    }
-  }
-  
-  return `${nearestAirport.name} (${nearestAirport.code})`;
 }
 
 /**
