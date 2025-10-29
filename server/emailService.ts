@@ -1,5 +1,15 @@
 import { getActiveNotificationEmails } from "./db";
 
+// Technician email addresses by region
+const TECHNICIAN_EMAILS: Record<string, string[]> = {
+  // East Coast and Central
+  'WAIKY LAU - Rolling Meadows IL Office': ['lauwaik@fagor-automation.com'],
+  'KHATEREH MOHAMMADI - Rolling Meadows IL Office': ['kmohammadi@fagor-automation.com'],
+  'YAREK GUGULSKI - Rolling Meadows IL Office': ['yarek@fagor-automation.com'],
+  // West Coast
+  'JOSEPH HAINLEY - ANAHEIM CA Office': ['jhainley@fagor-automation.com'],
+};
+
 interface TrainingRequestEmailData {
   companyName: string;
   contactPerson: string;
@@ -17,6 +27,8 @@ interface TrainingRequestEmailData {
   oemName?: string;
   oemContact?: string;
   oemEmail?: string;
+  assignedTechnician?: string;
+  referenceCode?: string;
 }
 
 /**
@@ -33,7 +45,14 @@ export async function sendTrainingRequestEmail(data: TrainingRequestEmailData): 
       return false;
     }
 
-    const emailAddresses = recipients.map(r => r.email);
+    let emailAddresses = recipients.map(r => r.email);
+    
+    // Add assigned technician's email if available
+    if (data.assignedTechnician) {
+      const technicianEmails = TECHNICIAN_EMAILS[data.assignedTechnician] || [];
+      emailAddresses = [...emailAddresses, ...technicianEmails];
+      console.log(`[Email] Adding technician emails for ${data.assignedTechnician}:`, technicianEmails);
+    }
     
     // Create email content
     const subject = `New Training Request from ${data.companyName}`;
@@ -84,6 +103,8 @@ export async function sendTrainingRequestEmail(data: TrainingRequestEmailData): 
 
       <div class="section">
         <div class="section-title">Training Details</div>
+        ${data.referenceCode ? `<div class="field"><span class="label">Reference Code:</span> <span class="value"><strong>${data.referenceCode}</strong></span></div>` : ''}
+        ${data.assignedTechnician ? `<div class="field"><span class="label">Assigned Technician:</span> <span class="value"><strong>${data.assignedTechnician}</strong></span></div>` : ''}
         ${data.controllerModel ? `<div class="field"><span class="label">CNC Model:</span> <span class="value">${data.controllerModel}</span></div>` : ''}
         ${data.machineType ? `<div class="field"><span class="label">Machine Type:</span> <span class="value">${data.machineType}</span></div>` : ''}
         ${data.programmingType ? `<div class="field"><span class="label">Programming Type:</span> <span class="value">${data.programmingType}</span></div>` : ''}
@@ -132,6 +153,8 @@ ${data.oemEmail ? `- OEM Email: ${data.oemEmail}` : ''}
 ` : ''}
 
 Training Details:
+${data.referenceCode ? `- Reference Code: ${data.referenceCode}` : ''}
+${data.assignedTechnician ? `- Assigned Technician: ${data.assignedTechnician}` : ''}
 ${data.controllerModel ? `- CNC Model: ${data.controllerModel}` : ''}
 ${data.machineType ? `- Machine Type: ${data.machineType}` : ''}
 ${data.programmingType ? `- Programming Type: ${data.programmingType}` : ''}

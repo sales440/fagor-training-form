@@ -200,6 +200,8 @@ export const appRouter = router({
             oemName: input.oemName,
             oemContact: input.oemContact,
             oemEmail: input.oemEmail,
+            assignedTechnician: assignedTechnician,
+            referenceCode: referenceCode,
           });
         } catch (error) {
           console.error('Error sending email notification:', error);

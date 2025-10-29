@@ -702,15 +702,15 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div>
-                  <Label>{t("signatureLabel")}</Label>
-                  <div className="border-2 border-gray-300 rounded-lg p-2 bg-white">
+                <div className="flex flex-col items-center">
+                  <Label className="self-start">{t("signatureLabel")}</Label>
+                  <div className="border-2 border-gray-300 rounded-lg p-2 bg-white w-full">
                     <canvas
                       ref={canvasRef}
                       width={600}
                       height={150}
                       className="w-full border border-gray-200 rounded"
-                      style={{ maxWidth: '600px', height: '150px' }}
+                      style={{ height: '150px' }}
                     />
                   </div>
                   <Button
@@ -866,16 +866,16 @@ export default function Home() {
                 <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
                   <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Travel Time</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">Travel Hours</span>
-                      <span className="text-right">
-                        <div className="text-sm text-gray-600">
-                          {quotationData.travelExpenses.flightTimeOneWay} hrs flight + {quotationData.travelExpenses.drivingTimeOneWay} hrs driving × 2 (round trip)
-                        </div>
-                        <div className="font-semibold">
+                    <div className="py-2 border-b">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Travel Hours</span>
+                        <span className="font-semibold">
                           {quotationData.travelExpenses.travelTimeHours} hrs total
-                        </div>
-                      </span>
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {quotationData.travelExpenses.flightTimeOneWay} hrs flight + {quotationData.travelExpenses.drivingTimeOneWay} hrs driving × 2 (round trip)
+                      </div>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b">
                       <span className="font-medium">Hourly Rate</span>

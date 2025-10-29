@@ -235,3 +235,10 @@
 - [x] FIX CRITICAL: Railway build failing - moved drizzle-kit migrate from build script to start script (migrations need database connection at runtime, not build time)
 
 
+
+
+- [x] FIX: Move travel hours breakdown text below "Travel Hours" label in quotation display
+- [x] FIX: Center signature canvas and make it span full width of container (without changing zoom level)
+- [x] FEATURE: Add technician email addresses to notification system based on region assignment (East/Central: Waiky Lau, Khatereh Mohammadi, Yarek Gugulski; West: Joseph Hainley)
+
+
