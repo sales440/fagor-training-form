@@ -36,6 +36,13 @@
       "when": 1761610099572,
       "tag": "0004_awesome_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1761703445460,
+      "tag": "0005_swift_bucky",
+      "breakpoints": true
     }
   ]
 }

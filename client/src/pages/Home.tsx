@@ -12,6 +12,7 @@ import { Globe, Loader2, AlertCircle } from "lucide-react";
 import SignaturePad from "signature_pad";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+import { TrainingCalendar } from "@/components/TrainingCalendar";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
@@ -21,6 +22,9 @@ export default function Home() {
   const [showWarning, setShowWarning] = useState(false);
   const [warningMessage, setWarningMessage] = useState("");
   const [quotationData, setQuotationData] = useState<any>(null);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [referenceCode, setReferenceCode] = useState<string>("");
+  const [assignedTechnician, setAssignedTechnician] = useState<string>("");
   const [oemFieldsEnabled, setOemFieldsEnabled] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -66,9 +70,20 @@ export default function Home() {
   });
 
   const createRequestMutation = trpc.trainingRequest.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // Store reference code and technician from response
+      if (data.referenceCode) {
+        setReferenceCode(data.referenceCode);
+      }
+      if (data.assignedTechnician) {
+        setAssignedTechnician(data.assignedTechnician);
+      }
+      
       toast.success(t("successMessage"));
       setShowQuotation(false);
+      
+      // Show calendar for date selection
+      setShowCalendar(true);
       // Reset form
       setFormData({
         companyName: "",
@@ -956,6 +971,26 @@ export default function Home() {
                 </Button>
               </div>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Calendar Dialog */}
+      <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
+        <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-red-600">Select Training Dates</DialogTitle>
+          </DialogHeader>
+          {showCalendar && referenceCode && (
+            <TrainingCalendar
+              referenceCode={referenceCode}
+              trainingDays={parseInt(formData.trainingDays) || 1}
+              assignedTechnician={assignedTechnician}
+              onDatesSelected={() => {
+                setShowCalendar(false);
+                toast.success("Training dates submitted! You will receive a confirmation email once approved.");
+              }}
+            />
           )}
         </DialogContent>
       </Dialog>

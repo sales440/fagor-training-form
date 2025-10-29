@@ -168,3 +168,29 @@ export async function getAllNotificationEmails(): Promise<NotificationEmail[]> {
   return await db.select().from(notificationEmails);
 }
 
+// Calendar and scheduling helpers
+export async function generateReferenceCode(): Promise<string> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const prefix = '290903-4020';
+  
+  // Get count of existing requests to determine next number
+  const allRequests = await db.select({ id: trainingRequests.id }).from(trainingRequests);
+  const nextNumber = allRequests.length + 1;
+  
+  return `${prefix}-${nextNumber.toString().padStart(4, '0')}`;
+}
+
+export async function getTrainingRequestByReferenceCode(referenceCode: string): Promise<TrainingRequest | undefined> {
+  const db = await getDb();
+  if (!db) {
+    throw new Error("Database not available");
+  }
+
+  const result = await db.select().from(trainingRequests).where(eq(trainingRequests.referenceCode, referenceCode)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+

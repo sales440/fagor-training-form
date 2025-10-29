@@ -188,3 +188,40 @@
 
 - [x] FIX: Modify "Travel Hours" line to show detailed breakdown: "X hrs flight + Y hrs driving × 2 (round trip) = Z total hrs"
 
+
+
+
+## New Features Required:
+
+- [ ] FEATURE: After accepting quotation, display calendar for client to select training date
+- [ ] FEATURE: Automatic technician assignment based on client state (Joseph Hainley: West/Central, Others: East/Central)
+- [ ] FEATURE: Connect to Google Sheets API for calendar management
+- [ ] FEATURE: Color coding system (green/yellow/orange/red) for availability status
+- [ ] FEATURE: Write training request to Google Sheets with yellow status (tentative)
+
+
+
+
+## PHASE 1: Application Implementation (COMPLETED)
+
+- [x] FEATURE: Generate unique reference code for each quotation (format: 290903-4020-XXXX)
+- [x] FEATURE: Create database table for tracking training requests
+- [x] FEATURE: Display calendar after quotation acceptance
+- [x] FEATURE: Automatic technician assignment based on state
+- [x] FEATURE: Allow client to select training dates
+- [x] FEATURE: Write selected dates to Google Sheets with YELLOW background (tentative)
+- [x] FEATURE: Store request data in database with status tracking
+- [ ] TODO: API endpoint to generate PDF with confirmed dates (for Phase 2 n8n workflow)
+
+## PHASE 2: n8n Workflow (PENDING USER CONFIRMATION)
+
+- [ ] FEATURE: Create n8n workflow via API
+- [ ] FEATURE: Implement polling system (every 30 minutes) to check for color changes in Google Sheets
+- [ ] FEATURE: When color changes from YELLOW to GREEN, trigger confirmation email
+- [ ] FEATURE: Send confirmation email with PDF attachment to client
+
+
+
+
+- [x] FIX: Ensure entire project is fully responsive for mobile devices (forms, quotation, calendar, dialogs)
+
