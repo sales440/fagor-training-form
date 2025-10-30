@@ -158,7 +158,7 @@ service@fagor-automation.com
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Fagor Training Forms <onboarding@resend.dev>',
+        from: 'Fagor Training Forms <jcrobledolopez@gmail.com>',
         to: emailAddresses,
         subject: subject,
         html: htmlContent,
@@ -432,7 +432,7 @@ export async function sendClientConfirmation(data: QuotationData): Promise<void>
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'FAGOR Training <onboarding@resend.dev>',
+        from: 'FAGOR Training <jcrobledolopez@gmail.com>',
         to: data.email,
         cc: ['jcrobledolopez@gmail.com'],
         subject: `Training Confirmed: ${data.confirmedStartDate} - ${data.confirmedEndDate} | Ref: ${data.referenceCode}`,
@@ -464,7 +464,7 @@ export async function sendTechnicianNotification(data: QuotationData, technician
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'FAGOR Training <onboarding@resend.dev>',
+        from: 'FAGOR Training <jcrobledolopez@gmail.com>',
         to: technicianEmail,
         cc: ['jcrobledolopez@gmail.com'],
         subject: `New Training Assignment: ${data.companyName} | ${data.confirmedStartDate} - ${data.confirmedEndDate}`,

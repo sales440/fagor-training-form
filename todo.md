@@ -244,3 +244,5 @@
 - [x] Correct spreadsheet ID: 1rBzXJdSIJXBF2LPuWNpYqKdPYs-Jx4mL3TeZSbxsP8it3VhnySoHygE5td0Z1gcp
 
 - [x] Fix database SSL configuration for Railway deployment
+
+- [x] Change email sender from fagor service to jcrobledolopez@gmail.com for all emails
