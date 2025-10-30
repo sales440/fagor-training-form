@@ -1,11 +1,12 @@
 import { google } from 'googleapis';
+import { getGoogleSheetsClient } from './googleAuth';
 
 // Google Sheets configuration
-const SPREADSHEET_ID = '13TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
+const SPREADSHEET_ID = '1rBzXJdSIJXBF2LPuWNpYqKdPYs-Jx4mL3TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
 const SHEET_NAME = 'Service Team 2025';
 
 // Technician assignment by state
-const TECHNICIAN_ASSIGNMENT = {
+const TECHNICIAN_ASSIGNMENT: Record<string, string> = {
   // Joseph Hainley - West/Central states
   'CA': 'JOSEPH HAINLEY - ANAHEIM CA Office',
   'OR': 'JOSEPH HAINLEY - ANAHEIM CA Office',
@@ -77,6 +78,7 @@ let authClient: GoogleSheetsAuth | null = null;
 
 /**
  * Initialize Google Sheets API client
+ * Now uses shared authentication module
  */
 async function getAuthClient(): Promise<GoogleSheetsAuth> {
   if (authClient) {
@@ -84,32 +86,20 @@ async function getAuthClient(): Promise<GoogleSheetsAuth> {
   }
 
   try {
-    // Get credentials from environment variable
-    const credsEnv = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
-    if (!credsEnv) {
-      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set');
-    }
-    const credentials = JSON.parse(credsEnv);
+    const sheets = await getGoogleSheetsClient();
 
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
+    authClient = {
+      sheets,
+    };
 
-    const authClientInstance = await auth.getClient();
-    const sheets = google.sheets({ version: 'v4', auth: authClientInstance as any });
-
-    authClient = { sheets };
+    console.log('[Google Sheets] Successfully initialized');
     return authClient;
   } catch (error) {
-    console.error('Error initializing Google Sheets client:', error);
-    throw new Error('Failed to initialize Google Sheets API');
+    console.error('[Google Sheets] Error initializing client:', error);
+    throw new Error('Failed to initialize Google Sheets client');
   }
 }
 
-/**
- * Get assigned technician based on client state
- */
 export function getAssignedTechnician(state: string): string {
   const technician = TECHNICIAN_ASSIGNMENT[state.toUpperCase()];
   if (!technician) {
@@ -120,71 +110,7 @@ export function getAssignedTechnician(state: string): string {
 }
 
 /**
- * Get technician availability for a specific date range
- */
-export async function getTechnicianAvailability(
-  technician: string,
-  startDate: Date,
-  endDate: Date
-): Promise<{ date: string; status: string; color: string }[]> {
-  try {
-    const { sheets } = await getAuthClient();
-    
-    const column = TECHNICIAN_COLUMNS[technician];
-    if (!column) {
-      throw new Error(`Technician column not found: ${technician}`);
-    }
-
-    // Read the entire column for the technician
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREADSHEET_ID,
-      range: `${SHEET_NAME}!A:${column}`,
-    });
-
-    const rows = response.data.values || [];
-    const availability: { date: string; status: string; color: string }[] = [];
-
-    // Parse rows to find dates and availability
-    for (let i = 2; i < rows.length; i++) {
-      const row = rows[i];
-      if (!row || row.length < 2) continue;
-
-      const dateStr = row[1]; // Column B contains dates
-      if (!dateStr) continue;
-
-      const cellValue = row[column.charCodeAt(0) - 'A'.charCodeAt(0)] || 'Office-Phone Support';
-      
-      // Determine status based on cell value
-      let status = 'available';
-      let color = 'green';
-
-      if (cellValue.includes('PTO') || cellValue.includes('VACATION') || cellValue.includes('HOLIDAY')) {
-        status = 'unavailable';
-        color = 'red';
-      } else if (cellValue.includes('TRAVEL') || cellValue.includes('Office-Phone Support')) {
-        status = 'available';
-        color = 'blue';
-      } else if (cellValue && cellValue !== 'Office-Phone Support') {
-        status = 'tentative';
-        color = 'yellow';
-      }
-
-      availability.push({
-        date: dateStr,
-        status,
-        color,
-      });
-    }
-
-    return availability;
-  } catch (error) {
-    console.error('Error fetching technician availability:', error);
-    throw new Error('Failed to fetch technician availability');
-  }
-}
-
-/**
- * Write training request to Google Sheets
+ * Write training request to Google Sheets with YELLOW background
  */
 export async function writeTrainingRequest(
   technician: string,
@@ -210,15 +136,27 @@ export async function writeTrainingRequest(
     const rows = response.data.values || [];
     let rowIndex = -1;
 
+    // Parse the input date to compare
+    const targetDate = new Date(date + 'T00:00:00');
+    const targetDateStr = targetDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+    
+    console.log(`[Google Sheets] Looking for date: ${date} (formatted: ${targetDateStr})`);
+
     for (let i = 2; i < rows.length; i++) {
-      if (rows[i] && rows[i][0] === date) {
-        rowIndex = i + 1; // +1 because sheets are 1-indexed
-        break;
+      if (rows[i] && rows[i][0]) {
+        const cellDate = rows[i][0].trim();
+        // Try exact match first
+        if (cellDate === date || cellDate === targetDateStr) {
+          rowIndex = i + 1; // +1 because sheets are 1-indexed
+          console.log(`[Google Sheets] Found date at row ${rowIndex}: ${cellDate}`);
+          break;
+        }
       }
     }
 
     if (rowIndex === -1) {
-      throw new Error(`Date not found in calendar: ${date}`);
+      console.error(`[Google Sheets] Available dates in sheet:`, rows.slice(2, 12).map((r, i) => `Row ${i+3}: ${r?.[0]}`));
+      throw new Error(`Date not found in calendar: ${date}. Please ensure the date exists in the Google Sheet.`);
     }
 
     // Write the training request
@@ -233,7 +171,22 @@ export async function writeTrainingRequest(
       },
     });
 
-    // Set cell background to yellow (tentative)
+    // Get sheet ID dynamically
+    const sheetMetadata = await sheets.spreadsheets.get({
+      spreadsheetId: SPREADSHEET_ID,
+      fields: 'sheets(properties(sheetId,title))',
+    });
+    
+    const sheet = sheetMetadata.data.sheets?.find(
+      (s: any) => s.properties?.title === SHEET_NAME
+    );
+    
+    const sheetId = sheet?.properties?.sheetId;
+    if (sheetId === undefined) {
+      throw new Error(`Sheet "${SHEET_NAME}" not found`);
+    }
+
+    // Set cell background to YELLOW (tentative/pending confirmation)
     await sheets.spreadsheets.batchUpdate({
       spreadsheetId: SPREADSHEET_ID,
       requestBody: {
@@ -241,7 +194,7 @@ export async function writeTrainingRequest(
           {
             repeatCell: {
               range: {
-                sheetId: 0, // Assuming first sheet, may need to get actual sheet ID
+                sheetId: sheetId,
                 startRowIndex: rowIndex - 1,
                 endRowIndex: rowIndex,
                 startColumnIndex: column.charCodeAt(0) - 'A'.charCodeAt(0),
@@ -263,10 +216,112 @@ export async function writeTrainingRequest(
       },
     });
 
-    console.log(`Training request written to Google Sheets: ${companyName} on ${date}`);
+    console.log(`[Google Sheets] Training request written with YELLOW background: ${companyName} on ${date}`);
   } catch (error) {
-    console.error('Error writing training request:', error);
+    console.error('[Google Sheets] Error writing training request:', error);
     throw new Error('Failed to write training request to Google Sheets');
   }
 }
 
+
+/**
+ * Get technician availability from Google Sheets
+ * Returns array of dates where technician is available (no entry or white background)
+ */
+export async function getTechnicianAvailability(
+  technician: string,
+  startDate: Date,
+  endDate: Date
+): Promise<string[]> {
+  try {
+    const { sheets } = await getAuthClient();
+    
+    const column = TECHNICIAN_COLUMNS[technician];
+    if (!column) {
+      throw new Error(`Technician column not found: ${technician}`);
+    }
+
+    // Get all dates in column B
+    const datesResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!B:B`,
+    });
+
+    const dateRows = datesResponse.data.values || [];
+    
+    // Get all values in technician's column
+    const technicianResponse = await sheets.spreadsheets.values.get({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${SHEET_NAME}!${column}:${column}`,
+    });
+
+    const technicianRows = technicianResponse.data.values || [];
+
+    // Get sheet metadata for background colors
+    const sheetMetadata = await sheets.spreadsheets.get({
+      spreadsheetId: SPREADSHEET_ID,
+      fields: 'sheets(properties(sheetId,title))',
+    });
+    
+    const sheet = sheetMetadata.data.sheets?.find(
+      (s: any) => s.properties?.title === SHEET_NAME
+    );
+    
+    const sheetId = sheet?.properties?.sheetId;
+    if (sheetId === undefined) {
+      throw new Error(`Sheet "${SHEET_NAME}" not found`);
+    }
+
+    const availableDates: string[] = [];
+
+    // Check each date in range
+    for (let i = 2; i < dateRows.length; i++) {
+      if (!dateRows[i] || !dateRows[i][0]) continue;
+
+      const cellDate = dateRows[i][0].trim();
+      const checkDate = new Date(cellDate + 'T00:00:00');
+
+      // Skip if date is outside range
+      if (checkDate < startDate || checkDate > endDate) continue;
+
+      // Check if cell is empty or has white background
+      const cellValue = technicianRows[i]?.[0];
+      const isEmpty = !cellValue || cellValue.trim() === '';
+
+      if (isEmpty) {
+        // Cell is empty, date is available
+        availableDates.push(cellDate);
+      } else {
+        // Check background color
+        const rowIndex = i + 1; // 1-indexed
+        const columnIndex = column.charCodeAt(0) - 'A'.charCodeAt(0);
+
+        const colorResponse = await sheets.spreadsheets.get({
+          spreadsheetId: SPREADSHEET_ID,
+          ranges: [`${SHEET_NAME}!R${rowIndex}C${columnIndex + 1}`],
+          fields: 'sheets(data(rowData(values(effectiveFormat(backgroundColor)))))',
+        });
+
+        const cellData = colorResponse.data.sheets?.[0]?.data?.[0]?.rowData?.[0]?.values?.[0];
+        const bgColor = cellData?.effectiveFormat?.backgroundColor;
+
+        // If no background color or white background, date is available
+        const isWhite = !bgColor || (
+          bgColor.red >= 0.9 && 
+          bgColor.green >= 0.9 && 
+          bgColor.blue >= 0.9
+        );
+
+        if (isWhite) {
+          availableDates.push(cellDate);
+        }
+      }
+    }
+
+    console.log(`[Google Sheets] Found ${availableDates.length} available dates for ${technician}`);
+    return availableDates;
+  } catch (error) {
+    console.error('[Google Sheets] Error getting technician availability:', error);
+    throw new Error('Failed to get technician availability from Google Sheets');
+  }
+}

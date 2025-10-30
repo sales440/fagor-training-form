@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "e4c9eed4-d81d-4cdf-9a03-0aaf6c05c56f",
+  "id": "9fe449e1-1b16-4bd2-b9b0-5dd8f081e918",
   "prevId": "186e489b-9c7c-4155-a241-31e26e5d4fcd",
   "tables": {
     "notification_emails": {
@@ -309,6 +309,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "mealsCost": {
+          "name": "mealsCost",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "carRentalCost": {
           "name": "carRentalCost",
           "type": "int",
@@ -323,8 +330,22 @@
           "notNull": false,
           "autoincrement": false
         },
+        "travelTimeCost": {
+          "name": "travelTimeCost",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "totalPrice": {
           "name": "totalPrice",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "totalCost": {
+          "name": "totalCost",
           "type": "int",
           "primaryKey": false,
           "notNull": false,
@@ -333,6 +354,27 @@
         "nearestAirport": {
           "name": "nearestAirport",
           "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "selectedAirport": {
+          "name": "selectedAirport",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "flightTimeOneWay": {
+          "name": "flightTimeOneWay",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "drivingTimeOneWay": {
+          "name": "drivingTimeOneWay",
+          "type": "int",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -409,23 +451,15 @@
           "autoincrement": false,
           "default": false
         },
-        "googleCalendarEventId": {
-          "name": "googleCalendarEventId",
-          "type": "varchar(255)",
+        "selectedDate": {
+          "name": "selectedDate",
+          "type": "varchar(20)",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         },
-        "calendarStatus": {
-          "name": "calendarStatus",
-          "type": "enum('none','pending','confirmed')",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'none'"
-        },
-        "lastCalendarCheck": {
-          "name": "lastCalendarCheck",
+        "confirmedAt": {
+          "name": "confirmedAt",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false,
@@ -433,7 +467,7 @@
         },
         "status": {
           "name": "status",
-          "type": "enum('pending','dates_selected','tentative','confirmed','approved','rejected','completed')",
+          "type": "enum('pending','dates_selected','tentative','pending_confirmation','confirmed','approved','rejected','completed')",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,

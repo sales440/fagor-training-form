@@ -73,10 +73,16 @@ export const trainingRequests = mysqlTable("training_requests", {
   travelExpenses: int("travelExpenses"),
   hotelCost: int("hotelCost"),
   foodCost: int("foodCost"),
+  mealsCost: int("mealsCost"), // Alias for foodCost
   carRentalCost: int("carRentalCost"),
   flightCost: int("flightCost"),
+  travelTimeCost: int("travelTimeCost"), // Cost for travel time
   totalPrice: int("totalPrice"),
+  totalCost: int("totalCost"), // Alias for totalPrice
   nearestAirport: varchar("nearestAirport", { length: 100 }),
+  selectedAirport: varchar("selectedAirport", { length: 100 }), // Alias for nearestAirport
+  flightTimeOneWay: int("flightTimeOneWay"), // Flight time in minutes
+  drivingTimeOneWay: int("drivingTimeOneWay"), // Driving time in minutes
   
   // Metadata
   language: varchar("language", { length: 10 }).default("en"),
@@ -92,12 +98,10 @@ export const trainingRequests = mysqlTable("training_requests", {
   googleSheetColumn: varchar("googleSheetColumn", { length: 10 }),
   confirmationEmailSent: boolean("confirmationEmailSent").default(false),
   
-  // Google Calendar Integration
-  googleCalendarEventId: varchar("googleCalendarEventId", { length: 255 }), // Event ID in Google Calendar
-  calendarStatus: mysqlEnum("calendarStatus", ["none", "pending", "confirmed"]).default("none"), // none = no event, pending = yellow, confirmed = green
-  lastCalendarCheck: timestamp("lastCalendarCheck"), // Last time we checked calendar status
+  selectedDate: varchar("selectedDate", { length: 20 }), // Selected training start date (YYYY-MM-DD)
+  confirmedAt: timestamp("confirmedAt"), // When training was confirmed (green cell detected)
   
-  status: mysqlEnum("status", ["pending", "dates_selected", "tentative", "confirmed", "approved", "rejected", "completed"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "dates_selected", "tentative", "pending_confirmation", "confirmed", "approved", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

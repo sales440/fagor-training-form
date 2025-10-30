@@ -109,4 +109,3 @@ temp/
 *.db
 *.sqlite
 *.sqlite3
-google-credentials.json
