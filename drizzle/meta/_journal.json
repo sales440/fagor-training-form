@@ -50,6 +50,13 @@
       "when": 1766296912430,
       "tag": "0006_skinny_nuke",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1766299079605,
+      "tag": "0007_nice_fallen_one",
+      "breakpoints": true
     }
   ]
 }

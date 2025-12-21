@@ -29,7 +29,7 @@ import { Calendar, Users, Clock, Mail, Phone, MapPin, GripVertical } from 'lucid
 import { format } from 'date-fns';
 
 // Type definitions
-type Status = 'pending' | 'awaiting_client_confirmation' | 'approved' | 'rejected';
+type Status = 'pending' | 'awaiting_client_confirmation' | 'dates_selected' | 'approved' | 'rejected' | 'completed';
 
 interface TrainingRequest {
   id: number;
@@ -107,7 +107,7 @@ function KanbanCard({ request, onClick }: { request: TrainingRequest; onClick: (
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3 text-muted-foreground" />
-                <span>{request.trainingDays}h</span>
+                <span>{request.trainingDays || 0} days</span>
               </div>
             </div>
 
@@ -344,7 +344,7 @@ export function KanbanBoard() {
             <Card className="shadow-lg opacity-90">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold">{activeRequest.companyName}</CardTitle>
-                <p className="text-xs text-muted-foreground">{activeRequest.trainingType}</p>
+                <p className="text-xs text-muted-foreground">{activeRequest.machineType || "N/A"}</p>
               </CardHeader>
             </Card>
           ) : null}
@@ -371,7 +371,7 @@ export function KanbanBoard() {
                 </div>
                 <div>
                   <Label className="text-sm font-semibold">Training Type</Label>
-                  <p className="text-sm mt-1">{selectedRequest.trainingType}</p>
+                  <p className="text-sm mt-1">{selectedRequest.machineType || "N/A"}</p>
                 </div>
               </div>
 
@@ -416,14 +416,14 @@ export function KanbanBoard() {
                     <Users className="h-4 w-4" />
                     Participants
                   </Label>
-                  <p className="text-sm mt-1">{selectedRequest.numberOfParticipants}</p>
+                  <p className="text-sm mt-1">{selectedRequest.trainees || 0}</p>
                 </div>
                 <div>
                   <Label className="text-sm font-semibold flex items-center gap-2">
                     <Clock className="h-4 w-4" />
                     Estimated Hours
                   </Label>
-                  <p className="text-sm mt-1">{selectedRequest.estimatedHours}</p>
+                  <p className="text-sm mt-1">{selectedRequest.trainingDays || 0}</p>
                 </div>
               </div>
 

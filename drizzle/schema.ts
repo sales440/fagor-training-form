@@ -101,7 +101,7 @@ export const trainingRequests = mysqlTable("training_requests", {
   clientConfirmationToken: varchar("clientConfirmationToken", { length: 64 }),
   tokenExpiresAt: timestamp("tokenExpiresAt"),
   
-  status: mysqlEnum("status", ["pending", "awaiting_client_confirmation", "approved", "rejected", "completed"]).default("pending").notNull(),
+  status: mysqlEnum("status", ["pending", "awaiting_client_confirmation", "dates_selected", "approved", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

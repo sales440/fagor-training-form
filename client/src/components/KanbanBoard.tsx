@@ -34,13 +34,13 @@ type Status = 'pending' | 'awaiting_client_confirmation' | 'approved' | 'rejecte
 interface TrainingRequest {
   id: number;
   companyName: string;
-  trainingType: string;
+  machineType?: string;
   status: Status;
   contactPerson: string;
   email: string;
   phone?: string;
-  numberOfParticipants: number;
-  estimatedHours: number;
+  trainees?: number;
+  trainingDays?: number;
   preferredDates?: string[];
   approvedDates?: string[];
   assignedTechnician?: string;
@@ -87,7 +87,7 @@ function KanbanCard({ request, onClick }: { request: TrainingRequest; onClick: (
           <div className="flex items-start justify-between">
             <div className="flex-1" onClick={onClick}>
               <CardTitle className="text-sm font-semibold">{request.companyName}</CardTitle>
-              <p className="text-xs text-muted-foreground mt-1">{request.trainingType}</p>
+              <p className="text-xs text-muted-foreground mt-1">{request.machineType || 'N/A'}</p>
             </div>
             <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing p-1">
               <GripVertical className="h-4 w-4 text-gray-400" />
@@ -106,11 +106,11 @@ function KanbanCard({ request, onClick }: { request: TrainingRequest; onClick: (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1">
                 <Users className="h-3 w-3 text-muted-foreground" />
-                <span>{request.numberOfParticipants} participants</span>
+                <span>{request.trainees || 0} trainees</span>
               </div>
               <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3 text-muted-foreground" />
-                <span>{request.estimatedHours}h</span>
+                <span>{request.trainingDays || 0} days</span>
               </div>
             </div>
 

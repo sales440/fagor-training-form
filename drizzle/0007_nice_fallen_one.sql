@@ -1,0 +1,1 @@
+ALTER TABLE `training_requests` MODIFY COLUMN `status` enum('pending','awaiting_client_confirmation','dates_selected','approved','rejected','completed') NOT NULL DEFAULT 'pending';

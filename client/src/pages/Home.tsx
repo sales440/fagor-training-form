@@ -12,7 +12,7 @@ import { Globe, Loader2, AlertCircle } from "lucide-react";
 import SignaturePad from "signature_pad";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { TrainingCalendar } from "@/components/TrainingCalendar";
+import AvailabilityCalendar from "@/components/AvailabilityCalendar";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
@@ -996,11 +996,11 @@ export default function Home() {
             <DialogTitle className="text-2xl font-bold text-red-600">Select Training Dates</DialogTitle>
           </DialogHeader>
           {showCalendar && referenceCode && (
-            <TrainingCalendar
-              referenceCode={referenceCode}
+            <AvailabilityCalendar
               trainingDays={parseInt(formData.trainingDays) || 1}
-              assignedTechnician={assignedTechnician}
-              onDatesSelected={() => {
+              onDateSelect={(start, end) => {
+                // TODO: Submit selected dates to backend
+                console.log('Selected dates:', start, end);
                 setShowCalendar(false);
                 toast.success("Training dates submitted! You will receive a confirmation email once approved.");
               }}
