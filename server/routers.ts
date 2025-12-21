@@ -9,6 +9,7 @@ import { calculateQuotation } from "./travelCalculator";
 import { sendTrainingRequestEmail, sendStatusUpdateEmail, sendClientConfirmationEmail } from "./emailService";
 import * as crypto from 'crypto';
 import { getAssignedTechnician, getTechnicianAvailability, writeTrainingRequest } from "./googleSheetsService";
+import { generateExcelBackup } from "./excelExport";
 import { getDb } from "./db";
 import { trainingRequests } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
@@ -385,6 +386,13 @@ export const appRouter = router({
           availability.push({ date: date.toISOString(), status });
         }
         return availability;
+      }),
+
+    exportExcel: publicProcedure
+      .mutation(async () => {
+        const requests = await getAllTrainingRequests();
+        const buffer = await generateExcelBackup(requests);
+        return { data: Buffer.from(buffer).toString('base64') };
       }),
   }),
 });

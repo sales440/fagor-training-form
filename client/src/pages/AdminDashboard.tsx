@@ -12,7 +12,32 @@ import { CalendarView } from '@/components/CalendarView';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { Card } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc';
-import { Loader2, Calendar, LayoutGrid, TrendingUp, Users, Clock, CheckCircle } from 'lucide-react';
+import { Loader2, Calendar, LayoutGrid, TrendingUp, Users, Clock, CheckCircle, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
+
+function ExportButton() {
+  const exportMutation = trpc.trainingRequest.exportExcel.useMutation({
+    onSuccess: (data) => {
+      const blob = new Blob([Uint8Array.from(atob(data.data), c => c.charCodeAt(0))], 
+        { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Fagor_Training_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      toast.success('Excel descargado');
+    },
+    onError: () => toast.error('Error al generar Excel')
+  });
+
+  return (
+    <Button onClick={() => exportMutation.mutate()} disabled={exportMutation.isPending} className="bg-[#DC241F]">
+      <Download className="mr-2 h-4 w-4" />
+      {exportMutation.isPending ? 'Generando...' : 'Descargar Excel'}
+    </Button>
+  );
+}
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -66,9 +91,7 @@ export default function AdminDashboard() {
                 Manage and track all training requests
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Welcome, {user.email}</span>
-            </div>
+            <ExportButton />
           </div>
         </div>
       </header>
