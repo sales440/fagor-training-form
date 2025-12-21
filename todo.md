@@ -409,3 +409,16 @@
 - [ ] Build visual calendar component with react-big-calendar
 - [ ] Apply color coding based on booking status
 - [ ] Integrate into client-facing date selection dialog
+
+
+---
+
+## 🚨 RAILWAY DEPLOYMENT CRITICAL FIXES (Dec 21, 2025)
+
+- [ ] FIX CRITICAL: Form submission error "Error submitting request. Please try again." in production
+- [ ] FIX CRITICAL: Admin login route returning 404 (page not found)
+- [ ] FIX CRITICAL: Completely disable Google Sheets integration to eliminate log errors
+- [ ] TEST: Verify form submission works end-to-end in Railway
+- [ ] TEST: Verify admin login and dashboard accessible in Railway
+- [ ] DEPLOY: Push fixes to GitHub and verify Railway auto-deploys
+- [ ] VERIFY: Confirm all functionality works correctly in production
