@@ -6,7 +6,7 @@ import { publicProcedure, router, protectedProcedure } from "./_core/trpc";
 import { z } from "zod";
 import { createTrainingRequest, getAllTrainingRequests, getTrainingRequestById, getAllNotificationEmails, addNotificationEmail, removeNotificationEmail, generateReferenceCode, getTrainingRequestByReferenceCode } from "./db";
 import { calculateQuotation } from "./travelCalculator";
-import { sendTrainingRequestEmail, sendStatusUpdateEmail, sendClientConfirmationEmail } from "./emailService";
+import { sendTrainingRequestEmail, sendStatusUpdateEmail, sendClientConfirmationEmail, sendDateApprovalEmail, sendDateRejectionEmail } from "./emailService";
 import * as crypto from 'crypto';
 import { getAssignedTechnician, getTechnicianAvailability, writeTrainingRequest } from "./googleSheetsService";
 import { generateExcelBackup } from "./excelExport";
@@ -244,9 +244,10 @@ export const appRouter = router({
     updateStatus: protectedProcedure
       .input(z.object({
         id: z.number(),
-        status: z.enum(['pending', 'awaiting_client_confirmation', 'approved', 'rejected']),
+        status: z.enum(['pending', 'awaiting_client_confirmation', 'approved', 'rejected', 'dates_selected']),
         rejectionReason: z.string().optional(),
         technicianNotes: z.string().optional(),
+        approvedDates: z.array(z.string()).optional(),
       }))
       .mutation(async ({ input, ctx }) => {
         if (ctx.user.role !== 'admin') {
@@ -277,6 +278,27 @@ export const appRouter = router({
         await db.update(trainingRequests)
           .set(updateData)
           .where(eq(trainingRequests.id, input.id));
+
+        // Send email notifications for approval/rejection
+        const request = await getTrainingRequestById(input.id);
+        if (request && input.status === 'approved' && input.approvedDates) {
+          await sendDateApprovalEmail({
+            clientEmail: request.email,
+            companyName: request.companyName,
+            contactPerson: request.contactPerson,
+            approvedDates: input.approvedDates,
+            technician: request.assignedTechnician || 'TBD',
+            referenceCode: request.referenceCode || '',
+          });
+        } else if (request && input.status === 'rejected' && input.rejectionReason) {
+          await sendDateRejectionEmail({
+            clientEmail: request.email,
+            companyName: request.companyName,
+            contactPerson: request.contactPerson,
+            rejectionReason: input.rejectionReason,
+            referenceCode: request.referenceCode || '',
+          });
+        }
 
         const [updatedRequest] = await db.select()
           .from(trainingRequests)

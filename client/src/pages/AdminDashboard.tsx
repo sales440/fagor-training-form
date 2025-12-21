@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CalendarView } from '@/components/CalendarView';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { ExportSettings } from '@/components/ExportSettings';
+import { MetricsDashboard } from '@/components/MetricsDashboard';
 import { Card } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc';
 import { Loader2, Calendar, LayoutGrid, TrendingUp, Users, Clock, CheckCircle, Download } from 'lucide-react';
@@ -168,7 +169,7 @@ export default function AdminDashboard() {
 
         {/* Main Content - Tabs */}
         <Tabs defaultValue="kanban" className="w-full">
-          <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-6">
             <TabsTrigger value="kanban" className="flex items-center gap-2">
               <LayoutGrid className="h-4 w-4" />
               Kanban Board
@@ -179,7 +180,11 @@ export default function AdminDashboard() {
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Download className="h-4 w-4" />
-              Export & Settings
+              Export
+            </TabsTrigger>
+            <TabsTrigger value="metrics" className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4" />
+              Métricas
             </TabsTrigger>
           </TabsList>
 
@@ -201,6 +206,13 @@ export default function AdminDashboard() {
           <TabsContent value="settings" className="mt-0">
             <Card className="p-6">
               <ExportSettings />
+            </Card>
+          </TabsContent>
+
+          {/* Metrics Tab */}
+          <TabsContent value="metrics" className="mt-0">
+            <Card className="p-6">
+              <MetricsDashboard />
             </Card>
           </TabsContent>
         </Tabs>

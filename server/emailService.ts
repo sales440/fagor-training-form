@@ -297,3 +297,90 @@ export async function sendClientConfirmationEmail(request: any) {
     console.error('Error sending client confirmation email:', error);
   }
 }
+
+export async function sendDateApprovalEmail(data: {
+  clientEmail: string;
+  companyName: string;
+  contactPerson: string;
+  approvedDates: string[];
+  technician: string;
+  referenceCode: string;
+}): Promise<boolean> {
+  try {
+    const html = `
+      <h2>Fechas de Capacitación Aprobadas - Fagor Automation</h2>
+      <p>Estimado/a ${data.contactPerson},</p>
+      <p>Nos complace informarle que sus fechas de capacitación han sido <strong>APROBADAS</strong>.</p>
+      <h3>Detalles:</h3>
+      <ul>
+        <li><strong>Empresa:</strong> ${data.companyName}</li>
+        <li><strong>Código de Referencia:</strong> ${data.referenceCode}</li>
+        <li><strong>Técnico Asignado:</strong> ${data.technician}</li>
+        <li><strong>Fechas Confirmadas:</strong></li>
+        <ul>${data.approvedDates.map(d => `<li>${new Date(d).toLocaleDateString()}</li>`).join('')}</ul>
+      </ul>
+      <p>Nuestro técnico se pondrá en contacto con usted próximamente para coordinar los detalles finales.</p>
+      <p>Saludos cordiales,<br>Fagor Automation USA</p>
+    `;
+
+    const response = await fetch(`${process.env.BUILT_IN_FORGE_API_URL}/email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.BUILT_IN_FORGE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        to: [data.clientEmail],
+        subject: `Fechas Aprobadas - ${data.referenceCode}`,
+        html,
+      }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('[Email] Failed to send approval email:', error);
+    return false;
+  }
+}
+
+export async function sendDateRejectionEmail(data: {
+  clientEmail: string;
+  companyName: string;
+  contactPerson: string;
+  rejectionReason: string;
+  referenceCode: string;
+}): Promise<boolean> {
+  try {
+    const html = `
+      <h2>Actualización de Fechas - Fagor Automation</h2>
+      <p>Estimado/a ${data.contactPerson},</p>
+      <p>Lamentamos informarle que las fechas propuestas no están disponibles.</p>
+      <h3>Detalles:</h3>
+      <ul>
+        <li><strong>Empresa:</strong> ${data.companyName}</li>
+        <li><strong>Código de Referencia:</strong> ${data.referenceCode}</li>
+        <li><strong>Motivo:</strong> ${data.rejectionReason}</li>
+      </ul>
+      <p>Por favor, proponga nuevas fechas alternativas respondiendo a este correo o contactándonos directamente.</p>
+      <p>Saludos cordiales,<br>Fagor Automation USA</p>
+    `;
+
+    const response = await fetch(`${process.env.BUILT_IN_FORGE_API_URL}/email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.BUILT_IN_FORGE_API_KEY}`,
+      },
+      body: JSON.stringify({
+        to: [data.clientEmail],
+        subject: `Actualización de Fechas - ${data.referenceCode}`,
+        html,
+      }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('[Email] Failed to send rejection email:', error);
+    return false;
+  }
+}
