@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, CheckCircle, XCircle, Calendar, Users, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import DateSelectionCalendar from '@/components/DateSelectionCalendar';
 
 export default function ConfirmDates() {
   const [, params] = useRoute('/confirm-dates/:token');

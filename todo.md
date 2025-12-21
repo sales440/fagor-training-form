@@ -393,3 +393,19 @@
 - [ ] UPDATE: Correct spreadsheet ID in environment variables or code
 - [ ] TEST: Verify quotation acceptance works after fix
 - [ ] DEPLOY: Push fix to Railway and verify in production
+
+
+---
+
+## 🎯 INTELLIGENT DATE SELECTION WITH VISUAL CALENDAR (Dec 21, 2025)
+
+- [ ] Auto-calculate end date based on `trainingDays` from client input
+- [ ] Show visual calendar with color-coded availability in client date selection
+- [ ] Color codes: Green (available), Yellow (pending), Red (booked), Gray (unavailable)
+- [ ] Only allow start date selection - end date auto-calculated
+- [ ] Display training duration prominently
+- [ ] Validate dates don't conflict with existing bookings
+- [ ] Create tRPC endpoint to fetch technician availability
+- [ ] Build visual calendar component with react-big-calendar
+- [ ] Apply color coding based on booking status
+- [ ] Integrate into client-facing date selection dialog

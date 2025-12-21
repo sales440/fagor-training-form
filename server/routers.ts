@@ -371,8 +371,22 @@ export const appRouter = router({
         await removeNotificationEmail(input.id);
         return { success: true };
       }),
+
+    getTechnicianAvailability: publicProcedure
+      .input(z.object({ technician: z.string() }))
+      .query(async ({ input }) => {
+        // Return mock availability data - replace with real Google Sheets integration
+        const today = new Date();
+        const availability = [];
+        for (let i = 0; i < 60; i++) {
+          const date = new Date(today);
+          date.setDate(today.getDate() + i);
+          const status = i % 7 === 0 ? 'booked' : i % 5 === 0 ? 'pending' : 'available';
+          availability.push({ date: date.toISOString(), status });
+        }
+        return availability;
+      }),
   }),
 });
 
 export type AppRouter = typeof appRouter;
-
