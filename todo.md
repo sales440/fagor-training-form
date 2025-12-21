@@ -422,3 +422,12 @@
 - [ ] TEST: Verify admin login and dashboard accessible in Railway
 - [ ] DEPLOY: Push fixes to GitHub and verify Railway auto-deploys
 - [ ] VERIFY: Confirm all functionality works correctly in production
+
+## 🔧 Railway SPA Routing Fix (Dec 21, 2025)
+
+- [ ] Add server-side fallback to serve index.html for all client routes
+- [ ] Configure Express to handle SPA routing
+- [ ] Test /admin/login route in Railway
+- [ ] Test /admin/dashboard route in Railway
+- [ ] Test /confirm-dates route in Railway
+- [ ] Verify form submission works end-to-end
