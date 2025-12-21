@@ -93,14 +93,19 @@ export const appRouter = router({
           throw new Error('Training request not found');
         }
         
-        // Write to Google Sheets with yellow background
-        await writeTrainingRequest(
-          request.assignedTechnician!,
-          input.startDate,
-          request.companyName,
-          request.trainingDays || 1,
-          'PENDING CONFIRMATION'
-        );
+        // Write to Google Sheets with yellow background (non-blocking)
+        try {
+          await writeTrainingRequest(
+            request.assignedTechnician!,
+            input.startDate,
+            request.companyName,
+            request.trainingDays || 1,
+            'PENDING CONFIRMATION'
+          );
+        } catch (error) {
+          console.error('Google Sheets write failed (non-critical):', error);
+          // Continue anyway - Google Sheets failure shouldn't block the request
+        }
         
         // Update database
         const db = await getDb();
