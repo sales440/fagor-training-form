@@ -205,3 +205,95 @@ service@fagor-automation.com
   }
 }
 
+
+// Calendar/Kanban email functions
+export async function sendStatusUpdateEmail(request: any) {
+  try {
+    const notificationEmails = await getActiveNotificationEmails();
+    const internalRecipients = notificationEmails.map((e) => e.email);
+
+    const statusMessages: Record<string, { subject: string; message: string }> = {
+      pending: {
+        subject: '⏳ Training Request Under Review',
+        message: 'Your training request is currently under review by our technical team.',
+      },
+      approved: {
+        subject: '✅ Training Request Approved',
+        message: 'Great news! Your training request has been approved and scheduled.',
+      },
+      rejected: {
+        subject: '❌ Training Request Update',
+        message: `We regret to inform you that your training request cannot be accommodated. ${request.rejectionReason ? `Reason: ${request.rejectionReason}` : ''}`,
+      },
+    };
+
+    const config = statusMessages[request.status] || statusMessages.pending;
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Fagor Training <onboarding@resend.dev>',
+        to: [request.email, ...internalRecipients],
+        subject: config.subject,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>${config.subject}</h2>
+            <p>Dear ${request.contactPerson},</p>
+            <p>${config.message}</p>
+            <hr />
+            <h3>Request Details:</h3>
+            <ul>
+              <li><strong>Company:</strong> ${request.companyName}</li>
+              <li><strong>Training Type:</strong> ${request.trainingType || 'N/A'}</li>
+              ${request.technicianNotes ? `<li><strong>Notes:</strong> ${request.technicianNotes}</li>` : ''}
+            </ul>
+            <p>Best regards,<br/>Fagor Automation Team</p>
+          </div>
+        `,
+      }),
+    });
+  } catch (error) {
+    console.error('Error sending status update email:', error);
+  }
+}
+
+export async function sendClientConfirmationEmail(request: any) {
+  try {
+    const confirmUrl = `${process.env.APP_URL || 'http://localhost:5173'}/confirm-dates?token=${request.clientConfirmationToken}`;
+
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Fagor Training <onboarding@resend.dev>',
+        to: request.email,
+        subject: '📅 Training Dates Proposed - Confirmation Required',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>Training Dates Proposed</h2>
+            <p>Dear ${request.contactPerson},</p>
+            <p>We have reviewed your training request and proposed the following dates:</p>
+            <ul>
+              ${request.approvedDates ? JSON.parse(request.approvedDates).map((d: string) => `<li>${new Date(d).toLocaleDateString()}</li>`).join('') : '<li>Dates to be confirmed</li>'}
+            </ul>
+            <p>Please click the button below to confirm or reject these dates:</p>
+            <a href="${confirmUrl}" style="display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
+              Confirm Dates
+            </a>
+            <p><small>This link will expire in 7 days.</small></p>
+            <p>Best regards,<br/>Fagor Automation Team</p>
+          </div>
+        `,
+      }),
+    });
+  } catch (error) {
+    console.error('Error sending client confirmation email:', error);
+  }
+}

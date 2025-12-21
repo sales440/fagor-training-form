@@ -43,6 +43,13 @@
       "when": 1761703445460,
       "tag": "0005_swift_bucky",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1766296912430,
+      "tag": "0006_skinny_nuke",
+      "breakpoints": true
     }
   ]
 }

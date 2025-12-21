@@ -382,3 +382,14 @@
 - [ ] server/db.ts - Revisar funciones de notificación
 - [ ] drizzle/schema.ts - Verificar campos de email
 - [ ] client/src/pages/Home.tsx - Verificar validación de email en formulario
+
+
+---
+
+## 🚨 CRITICAL PRODUCTION ERROR (Dec 21, 2025)
+
+- [ ] FIX CRITICAL: "Error submitting request" when accepting quotation in production
+- [ ] FIX: Google Sheets spreadsheet ID is incorrect (404 error: "Requested entity was not found")
+- [ ] UPDATE: Correct spreadsheet ID in environment variables or code
+- [ ] TEST: Verify quotation acceptance works after fix
+- [ ] DEPLOY: Push fix to Railway and verify in production

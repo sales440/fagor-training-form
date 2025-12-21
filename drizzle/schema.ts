@@ -92,7 +92,16 @@ export const trainingRequests = mysqlTable("training_requests", {
   googleSheetColumn: varchar("googleSheetColumn", { length: 10 }),
   confirmationEmailSent: boolean("confirmationEmailSent").default(false),
   
-  status: mysqlEnum("status", ["pending", "dates_selected", "tentative", "confirmed", "approved", "rejected", "completed"]).default("pending").notNull(),
+  // Calendar/Kanban workflow fields
+  preferredDates: text("preferredDates"), // JSON array of ISO date strings
+  approvedDates: text("approvedDates"), // JSON array of approved dates
+  rejectionReason: text("rejectionReason"),
+  technicianNotes: text("technicianNotes"),
+  clientConfirmed: boolean("clientConfirmed").default(false),
+  clientConfirmationToken: varchar("clientConfirmationToken", { length: 64 }),
+  tokenExpiresAt: timestamp("tokenExpiresAt"),
+  
+  status: mysqlEnum("status", ["pending", "awaiting_client_confirmation", "approved", "rejected", "completed"]).default("pending").notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
