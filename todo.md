@@ -230,3 +230,16 @@
 - [x] FIX CRITICAL: Terms and conditions checkbox not working in production - replaced shadcn/ui Checkbox with native HTML input
 
 
+
+
+## CURRENT CRITICAL ISSUES (Dec 20, 2025)
+
+- [x] FIX: TypeScript compilation error in googleSheetsService.ts line 114 (index signature issue)
+- [x] RESTORE: Created airportFinder.ts with nearest airport functionality
+- [x] FIX: Integrated findNearestInternationalAirport() into travelCalculator.ts
+- [x] FIX: Added missing airport coordinates (IAH, SAN, SFO, SJC, OAK, SMF, AUS, SAT, MCO, TPA)
+- [x] TEST: Verified nearest airport functionality works correctly (Houston→IAH, Colorado Springs→DEN, San Diego→SAN)
+- [x] FIX: Improved error handling in create mutation with detailed error messages
+- [ ] FIX CRITICAL: "Error submitting request" when accepting quotation in production (Railway) - likely database connection issue
+- [ ] DEPLOY: Push changes to Railway and verify production functionality
+- [ ] TEST: Verify complete end-to-end workflow in production after deployment

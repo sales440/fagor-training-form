@@ -171,19 +171,20 @@ export const appRouter = router({
         language: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        // Generate reference code and assign technician
-        const referenceCode = await generateReferenceCode();
-        const assignedTechnician = getAssignedTechnician(input.state || '');
-        
-        const request = await createTrainingRequest({
-          ...input,
-          referenceCode,
-          assignedTechnician,
-        });
-        
-        // Send email notification about new training request (non-blocking)
         try {
-          await sendTrainingRequestEmail({
+          // Generate reference code and assign technician
+          const referenceCode = await generateReferenceCode();
+          const assignedTechnician = getAssignedTechnician(input.state || '');
+          
+          const request = await createTrainingRequest({
+            ...input,
+            referenceCode,
+            assignedTechnician,
+          });
+          
+          // Send email notification about new training request (non-blocking)
+          try {
+            await sendTrainingRequestEmail({
             companyName: input.companyName,
             contactPerson: input.contactPerson,
             email: input.email,
@@ -201,12 +202,16 @@ export const appRouter = router({
             oemContact: input.oemContact,
             oemEmail: input.oemEmail,
           });
+          } catch (error) {
+            console.error('Error sending email notification:', error);
+            // Continue anyway - email failure shouldn't block form submission
+          }
+          
+          return request;
         } catch (error) {
-          console.error('Error sending email notification:', error);
-          // Continue anyway - email failure shouldn't block form submission
+          console.error('Error creating training request:', error);
+          throw new Error(`Failed to create training request: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
-        
-        return request;
       }),
 
     list: protectedProcedure.query(async () => {

@@ -7,6 +7,7 @@ import XLSX from 'xlsx';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { findNearestInternationalAirport } from './airportFinder';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -271,6 +272,16 @@ function getAirportCoordinates(code: string): { lat: number; lng: number } | nul
     'FSD': { lat: 43.5820, lng: -96.7420 }, // Sioux Falls
     'BNA': { lat: 36.1245, lng: -86.6782 }, // Nashville
     'DFW': { lat: 32.8998, lng: -97.0403 }, // Dallas
+    'IAH': { lat: 29.9902, lng: -95.3368 }, // Houston Intercontinental
+    'AUS': { lat: 30.1945, lng: -97.6699 }, // Austin
+    'SAT': { lat: 29.5337, lng: -98.4698 }, // San Antonio
+    'SAN': { lat: 32.7338, lng: -117.1933 }, // San Diego
+    'SFO': { lat: 37.6213, lng: -122.3790 }, // San Francisco
+    'SJC': { lat: 37.3639, lng: -121.9289 }, // San Jose
+    'OAK': { lat: 37.7126, lng: -122.2197 }, // Oakland
+    'SMF': { lat: 38.6954, lng: -121.5908 }, // Sacramento
+    'MCO': { lat: 28.4312, lng: -81.3081 }, // Orlando
+    'TPA': { lat: 27.9755, lng: -82.5332 }, // Tampa
     'SLC': { lat: 40.7899, lng: -111.9791 }, // Salt Lake City
     'BTV': { lat: 44.4719, lng: -73.1533 }, // Burlington
     'RIC': { lat: 37.5052, lng: -77.3197 }, // Richmond
@@ -295,10 +306,12 @@ function estimateFlightTime(distanceMiles: number): number {
  */
 export async function calculateTravelExpenses(
   address: string,
-  trainingDays: number
+  trainingDays: number,
+  cityParam?: string,
+  stateParam?: string
 ): Promise<TravelCalculation> {
   const stateData = loadStateData();
-  const stateCode = extractStateFromAddress(address);
+  const stateCode = stateParam || extractStateFromAddress(address);
 
   let state: StateData | undefined;
   if (stateCode) {
@@ -327,12 +340,17 @@ export async function calculateTravelExpenses(
   
   // Determine flight cost and airport
   let flightCost = 0;
-  let nearestAirport = state.codigo_aeropuerto;
+  
+  // Find the nearest airport to the client's specific address (not just state's main airport)
+  const cityToUse = cityParam || state?.ciudad_principal || 'Chicago';
+  let nearestAirportInfo = await findNearestInternationalAirport(cityToUse, stateCode || 'IL');
+  // Extract airport code from format "Airport Name (CODE)"
+  const airportCodeMatch = nearestAirportInfo.match(/\(([A-Z]{3})\)/);
+  let nearestAirport = airportCodeMatch ? airportCodeMatch[1] : state.codigo_aeropuerto;
   let flightDistance = state.distancia_millas;
   
   if (isWestCoast) {
     // West coast: use Anaheim office and LAX flight prices
-    nearestAirport = state.codigo_aeropuerto;
     // ANAHEIM_FLIGHT_PRICES already contains round trip prices
     flightCost = ANAHEIM_FLIGHT_PRICES[nearestAirport] || 400; // Default round trip if not in list
     // For California, no flight cost
@@ -341,7 +359,6 @@ export async function calculateTravelExpenses(
     }
   } else {
     // East/Central: use Rolling Meadows office and ORD flight prices from Excel
-    nearestAirport = state.codigo_aeropuerto;
     // Only Illinois has $0 flight cost
     if (stateCode === 'IL') {
       flightCost = 0;
@@ -369,7 +386,7 @@ export async function calculateTravelExpenses(
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
   
   return {
-    nearestAirport,
+    nearestAirport: nearestAirportInfo,
     flightCost,
     hotelCost,
     foodCost,
@@ -402,7 +419,7 @@ export async function calculateQuotation(
   const trainingPrice = trainingDays > 0 
     ? TRAINING_PRICE_FIRST_DAY + (TRAINING_PRICE_ADDITIONAL_DAY * Math.max(0, trainingDays - 1))
     : 0;
-  const travelExpenses = await calculateTravelExpenses(address, trainingDays);
+  const travelExpenses = await calculateTravelExpenses(address, trainingDays, city, state);
   const totalPrice = trainingPrice + travelExpenses.totalTravelExpenses + travelExpenses.travelTimeCost;
   
   return {

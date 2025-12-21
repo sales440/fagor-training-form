@@ -5,7 +5,7 @@ const SPREADSHEET_ID = '13TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
 const SHEET_NAME = 'Service Team 2025';
 
 // Technician assignment by state
-const TECHNICIAN_ASSIGNMENT = {
+const TECHNICIAN_ASSIGNMENT: Record<string, string> = {
   // Joseph Hainley - West/Central states
   'CA': 'JOSEPH HAINLEY - ANAHEIM CA Office',
   'OR': 'JOSEPH HAINLEY - ANAHEIM CA Office',
