@@ -388,6 +388,20 @@ export const appRouter = router({
         return availability;
       }),
 
+    updateRequest: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        assignedTechnician: z.string().optional(),
+        trainingPrice: z.number().optional(),
+        travelExpenses: z.number().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error('Database not available');
+        await db.update(trainingRequests).set(input).where(eq(trainingRequests.id, input.id));
+        return { success: true };
+      }),
+
     exportExcel: publicProcedure
       .mutation(async () => {
         const requests = await getAllTrainingRequests();

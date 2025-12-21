@@ -189,6 +189,8 @@ export function KanbanBoard() {
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [technicianNotes, setTechnicianNotes] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState({ technician: '', trainingPrice: 0, travelExpenses: 0 });
 
   // Configure drag sensors
   const sensors = useSensors(
@@ -280,6 +282,12 @@ export function KanbanBoard() {
   const handleCardClick = (request: TrainingRequest) => {
     setSelectedRequest(request);
     setTechnicianNotes(request.technicianNotes || '');
+    setEditData({ 
+      technician: request.assignedTechnician || '', 
+      trainingPrice: request.trainingPrice || 0, 
+      travelExpenses: request.travelExpenses || 0 
+    });
+    setEditMode(false);
     setIsDetailsOpen(true);
   };
 
@@ -298,9 +306,28 @@ export function KanbanBoard() {
     setRejectionReason('');
   };
 
+  const updateRequestMutation = trpc.trainingRequest.updateRequest.useMutation({
+    onSuccess: () => {
+      toast({ title: 'Actualizado', description: 'Datos actualizados exitosamente' });
+      utils.trainingRequest.getAll.invalidate();
+    },
+    onError: (error) => {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+    },
+  });
+
   // Handle saving technician notes
   const handleSaveNotes = () => {
     if (!selectedRequest) return;
+
+    if (editMode) {
+      updateRequestMutation.mutate({
+        id: selectedRequest.id,
+        assignedTechnician: editData.technician,
+        trainingPrice: editData.trainingPrice,
+        travelExpenses: editData.travelExpenses,
+      });
+    }
 
     updateStatusMutation.mutate({
       id: selectedRequest.id,
@@ -309,6 +336,7 @@ export function KanbanBoard() {
     });
 
     setIsDetailsOpen(false);
+    setEditMode(false);
   };
 
   // Get the active request for drag overlay
@@ -463,6 +491,26 @@ export function KanbanBoard() {
                 </div>
               )}
 
+              {/* Edit Fields */}
+              {editMode && (
+                <div className="space-y-3 p-3 bg-blue-50 rounded">
+                  <div>
+                    <Label>Técnico Asignado</Label>
+                    <input className="w-full border rounded px-3 py-2" value={editData.technician} onChange={e => setEditData({...editData, technician: e.target.value})} />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label>Precio Capacitación ($)</Label>
+                      <input type="number" className="w-full border rounded px-3 py-2" value={editData.trainingPrice} onChange={e => setEditData({...editData, trainingPrice: Number(e.target.value)})} />
+                    </div>
+                    <div>
+                      <Label>Gastos Viaje ($)</Label>
+                      <input type="number" className="w-full border rounded px-3 py-2" value={editData.travelExpenses} onChange={e => setEditData({...editData, travelExpenses: Number(e.target.value)})} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Technician Notes */}
               <div>
                 <Label htmlFor="tech-notes" className="text-sm font-semibold">
@@ -489,6 +537,9 @@ export function KanbanBoard() {
           )}
 
           <DialogFooter>
+            <Button variant="outline" onClick={() => setEditMode(!editMode)}>
+              {editMode ? 'Cancelar Edición' : 'Editar Datos'}
+            </Button>
             <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
               Cancel
             </Button>
