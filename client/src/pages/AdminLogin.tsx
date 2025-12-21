@@ -8,18 +8,22 @@ export default function AdminLogin() {
   const [, navigate] = useLocation();
   const [pin, setPin] = useState('');
 
-  const validatePin = () => {
-    const now = new Date();
-    const day = now.getDate();
-    const minutes = now.getMinutes();
-    const correctPin = 4020 + day + minutes;
-    
-    if (parseInt(pin) === correctPin) {
-      sessionStorage.setItem('adminAuth', 'true');
-      navigate('/admin/dashboard');
-    } else {
-      toast.error('Código incorrecto');
-      setPin('');
+  const validatePin = async () => {
+    try {
+      const response = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+      
+      if (response.ok) {
+        navigate('/admin/dashboard');
+      } else {
+        toast.error('Código incorrecto');
+        setPin('');
+      }
+    } catch (error) {
+      toast.error('Error de conexión');
     }
   };
 

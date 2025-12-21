@@ -359,16 +359,16 @@ export default function ConfirmDates() {
                   variant="outline"
                   onClick={() => setShowConfirmation(false)}
                   className="flex-1"
-                  disabled={confirmMutation.isLoading}
+                  disabled={confirmMutation.isPending}
                 >
                   Go Back
                 </Button>
                 <Button
                   onClick={handleSubmit}
                   className={`flex-1 ${isAccepting ? 'bg-green-600 hover:bg-green-700' : ''}`}
-                  disabled={(!isAccepting && !rejectionReason.trim()) || confirmMutation.isLoading}
+                  disabled={(!isAccepting && !rejectionReason.trim()) || confirmMutation.isPending}
                 >
-                  {confirmMutation.isLoading ? (
+                  {confirmMutation.isPending ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin mr-2" />
                       Submitting...

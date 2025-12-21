@@ -50,10 +50,18 @@ export default function AdminDashboard() {
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'admin')) {
-      navigate('/');
-    }
-  }, [user, authLoading, navigate]);
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/admin/me');
+        if (!response.ok) {
+          navigate('/admin/login');
+        }
+      } catch (error) {
+        navigate('/admin/login');
+      }
+    };
+    checkAuth();
+  }, [navigate]);
 
   // Calculate statistics
   const stats = {

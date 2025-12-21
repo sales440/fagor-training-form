@@ -323,13 +323,14 @@ export async function sendDateApprovalEmail(data: {
       <p>Saludos cordiales,<br>Fagor Automation USA</p>
     `;
 
-    const response = await fetch(`${process.env.BUILT_IN_FORGE_API_URL}/email/send`, {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.BUILT_IN_FORGE_API_KEY}`,
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'service@fagor-automation.com',
         to: [data.clientEmail],
         subject: `Fechas Aprobadas - ${data.referenceCode}`,
         html,
@@ -365,13 +366,14 @@ export async function sendDateRejectionEmail(data: {
       <p>Saludos cordiales,<br>Fagor Automation USA</p>
     `;
 
-    const response = await fetch(`${process.env.BUILT_IN_FORGE_API_URL}/email/send`, {
+    const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.BUILT_IN_FORGE_API_KEY}`,
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
       },
       body: JSON.stringify({
+        from: process.env.EMAIL_FROM || 'service@fagor-automation.com',
         to: [data.clientEmail],
         subject: `Actualización de Fechas - ${data.referenceCode}`,
         html,
