@@ -79,6 +79,9 @@ let authClient: GoogleSheetsAuth | null = null;
  * Initialize Google Sheets API client
  */
 async function getAuthClient(): Promise<GoogleSheetsAuth> {
+  // Google Sheets disabled for Railway deployment
+  throw new Error('Google Sheets integration disabled');
+  
   if (authClient) {
     return authClient;
   }
@@ -127,6 +130,10 @@ export async function getTechnicianAvailability(
   startDate: Date,
   endDate: Date
 ): Promise<{ date: string; status: string; color: string }[]> {
+  // Google Sheets disabled - return empty availability
+  console.log('[GoogleSheets] Integration disabled, returning empty availability');
+  return [];
+  
   try {
     const { sheets } = await getAuthClient();
     
@@ -193,6 +200,10 @@ export async function writeTrainingRequest(
   trainingDays: number,
   paymentMethod: string = 'PENDING'
 ): Promise<void> {
+  // Google Sheets disabled - skip writing
+  console.log('[GoogleSheets] Integration disabled, skipping write');
+  return;
+  
   try {
     const { sheets } = await getAuthClient();
     
