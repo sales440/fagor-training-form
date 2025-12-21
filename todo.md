@@ -443,7 +443,7 @@
 
 ## 🚨 Railway Middleware Order Fix (Dec 21, 2025)
 
-- [ ] Add express.static(distPath) BEFORE app.use("*") catchall
-- [ ] Ensure static files are served before SPA fallback
-- [ ] Push to GitHub and verify Railway deployment
-- [ ] Test all routes work correctly
+- [x] Add express.static(distPath) BEFORE app.use("*") catchall (was already correct)
+- [x] Ensure static files are served before SPA fallback
+- [x] Push to GitHub and verify Railway deployment
+- [ ] Test all routes work correctly (STILL FAILING - 404)
