@@ -425,9 +425,9 @@
 
 ## 🔧 Railway SPA Routing Fix (Dec 21, 2025)
 
-- [ ] Add server-side fallback to serve index.html for all client routes
-- [ ] Configure Express to handle SPA routing
-- [ ] Test /admin/login route in Railway
+- [x] Add server-side fallback to serve index.html for all client routes
+- [x] Configure Express to handle SPA routing
+- [ ] Test /admin/login route in Railway (STILL FAILING - 404)
 - [ ] Test /admin/dashboard route in Railway
 - [ ] Test /confirm-dates route in Railway
 - [ ] Verify form submission works end-to-end
