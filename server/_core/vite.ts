@@ -47,6 +47,7 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+// SPA fallback: serve index.html for all routes in production
 export function serveStatic(app: Express) {
   const distPath =
     process.env.NODE_ENV === "development"
