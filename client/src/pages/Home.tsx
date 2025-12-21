@@ -944,6 +944,18 @@ export default function Home() {
                 </div>
               </div>
 
+              {/* Estimated Expenses Disclaimer */}
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-sm italic">
+                <p className="font-semibold text-blue-900 mb-2">
+                  {language === 'es' ? 'Nota Importante:' : 'Important Note:'}
+                </p>
+                <p className="text-blue-800">
+                  {language === 'es' 
+                    ? 'Los gastos de viaje son estimados y sujetos a cambios. Los costos finales serán revisados y ajustados según los gastos reales incurridos.'
+                    : 'Travel expenses are estimated and subject to change. Final costs will be reviewed and adjusted based on actual expenses incurred.'}
+                </p>
+              </div>
+
               <div className="bg-blue-50 p-4 rounded-lg text-sm space-y-1">
                 <p><strong>{t("quotationTermsTitle") || "TERMS AND CONDITIONS"}</strong></p>
                 <p>{t("quotationTerm1") || "Prices in USD without taxes"}</p>

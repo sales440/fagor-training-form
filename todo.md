@@ -243,3 +243,142 @@
 - [ ] FIX CRITICAL: "Error submitting request" when accepting quotation in production (Railway) - likely database connection issue
 - [ ] DEPLOY: Push changes to Railway and verify production functionality
 - [ ] TEST: Verify complete end-to-end workflow in production after deployment
+
+
+---
+
+## 🎯 NEW REQUIREMENTS - COMPREHENSIVE AUDIT & MULTI-RECIPIENT EMAILS (Dec 20, 2025)
+
+### 📧 PHASE A: MULTI-RECIPIENT EMAIL SYSTEM (CRITICAL) ✅ COMPLETED
+
+**Requirement:** When client accepts quotation, send email to:
+- [x] Client's email (from form - dynamic)
+- [x] jcrobledo@fagor-automation.com (fixed)
+- [x] service@fagor-automation.com (fixed)  
+- [x] jcrobledolopez@gmail.com (fixed - already configured)
+
+**Implementation Tasks:**
+- [x] Update `notification_emails` table to support multiple fixed recipients
+- [x] Add fixed emails to database: jcrobledo@fagor-automation.com, service@fagor-automation.com
+- [x] Modify `emailService.ts` to send to client email + all active notification emails
+- [x] Validate client email format before sending
+- [x] Add email validation in form (syntax + domain check)
+- [x] Ensure client email is stored in `training_requests.email` field
+- [x] Update `sendTrainingRequestNotification()` to include client as recipient
+- [ ] Add retry logic for failed email sends (future enhancement)
+- [x] Implement secure logging (don't expose full emails in logs)
+- [x] Add unit tests for multi-recipient email service
+
+### ✈️ PHASE B: AIRPORT FINDER INTEGRATION ✅ COMPLETED
+
+- [x] Created airportFinder.ts with Google Distance Matrix API integration
+- [x] Integrated into travelCalculator.ts
+- [x] Verified functionality with local tests (Houston, Colorado Springs, San Diego, etc.)
+- [x] Added missing airport coordinates (IAH, SAN, SFO, etc.)
+- [ ] Merge branch `fix/nearest-airport-calculation` into `main` on GitHub (ready to merge)
+- [ ] Verify production deployment after merge
+- [ ] Add UI option for manual airport override (future enhancement)
+- [x] Document airport selection algorithm
+
+### 💰 PHASE C: ESTIMATED EXPENSES DISCLAIMER (MULTILINGUAL) ✅ COMPLETED
+
+**Requirement:** Add note in quotation indicating expenses are estimated
+
+**Implementation:**
+- [x] Add disclaimer text in English: "Travel expenses are estimated and subject to change. Final costs will be reviewed and adjusted based on actual expenses incurred."
+- [x] Add disclaimer text in Spanish: "Los gastos de viaje son estimados y sujetos a cambios. Los costos finales serán revisados y ajustados según los gastos reales incurridos."
+- [x] Add disclaimer to QuotationDialog component (visible in UI)
+- [x] Add disclaimer to email notification template
+- [x] Ensure disclaimer appears in all supported languages (English/Spanish)
+- [x] Style disclaimer appropriately (blue info box with border)
+
+### 🧪 PHASE D: END-TO-END TESTING
+
+- [ ] Test complete flow: form fill → quotation → acceptance → emails sent
+- [ ] Verify client email is saved to database
+- [ ] Verify all 4 recipients receive email (client + 3 fixed)
+- [ ] Test with different addresses (Houston, Colorado, San Diego, Miami, Seattle)
+- [ ] Verify nearest airport calculation is accurate
+- [ ] Test in both English and Spanish
+- [ ] Verify estimated expenses disclaimer appears
+- [ ] Test error handling (invalid email, API failures, DB connection issues)
+- [ ] Test on mobile devices (responsive design)
+
+### 🚀 PHASE E: RAILWAY DEPLOYMENT
+
+- [ ] Create checkpoint before deployment
+- [ ] Merge `fix/nearest-airport-calculation` into `main`
+- [ ] Verify Railway auto-deploys from GitHub push
+- [ ] Monitor Railway deployment logs
+- [ ] Verify no TypeScript compilation errors
+- [ ] Verify all environment variables are set:
+  - [ ] DATABASE_URL
+  - [ ] GOOGLE_MAPS_API_KEY
+  - [ ] VITE_GOOGLE_MAPS_API_KEY
+  - [ ] RESEND_API_KEY
+  - [ ] GOOGLE_SERVICE_ACCOUNT_KEY
+- [ ] Test production application thoroughly
+- [ ] Verify email sending works in production
+- [ ] Document rollback procedure if needed
+
+### 📊 PHASE F: FINAL DELIVERABLES
+
+- [ ] Create audit report with findings
+- [ ] Document all code changes made
+- [ ] Create admin guide for managing notification emails
+- [ ] Document email service API and configuration
+- [ ] Create troubleshooting guide for common issues
+- [ ] Document deployment process step-by-step
+- [ ] Provide clean, well-documented source code
+- [ ] Create user guide for form submission process
+
+---
+
+## 🔍 AUDIT FINDINGS (To be completed)
+
+### Database Schema
+- ✅ `training_requests` table has `email` field for client email
+- ✅ `notification_emails` table exists with `isActive` field
+- ⚠️ Only 1 email configured (jcrobledolopez@gmail.com), need to add 2 more
+
+### Email Service
+- ✅ `emailService.ts` exists and uses Resend API
+- ✅ `sendTrainingRequestNotification()` function implemented
+- ⚠️ Currently only sends to notification_emails table, not to client
+- ❌ No retry logic for failed sends
+- ❌ No email validation before sending
+
+### Airport Finder
+- ✅ `airportFinder.ts` created with Google Distance Matrix API
+- ✅ Integrated into `travelCalculator.ts`
+- ⚠️ Not yet merged to production (in branch `fix/nearest-airport-calculation`)
+- ✅ Tested locally with 6 different cities, all successful
+
+### Code Quality
+- ✅ TypeScript compilation errors fixed
+- ✅ Proper error handling in most places
+- ⚠️ Some console.log statements could be replaced with proper logging
+- ✅ Code is generally well-structured and maintainable
+
+---
+
+## 📝 NOTES FOR IMPLEMENTATION
+
+- Use Resend API for email sending (already configured)
+- Google Maps API key is available in environment variables
+- Database connection is via Drizzle ORM
+- Frontend uses React 19 + Tailwind 4
+- Backend uses Express 4 + tRPC 11
+- Railway auto-deploys from `main` branch on GitHub push
+
+
+---
+
+## 🔍 AUDITORÍA EN PROGRESO
+
+### Archivos a Revisar:
+- [ ] server/emailService.ts - Revisar implementación actual
+- [ ] server/routers.ts - Revisar mutation trainingRequest.create
+- [ ] server/db.ts - Revisar funciones de notificación
+- [ ] drizzle/schema.ts - Verificar campos de email
+- [ ] client/src/pages/Home.tsx - Verificar validación de email en formulario

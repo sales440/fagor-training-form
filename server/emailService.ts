@@ -20,20 +20,39 @@ interface TrainingRequestEmailData {
 }
 
 /**
+ * Validate email format
+ */
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+/**
  * Send email notification about new training request
+ * Sends to client email + all active notification emails from database
  * Uses Resend API for email delivery
  */
 export async function sendTrainingRequestEmail(data: TrainingRequestEmailData): Promise<boolean> {
   try {
-    // Get all active notification emails from database
-    const recipients = await getActiveNotificationEmails();
+    // Get all active notification emails from database (fixed recipients)
+    const fixedRecipients = await getActiveNotificationEmails();
     
-    if (recipients.length === 0) {
+    if (fixedRecipients.length === 0) {
       console.warn("[Email] No active notification emails configured");
       return false;
     }
 
-    const emailAddresses = recipients.map(r => r.email);
+    // Validate client email
+    if (!data.email || !isValidEmail(data.email)) {
+      console.error("[Email] Invalid client email address:", data.email);
+      return false;
+    }
+
+    // Combine client email + fixed recipients
+    const fixedEmailAddresses = fixedRecipients.map(r => r.email);
+    const allRecipients = [data.email, ...fixedEmailAddresses];
+    
+    console.log(`[Email] Sending to ${allRecipients.length} recipients: client (${data.email}) + ${fixedEmailAddresses.length} fixed`);
     
     // Create email content
     const subject = `New Training Request from ${data.companyName}`;
@@ -94,6 +113,11 @@ export async function sendTrainingRequestEmail(data: TrainingRequestEmailData): 
       <div class="section">
         <div class="section-title">Quotation</div>
         <div class="field"><span class="label">Total Price:</span> <span class="value"><strong>$${data.totalPrice?.toLocaleString() || 0}</strong></span></div>
+      </div>
+
+      <div class="section" style="background-color: #e7f3ff; padding: 15px; border-left: 4px solid #2196F3; font-size: 13px; font-style: italic;">
+        <strong>Note:</strong> Travel expenses are estimated and subject to change. Final costs will be reviewed and adjusted based on actual expenses incurred.<br><br>
+        <strong>Nota:</strong> Los gastos de viaje son estimados y sujetos a cambios. Los costos finales serán revisados y ajustados según los gastos reales incurridos.
       </div>
 
       <div class="section" style="background-color: #fff3cd; padding: 15px; border-left: 4px solid #DC241F;">
@@ -159,7 +183,7 @@ service@fagor-automation.com
       },
       body: JSON.stringify({
         from: 'Fagor Training Forms <onboarding@resend.dev>',
-        to: emailAddresses,
+        to: allRecipients,
         subject: subject,
         html: htmlContent,
         text: textContent,

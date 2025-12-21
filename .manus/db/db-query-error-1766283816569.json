@@ -1,0 +1,8 @@
+{
+  "query": "SELECT * FROM notification_emails WHERE active = 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 385B8cqVvDyKYq8.0dd908e03316 --database fnckYwCtTAYRJhbGQZKYQz --execute SELECT * FROM notification_emails WHERE active = 1",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1054 (42S22) at line 1: Unknown column 'active' in 'where clause'"
+  ]
+}

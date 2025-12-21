@@ -1,0 +1,9 @@
+{
+  "query": "INSERT INTO notification_emails (email, isActive) VALUES \n('jcrobledo@fagor-automation.com', 1),\n('service@fagor-automation.com', 1)\nON DUPLICATE KEY UPDATE isActive = 1",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 385B8cqVvDyKYq8.0dd908e03316 --database fnckYwCtTAYRJhbGQZKYQz --execute INSERT INTO notification_emails (email, isActive) VALUES \n('jcrobledo@fagor-automation.com', 1),\n('service@fagor-automation.com', 1)\nON DUPLICATE KEY UPDATE isActive = 1",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 856
+}

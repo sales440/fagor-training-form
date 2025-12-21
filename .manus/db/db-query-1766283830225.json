@@ -1,0 +1,15 @@
+{
+  "query": "SELECT id, email, createdAt FROM notification_emails LIMIT 10",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 385B8cqVvDyKYq8.0dd908e03316 --database fnckYwCtTAYRJhbGQZKYQz --execute SELECT id, email, createdAt FROM notification_emails LIMIT 10",
+  "rows": [
+    {
+      "id": "1",
+      "email": "jcrobledolopez@gmail.com",
+      "createdAt": "2025-10-27 04:36:50"
+    }
+  ],
+  "messages": [],
+  "stdout": "id\temail\tcreatedAt\n1\tjcrobledolopez@gmail.com\t2025-10-27 04:36:50\n",
+  "stderr": "",
+  "execution_time_ms": 52
+}
