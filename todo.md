@@ -447,3 +447,29 @@
 - [x] Ensure static files are served before SPA fallback
 - [x] Push to GitHub and verify Railway deployment
 - [ ] Test all routes work correctly (STILL FAILING - 404)
+
+
+---
+
+## 🔴 CRITICAL FIXES - Dec 30, 2025 (ADDRESS PARSING & TRAVEL CALCULATION)
+
+### ROOT CAUSE IDENTIFIED:
+The application is NOT correctly parsing the client's full address to extract the state. This causes:
+1. ❌ System fails to detect client is in a different state (e.g., Texas, Florida, etc.)
+2. ❌ Incorrectly assumes client is local to Chicago office
+3. ❌ Calculates 37 hours of DRIVING instead of FLYING
+4. ❌ Wrong nearest airport detection (using Chicago address instead of client address)
+5. ❌ All quotation calculations are completely wrong
+
+### FIXES REQUIRED:
+
+- [x] FIX CRITICAL: Address parsing logic to correctly extract state from full address
+- [x] FIX CRITICAL: Verify client state detection works for all 50 US states
+- [x] FIX CRITICAL: Nearest airport finder must use CLIENT address, not office address
+- [x] FIX CRITICAL: Flight cost calculation must use correct origin/destination airports
+- [x] FIX CRITICAL: Driving time should be airport-to-client (1-3 hours), NOT 37 hours
+- [x] FIX CRITICAL: Travel hours formula: (flight time + driving time from airport to client) × 2
+- [x] TEST: Houston, TX address → IAH airport, $734 flight, 2.4h flight + 0.5h driving = 6h total ✅
+- [x] TEST: Miami, FL address → MIA airport, $590 flight, 2.8h flight + 0.5h driving = 7h total ✅
+- [ ] TEST: Los Angeles, CA address → Should show LAX airport, $0 flight (local office), ~1 hour driving
+- [ ] DEPLOY: Push fixes to GitHub and Railway

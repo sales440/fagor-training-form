@@ -192,7 +192,7 @@ export default function Home() {
       return;
     }
 
-    // Combine address fields
+    // Build complete address for accurate geocoding
     const fullAddress = `${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
     
     calculateQuotationMutation.mutate({

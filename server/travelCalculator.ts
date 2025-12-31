@@ -342,8 +342,8 @@ export async function calculateTravelExpenses(
   let flightCost = 0;
   
   // Find the nearest airport to the client's specific address (not just state's main airport)
-  const cityToUse = cityParam || state?.ciudad_principal || 'Chicago';
-  let nearestAirportInfo = await findNearestInternationalAirport(cityToUse, stateCode || 'IL');
+  // Use the full address parameter for accurate geocoding
+  let nearestAirportInfo = await findNearestInternationalAirport(address, stateCode || 'IL');
   // Extract airport code from format "Airport Name (CODE)"
   const airportCodeMatch = nearestAirportInfo.match(/\(([A-Z]{3})\)/);
   let nearestAirport = airportCodeMatch ? airportCodeMatch[1] : state.codigo_aeropuerto;
