@@ -13,6 +13,7 @@ import SignaturePad from "signature_pad";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import AvailabilityCalendar from "@/components/AvailabilityCalendar";
+import { useAddressAutocomplete } from "@/hooks/useAddressAutocomplete";
 
 export default function Home() {
   const { language, setLanguage, t } = useLanguage();
@@ -29,6 +30,19 @@ export default function Home() {
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
+
+  // Address autocomplete hook
+  const addressInputRef = useAddressAutocomplete({
+    onPlaceSelected: (address) => {
+      setFormData((prev) => ({
+        ...prev,
+        address1: address.address1,
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode,
+      }));
+    },
+  });
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -353,10 +367,12 @@ export default function Home() {
                       Address 1
                     </Label>
                     <Input
+                      ref={addressInputRef}
                       id="address1"
                       value={formData.address1}
                       onChange={(e) => handleInputChange("address1", e.target.value)}
                       placeholder="Street address"
+                      autoComplete="off"
                       required
                     />
                   </div>
