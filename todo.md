@@ -473,3 +473,53 @@ The application is NOT correctly parsing the client's full address to extract th
 - [x] TEST: Miami, FL address → MIA airport, $590 flight, 2.8h flight + 0.5h driving = 7h total ✅
 - [ ] TEST: Los Angeles, CA address → Should show LAX airport, $0 flight (local office), ~1 hour driving
 - [ ] DEPLOY: Push fixes to GitHub and Railway
+
+
+---
+
+## 🛫 REGIONAL AIRPORTS ENHANCEMENT - Dec 30, 2025
+
+### ISSUE IDENTIFIED:
+Odessa, TX (79763) is detecting San Antonio (SAT) as nearest airport with 5 hours driving time, but Midland (MAF) is only 25 minutes away.
+
+### FIXES COMPLETED:
+- [x] Add Texas regional airports: MAF (Midland), LBB (Lubbock), ELP (El Paso), CRP (Corpus Christi), etc.
+- [x] Add other US regional airports to improve accuracy nationwide (120+ total airports)
+- [x] Update flight price data for new regional airports
+- [x] Test Odessa, TX → Correctly detects MAF (Midland) with 1 hour driving ✅
+- [x] Verify all regional airports are included in nearest airport detection
+
+### AIRPORTS ADDED BY STATE:
+- California (5): ONT, BUR, SNA, FAT, PSP
+- Washington (2): GEG, PSC
+- Oregon (2): EUG, MFR
+- Arizona (3): TUS, FLG, YUM
+- Nevada (1): RNO
+- Utah (1): SGU
+- Colorado (3): COS, GJT, ASE
+- Idaho (2): BOI, IDA
+- Montana (3): BIL, MSO, GTF
+- Wyoming (2): JAC, CPR
+- Nebraska (2): OMA, LNK
+- South Dakota (2): RAP, FSD
+- North Dakota (2): FAR, BIS
+- Iowa (2): DSM, CID
+- Kansas (1): ICT
+- New York (4): ALB, BUF, ROC, SYR
+- Connecticut (1): BDL
+- Rhode Island (1): PVD
+- New Hampshire (1): MHT
+- Maine (2): PWM, BGR
+- Vermont (1): BTV
+- Pennsylvania (4): ABE, MDT, AVP, ERI
+- Delaware (1): ILG
+- New Jersey (1): ACY
+- Michigan (3): GRR, FNT, LAN
+- Ohio (4): CMH, DAY, CAK, TOL
+- Indiana (3): SBN, FWA, EVV
+- Wisconsin (2): GRB, MSN
+- Missouri (1): SGF
+- Kentucky (2): LEX, SDF
+- West Virginia (1): CRW
+
+**Total Airports: 120+ covering all 50 US states**
