@@ -504,3 +504,30 @@
 - [x] Create SendGrid domain verification guide
 - [x] Create Google Sheets setup guide (optional feature)
 - [x] Document troubleshooting steps for common issues
+
+
+## 🚨 RAILWAY PRODUCTION ERRORS (Jan 1, 2026)
+
+### Critical Errors Found in Logs:
+
+- [ ] FIX CRITICAL: `OAUTH_SERVER_URL is not configured` - OAuth initialization failing
+- [ ] FIX: Google Maps API key not configured in production (using default 1 hour for travel calculations)
+- [ ] FIX CRITICAL: `Database not available` error when creating training requests
+- [ ] Verify all required environment variables are set in Railway
+- [ ] Test complete flow in production after fixes
+
+
+## 🔧 RAILWAY BUILD ERROR FIX (Jan 1, 2026 - 4:05 PM)
+
+### Issue:
+Railway build failing with error: `secret OAUTH_SERVER_URL: not found`
+
+### Root Cause:
+Railway treats OAUTH_SERVER_URL as a build-time secret, but secrets are only available at runtime, not during build process.
+
+### Solution:
+- [ ] Modify code to defer OAUTH_SERVER_URL validation to runtime only
+- [ ] Ensure env.ts doesn't access OAUTH_SERVER_URL during TypeScript compilation
+- [ ] Test build locally with `pnpm build`
+- [ ] Deploy to Railway and verify successful build
+- [ ] Test OAuth functionality in production
