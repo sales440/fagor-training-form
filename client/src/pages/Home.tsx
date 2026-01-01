@@ -206,7 +206,7 @@ export default function Home() {
       return;
     }
 
-    // Build complete address for accurate geocoding
+    // Combine address fields
     const fullAddress = `${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
     
     calculateQuotationMutation.mutate({
@@ -1014,11 +1014,24 @@ export default function Home() {
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
               trainingDays={parseInt(formData.trainingDays) || 1}
-              onDateSelect={(start, end) => {
-                // TODO: Submit selected dates to backend
-                console.log('Selected dates:', start, end);
-                setShowCalendar(false);
-                toast.success("Training dates submitted! You will receive a confirmation email once approved.");
+              onDateSelect={async (start, end) => {
+                try {
+                  // Submit dates to backend
+                  await trpc.trainingRequest.selectDates.mutate({
+                    referenceCode,
+                    startDate: start.toISOString().split('T')[0],
+                    endDate: end.toISOString().split('T')[0],
+                  });
+                  
+                  setShowCalendar(false);
+                  toast.success(
+                    "Your dates will be confirmed later via email or alternative dates will be proposed.",
+                    { duration: 6000 }
+                  );
+                } catch (error) {
+                  console.error('Error submitting dates:', error);
+                  toast.error("Failed to submit dates. Please try again.");
+                }
               }}
             />
           )}

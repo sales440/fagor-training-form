@@ -1,8 +1,11 @@
 import { google } from 'googleapis';
 
-// Google Sheets configuration
-const SPREADSHEET_ID = '13TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
+// Google Sheets configuration - Use environment variable for flexibility
+const SPREADSHEET_ID = process.env.GOOGLE_SHEETS_SPREADSHEET_ID || '1rBzXJdSIJXBF2LPuWNpYqKdPYs-Jx4mL3TeZSbxsP8it3VhnySoHygE5td0Z1gcp';
 const SHEET_NAME = 'Service Team 2025';
+
+// Feature flag to enable/disable Google Sheets integration
+const GOOGLE_SHEETS_ENABLED = process.env.GOOGLE_SHEETS_ENABLED === 'true';
 
 // Technician assignment by state
 const TECHNICIAN_ASSIGNMENT: Record<string, string> = {
@@ -76,12 +79,15 @@ interface GoogleSheetsAuth {
 let authClient: GoogleSheetsAuth | null = null;
 
 /**
- * Initialize Google Sheets API client
+ * Initialize Google Sheets API client with proper error handling
  */
 async function getAuthClient(): Promise<GoogleSheetsAuth> {
-  // Google Sheets disabled for Railway deployment
-  throw new Error('Google Sheets integration disabled');
-  
+  // Check if Google Sheets is enabled
+  if (!GOOGLE_SHEETS_ENABLED) {
+    throw new Error('Google Sheets integration is disabled. Set GOOGLE_SHEETS_ENABLED=true to enable.');
+  }
+
+  // Return cached client if available
   if (authClient) {
     return authClient;
   }
@@ -92,8 +98,16 @@ async function getAuthClient(): Promise<GoogleSheetsAuth> {
     if (!credsEnv) {
       throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set');
     }
-    const credentials = JSON.parse(credsEnv);
 
+    // Parse credentials with proper error handling
+    let credentials;
+    try {
+      credentials = JSON.parse(credsEnv);
+    } catch (parseError) {
+      throw new Error('Failed to parse GOOGLE_SERVICE_ACCOUNT_KEY: Invalid JSON format');
+    }
+
+    // Initialize Google Auth
     const auth = new google.auth.GoogleAuth({
       credentials,
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
@@ -102,11 +116,14 @@ async function getAuthClient(): Promise<GoogleSheetsAuth> {
     const authClientInstance = await auth.getClient();
     const sheets = google.sheets({ version: 'v4', auth: authClientInstance as any });
 
+    // Cache the authenticated client
     authClient = { sheets };
+    console.log('[GoogleAuth] Successfully authenticated with Google Sheets API');
+    
     return authClient;
   } catch (error) {
-    console.error('Error initializing Google Sheets client:', error);
-    throw new Error('Failed to initialize Google Sheets API');
+    console.error('[GoogleAuth] Error initializing Google Sheets client:', error);
+    throw error;
   }
 }
 
@@ -117,6 +134,7 @@ export function getAssignedTechnician(state: string): string {
   const technician = TECHNICIAN_ASSIGNMENT[state.toUpperCase()];
   if (!technician) {
     // Default to Waiky Lau if state not found
+    console.warn(`[Technician] State not found in assignment map: ${state}, defaulting to Waiky Lau`);
     return 'WAIKY LAU - Rolling Meadows IL Office';
   }
   return technician;
@@ -124,22 +142,26 @@ export function getAssignedTechnician(state: string): string {
 
 /**
  * Get technician availability for a specific date range
+ * Returns empty array if Google Sheets is disabled
  */
 export async function getTechnicianAvailability(
   technician: string,
   startDate: Date,
   endDate: Date
 ): Promise<{ date: string; status: string; color: string }[]> {
-  // Google Sheets disabled - return empty availability
-  console.log('[GoogleSheets] Integration disabled, returning empty availability');
-  return [];
-  
+  // Return empty if disabled
+  if (!GOOGLE_SHEETS_ENABLED) {
+    console.log('[GoogleSheets] Integration disabled, returning empty availability');
+    return [];
+  }
+
   try {
     const { sheets } = await getAuthClient();
     
     const column = TECHNICIAN_COLUMNS[technician];
     if (!column) {
-      throw new Error(`Technician column not found: ${technician}`);
+      console.error(`[GoogleSheets] Technician column not found: ${technician}`);
+      return [];
     }
 
     // Read the entire column for the technician
@@ -185,13 +207,15 @@ export async function getTechnicianAvailability(
 
     return availability;
   } catch (error) {
-    console.error('Error fetching technician availability:', error);
-    throw new Error('Failed to fetch technician availability');
+    console.error('[GoogleSheets] Error fetching technician availability:', error);
+    // Return empty array instead of throwing - graceful degradation
+    return [];
   }
 }
 
 /**
  * Write training request to Google Sheets
+ * Silently fails if Google Sheets is disabled
  */
 export async function writeTrainingRequest(
   technician: string,
@@ -200,16 +224,19 @@ export async function writeTrainingRequest(
   trainingDays: number,
   paymentMethod: string = 'PENDING'
 ): Promise<void> {
-  // Google Sheets disabled - skip writing
-  console.log('[GoogleSheets] Integration disabled, skipping write');
-  return;
-  
+  // Skip if disabled
+  if (!GOOGLE_SHEETS_ENABLED) {
+    console.log('[GoogleSheets] Integration disabled, skipping write');
+    return;
+  }
+
   try {
     const { sheets } = await getAuthClient();
     
     const column = TECHNICIAN_COLUMNS[technician];
     if (!column) {
-      throw new Error(`Technician column not found: ${technician}`);
+      console.error(`[GoogleSheets] Technician column not found: ${technician}`);
+      return;
     }
 
     // Find the row for the given date
@@ -229,7 +256,8 @@ export async function writeTrainingRequest(
     }
 
     if (rowIndex === -1) {
-      throw new Error(`Date not found in calendar: ${date}`);
+      console.error(`[GoogleSheets] Date not found in calendar: ${date}`);
+      return;
     }
 
     // Write the training request
@@ -274,10 +302,9 @@ export async function writeTrainingRequest(
       },
     });
 
-    console.log(`Training request written to Google Sheets: ${companyName} on ${date}`);
+    console.log(`[GoogleSheets] Training request written: ${companyName} on ${date}`);
   } catch (error) {
-    console.error('Error writing training request:', error);
-    throw new Error('Failed to write training request to Google Sheets');
+    console.error('[GoogleSheets] Error writing training request:', error);
+    // Graceful degradation - don't throw, just log
   }
 }
-

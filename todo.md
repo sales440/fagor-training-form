@@ -443,99 +443,26 @@
 
 ## 🚨 Railway Middleware Order Fix (Dec 21, 2025)
 
-- [x] Add express.static(distPath) BEFORE app.use("*") catchall (was already correct)
-- [x] Ensure static files are served before SPA fallback
-- [x] Push to GitHub and verify Railway deployment
-- [ ] Test all routes work correctly (STILL FAILING - 404)
+- [ ] Add express.static(distPath) BEFORE app.use("*") catchall
+- [ ] Ensure static files are served before SPA fallback
+- [ ] Push to GitHub and verify Railway deployment
+- [ ] Test all routes work correctly
 
 
 ---
 
-## 🔴 CRITICAL FIXES - Dec 30, 2025 (ADDRESS PARSING & TRAVEL CALCULATION)
+## 🎯 NEW FEATURES - KANBAN CALENDAR & MULTI-EMAIL (Jan 1, 2026) - 300 CREDITS
 
-### ROOT CAUSE IDENTIFIED:
-The application is NOT correctly parsing the client's full address to extract the state. This causes:
-1. ❌ System fails to detect client is in a different state (e.g., Texas, Florida, etc.)
-2. ❌ Incorrectly assumes client is local to Chicago office
-3. ❌ Calculates 37 hours of DRIVING instead of FLYING
-4. ❌ Wrong nearest airport detection (using Chicago address instead of client address)
-5. ❌ All quotation calculations are completely wrong
-
-### FIXES REQUIRED:
-
-- [x] FIX CRITICAL: Address parsing logic to correctly extract state from full address
-- [x] FIX CRITICAL: Verify client state detection works for all 50 US states
-- [x] FIX CRITICAL: Nearest airport finder must use CLIENT address, not office address
-- [x] FIX CRITICAL: Flight cost calculation must use correct origin/destination airports
-- [x] FIX CRITICAL: Driving time should be airport-to-client (1-3 hours), NOT 37 hours
-- [x] FIX CRITICAL: Travel hours formula: (flight time + driving time from airport to client) × 2
-- [x] TEST: Houston, TX address → IAH airport, $734 flight, 2.4h flight + 0.5h driving = 6h total ✅
-- [x] TEST: Miami, FL address → MIA airport, $590 flight, 2.8h flight + 0.5h driving = 7h total ✅
-- [ ] TEST: Los Angeles, CA address → Should show LAX airport, $0 flight (local office), ~1 hour driving
-- [ ] DEPLOY: Push fixes to GitHub and Railway
-
-
----
-
-## 🛫 REGIONAL AIRPORTS ENHANCEMENT - Dec 30, 2025
-
-### ISSUE IDENTIFIED:
-Odessa, TX (79763) is detecting San Antonio (SAT) as nearest airport with 5 hours driving time, but Midland (MAF) is only 25 minutes away.
-
-### FIXES COMPLETED:
-- [x] Add Texas regional airports: MAF (Midland), LBB (Lubbock), ELP (El Paso), CRP (Corpus Christi), etc.
-- [x] Add other US regional airports to improve accuracy nationwide (120+ total airports)
-- [x] Update flight price data for new regional airports
-- [x] Test Odessa, TX → Correctly detects MAF (Midland) with 1 hour driving ✅
-- [x] Verify all regional airports are included in nearest airport detection
-
-### AIRPORTS ADDED BY STATE:
-- California (5): ONT, BUR, SNA, FAT, PSP
-- Washington (2): GEG, PSC
-- Oregon (2): EUG, MFR
-- Arizona (3): TUS, FLG, YUM
-- Nevada (1): RNO
-- Utah (1): SGU
-- Colorado (3): COS, GJT, ASE
-- Idaho (2): BOI, IDA
-- Montana (3): BIL, MSO, GTF
-- Wyoming (2): JAC, CPR
-- Nebraska (2): OMA, LNK
-- South Dakota (2): RAP, FSD
-- North Dakota (2): FAR, BIS
-- Iowa (2): DSM, CID
-- Kansas (1): ICT
-- New York (4): ALB, BUF, ROC, SYR
-- Connecticut (1): BDL
-- Rhode Island (1): PVD
-- New Hampshire (1): MHT
-- Maine (2): PWM, BGR
-- Vermont (1): BTV
-- Pennsylvania (4): ABE, MDT, AVP, ERI
-- Delaware (1): ILG
-- New Jersey (1): ACY
-- Michigan (3): GRR, FNT, LAN
-- Ohio (4): CMH, DAY, CAK, TOL
-- Indiana (3): SBN, FWA, EVV
-- Wisconsin (2): GRB, MSN
-- Missouri (1): SGF
-- Kentucky (2): LEX, SDF
-- West Virginia (1): CRW
-
-**Total Airports: 120+ covering all 50 US states**
-
-
----
-
-## 🔍 GOOGLE PLACES AUTOCOMPLETE - Dec 31, 2025
-
-### NEW FEATURE REQUEST:
-Add autocomplete functionality to address fields that automatically suggests city and state as user types street address.
-
-### IMPLEMENTATION TASKS:
-- [x] Load Google Places Autocomplete API in frontend
-- [x] Implement autocomplete on Address 1 field
-- [x] Auto-fill City, State, and Zip Code when user selects an address
-- [x] Ensure autocomplete only suggests US addresses
-- [x] Test with various addresses across different states
-- [x] Verify form validation still works correctly
+### CRITICAL FIXES:
+- [ ] FIX: Google Maps not displaying in quotation (API key error - "Google Maps Platform rejected your request")
+- [ ] FIX: Implement route map from airport to client location with proper API key
+- [ ] FEATURE: Kanban calendar appears after clicking "ACCEPT QUOTATION" button
+- [ ] FEATURE: Calendar shows FAGOR logo in top-left corner
+- [ ] FEATURE: User can select training dates based on training days count from form
+- [ ] FEATURE: SUBMIT button in calendar sends date selection
+- [ ] FEATURE: Confirmation message: "Your training dates will be confirmed via email, or alternative dates will be proposed"
+- [ ] EMAIL: Send quotation to user email (variable from form: formData.email)
+- [ ] EMAIL: Send quotation to jcrobledo@fagor-automation.com (fixed)
+- [ ] EMAIL: Send quotation to service@fagor-automation.com (fixed)
+- [ ] DEPLOY: Push all changes to GitHub
+- [ ] TEST: Verify complete flow works in Railway production end-to-end

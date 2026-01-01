@@ -49,7 +49,8 @@ export async function setupVite(app: Express, server: Server) {
 
 // SPA fallback: serve index.html for all routes in production
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "../..", "dist", "public");
+  // Use process.cwd() for Railway compatibility (works in both dev and prod)
+  const distPath = path.resolve(process.cwd(), "dist", "public");
   if (!fs.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`

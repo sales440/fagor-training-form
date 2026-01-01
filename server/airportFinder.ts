@@ -235,7 +235,7 @@ async function getCoordinates(city: string, state: string): Promise<{ lat: numbe
 }
 
 /**
- * Get coordinates from a full address using Google Maps Geocoding API
+ * Get coordinates from a full address string using Google Maps Geocoding API
  */
 async function getCoordinatesFromAddress(address: string): Promise<{ lat: number; lng: number } | null> {
   try {
@@ -256,17 +256,15 @@ async function getCoordinatesFromAddress(address: string): Promise<{ lat: number
 }
 
 /**
- * Find the nearest international airport to a given address using Google Distance Matrix API
+ * Find the nearest international airport to a given city/state using Google Distance Matrix API
  * This provides accurate driving time instead of straight-line distance
  */
-export async function findNearestInternationalAirport(address: string, state: string): Promise<string> {
+export async function findNearestInternationalAirport(city: string, state: string): Promise<string> {
   try {
-    // Use the full address provided (already includes city, state, zip)
-    const customerAddress = address.includes('USA') ? address : `${address}, USA`;
+    const customerAddress = `${city}, ${state}, USA`;
     
     // Get top 5 closest airports by straight-line distance as candidates
-    // Extract coordinates from the full address
-    const coords = await getCoordinatesFromAddress(customerAddress);
+    const coords = await getCoordinates(city, state);
     
     if (!coords) {
       // Fallback: return airport based on state

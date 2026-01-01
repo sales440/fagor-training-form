@@ -1,4 +1,12 @@
+import sgMail from '@sendgrid/mail';
 import { getActiveNotificationEmails } from "./db";
+
+// Initialize SendGrid with API key
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+} else {
+  console.warn("[Email] SENDGRID_API_KEY not configured");
+}
 
 interface TrainingRequestEmailData {
   companyName: string;
@@ -30,7 +38,7 @@ function isValidEmail(email: string): boolean {
 /**
  * Send email notification about new training request
  * Sends to client email + all active notification emails from database
- * Uses Resend API for email delivery
+ * Uses SendGrid API for email delivery
  */
 export async function sendTrainingRequestEmail(data: TrainingRequestEmailData): Promise<boolean> {
   try {
@@ -174,33 +182,20 @@ Tel: 847-981-1500 | Fax: 847-981-1311
 service@fagor-automation.com
     `.trim();
 
-    // Send email using Resend API
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Fagor Training Forms <onboarding@resend.dev>',
-        to: allRecipients,
-        subject: subject,
-        html: htmlContent,
-        text: textContent,
-      }),
-    });
+    // Send email using SendGrid API
+    const msg = {
+      to: allRecipients,
+      from: 'noreply@fagor-automation.com', // Must be verified sender in SendGrid
+      subject: subject,
+      text: textContent,
+      html: htmlContent,
+    };
 
-    if (!response.ok) {
-      const errorData = await response.text();
-      console.error('[Email] Failed to send email:', response.status, errorData);
-      return false;
-    }
-
-    const result = await response.json();
-    console.log('[Email] Email sent successfully:', result);
+    await sgMail.send(msg);
+    console.log('[Email] Email sent successfully via SendGrid');
     return true;
-  } catch (error) {
-    console.error('[Email] Error sending email:', error);
+  } catch (error: any) {
+    console.error('[Email] Error sending email via SendGrid:', error.response?.body || error.message || error);
     return false;
   }
 }
@@ -229,33 +224,28 @@ export async function sendStatusUpdateEmail(request: any) {
 
     const config = statusMessages[request.status] || statusMessages.pending;
 
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Fagor Training <onboarding@resend.dev>',
-        to: [request.email, ...internalRecipients],
-        subject: config.subject,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>${config.subject}</h2>
-            <p>Dear ${request.contactPerson},</p>
-            <p>${config.message}</p>
-            <hr />
-            <h3>Request Details:</h3>
-            <ul>
-              <li><strong>Company:</strong> ${request.companyName}</li>
-              <li><strong>Training Type:</strong> ${request.trainingType || 'N/A'}</li>
-              ${request.technicianNotes ? `<li><strong>Notes:</strong> ${request.technicianNotes}</li>` : ''}
-            </ul>
-            <p>Best regards,<br/>Fagor Automation Team</p>
-          </div>
-        `,
-      }),
-    });
+    const msg = {
+      to: [request.email, ...internalRecipients],
+      from: 'noreply@fagor-automation.com',
+      subject: config.subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>${config.subject}</h2>
+          <p>Dear ${request.contactPerson},</p>
+          <p>${config.message}</p>
+          <hr />
+          <h3>Request Details:</h3>
+          <ul>
+            <li><strong>Company:</strong> ${request.companyName}</li>
+            <li><strong>Training Type:</strong> ${request.trainingType || 'N/A'}</li>
+            ${request.technicianNotes ? `<li><strong>Notes:</strong> ${request.technicianNotes}</li>` : ''}
+          </ul>
+          <p>Best regards,<br/>Fagor Automation Team</p>
+        </div>
+      `,
+    };
+
+    await sgMail.send(msg);
   } catch (error) {
     console.error('Error sending status update email:', error);
   }
@@ -265,124 +255,78 @@ export async function sendClientConfirmationEmail(request: any) {
   try {
     const confirmUrl = `${process.env.APP_URL || 'http://localhost:5173'}/confirm-dates?token=${request.clientConfirmationToken}`;
 
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Fagor Training <onboarding@resend.dev>',
-        to: request.email,
-        subject: '📅 Training Dates Proposed - Confirmation Required',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Training Dates Proposed</h2>
-            <p>Dear ${request.contactPerson},</p>
-            <p>We have reviewed your training request and proposed the following dates:</p>
-            <ul>
-              ${request.approvedDates ? JSON.parse(request.approvedDates).map((d: string) => `<li>${new Date(d).toLocaleDateString()}</li>`).join('') : '<li>Dates to be confirmed</li>'}
-            </ul>
-            <p>Please click the button below to confirm or reject these dates:</p>
-            <a href="${confirmUrl}" style="display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 20px 0;">
-              Confirm Dates
-            </a>
-            <p><small>This link will expire in 7 days.</small></p>
-            <p>Best regards,<br/>Fagor Automation Team</p>
-          </div>
-        `,
-      }),
-    });
+    const msg = {
+      to: request.email,
+      from: 'noreply@fagor-automation.com',
+      subject: '📅 Confirm Your Training Dates',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Confirm Your Training Dates</h2>
+          <p>Dear ${request.contactPerson},</p>
+          <p>We have proposed the following training dates for your request:</p>
+          <ul>
+            ${request.proposedDates?.map((date: string) => `<li>${new Date(date).toLocaleDateString()}</li>`).join('') || '<li>Dates pending</li>'}
+          </ul>
+          <p>Please click the link below to confirm or request changes:</p>
+          <a href="${confirmUrl}" style="display: inline-block; padding: 12px 24px; background-color: #DC241F; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0;">Confirm Dates</a>
+          <p>Best regards,<br/>Fagor Automation Team</p>
+        </div>
+      `,
+    };
+
+    await sgMail.send(msg);
   } catch (error) {
     console.error('Error sending client confirmation email:', error);
   }
 }
 
-export async function sendDateApprovalEmail(data: {
-  clientEmail: string;
-  companyName: string;
-  contactPerson: string;
-  approvedDates: string[];
-  technician: string;
-  referenceCode: string;
-}): Promise<boolean> {
+
+export async function sendDateApprovalEmail(data: { clientEmail: string; companyName: string; contactPerson?: string; technician?: string; referenceCode?: string; approvedDates: string[] }) {
   try {
-    const html = `
-      <h2>Fechas de Capacitación Aprobadas - Fagor Automation</h2>
-      <p>Estimado/a ${data.contactPerson},</p>
-      <p>Nos complace informarle que sus fechas de capacitación han sido <strong>APROBADAS</strong>.</p>
-      <h3>Detalles:</h3>
-      <ul>
-        <li><strong>Empresa:</strong> ${data.companyName}</li>
-        <li><strong>Código de Referencia:</strong> ${data.referenceCode}</li>
-        <li><strong>Técnico Asignado:</strong> ${data.technician}</li>
-        <li><strong>Fechas Confirmadas:</strong></li>
-        <ul>${data.approvedDates.map(d => `<li>${new Date(d).toLocaleDateString()}</li>`).join('')}</ul>
-      </ul>
-      <p>Nuestro técnico se pondrá en contacto con usted próximamente para coordinar los detalles finales.</p>
-      <p>Saludos cordiales,<br>Fagor Automation USA</p>
-    `;
+    const msg = {
+      to: data.clientEmail,
+      from: 'noreply@fagor-automation.com',
+      subject: '✅ Training Dates Approved',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Training Dates Approved</h2>
+          <p>Dear ${data.companyName},</p>
+          <p>Your training dates have been approved:</p>
+          <ul>
+            ${data.approvedDates.map((date: string) => `<li>${new Date(date).toLocaleDateString()}</li>`).join('')}
+          </ul>
+          <p>We look forward to working with you!</p>
+          <p>Best regards,<br/>Fagor Automation Team</p>
+        </div>
+      `,
+    };
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'service@fagor-automation.com',
-        to: [data.clientEmail],
-        subject: `Fechas Aprobadas - ${data.referenceCode}`,
-        html,
-      }),
-    });
-
-    return response.ok;
+    await sgMail.send(msg);
   } catch (error) {
-    console.error('[Email] Failed to send approval email:', error);
-    return false;
+    console.error('Error sending date approval email:', error);
   }
 }
 
-export async function sendDateRejectionEmail(data: {
-  clientEmail: string;
-  companyName: string;
-  contactPerson: string;
-  rejectionReason: string;
-  referenceCode: string;
-}): Promise<boolean> {
+export async function sendDateRejectionEmail(data: { clientEmail: string; companyName: string; contactPerson?: string; referenceCode?: string; rejectionReason: string }) {
   try {
-    const html = `
-      <h2>Actualización de Fechas - Fagor Automation</h2>
-      <p>Estimado/a ${data.contactPerson},</p>
-      <p>Lamentamos informarle que las fechas propuestas no están disponibles.</p>
-      <h3>Detalles:</h3>
-      <ul>
-        <li><strong>Empresa:</strong> ${data.companyName}</li>
-        <li><strong>Código de Referencia:</strong> ${data.referenceCode}</li>
-        <li><strong>Motivo:</strong> ${data.rejectionReason}</li>
-      </ul>
-      <p>Por favor, proponga nuevas fechas alternativas respondiendo a este correo o contactándonos directamente.</p>
-      <p>Saludos cordiales,<br>Fagor Automation USA</p>
-    `;
+    const msg = {
+      to: data.clientEmail,
+      from: 'noreply@fagor-automation.com',
+      subject: '❌ Training Dates Update',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h2>Training Dates Update</h2>
+          <p>Dear ${data.companyName},</p>
+          <p>We regret to inform you that the requested training dates are not available.</p>
+          <p><strong>Reason:</strong> ${data.rejectionReason}</p>
+          <p>Please contact us to discuss alternative dates.</p>
+          <p>Best regards,<br/>Fagor Automation Team</p>
+        </div>
+      `,
+    };
 
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: process.env.EMAIL_FROM || 'service@fagor-automation.com',
-        to: [data.clientEmail],
-        subject: `Actualización de Fechas - ${data.referenceCode}`,
-        html,
-      }),
-    });
-
-    return response.ok;
+    await sgMail.send(msg);
   } catch (error) {
-    console.error('[Email] Failed to send rejection email:', error);
-    return false;
+    console.error('Error sending date rejection email:', error);
   }
 }

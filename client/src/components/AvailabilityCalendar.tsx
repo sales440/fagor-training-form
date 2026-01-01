@@ -3,6 +3,7 @@ import { addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMon
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_LOGO } from '@/const';
 
 interface AvailabilityCalendarProps {
   trainingDays: number;
@@ -43,6 +44,10 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
 
   return (
     <div className="p-4">
+      {/* FAGOR Logo */}
+      <div className="flex justify-center mb-6">
+        <img src={APP_LOGO} alt="FAGOR Automation" className="h-16 w-auto" />
+      </div>
       {/* Legend */}
       <div className="mb-4 flex gap-3 text-xs flex-wrap">
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div><span>Available</span></div>
@@ -100,6 +105,18 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
         <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm font-medium">Selected: {format(selectedStart, 'MMM dd, yyyy')} - {format(addDays(selectedStart, trainingDays - 1), 'MMM dd, yyyy')}</p>
           <p className="text-xs text-gray-600 mt-1">Duration: {trainingDays} day{trainingDays > 1 ? 's' : ''}</p>
+        </div>
+      )}
+
+      {/* Submit Button */}
+      {selectedStart && (
+        <div className="mt-6 flex justify-center">
+          <Button
+            onClick={() => onDateSelect(selectedStart, addDays(selectedStart, trainingDays - 1))}
+            className="bg-[#DC241F] hover:bg-[#B01D1A] text-white px-8 py-3 text-lg font-semibold"
+          >
+            SUBMIT DATES
+          </Button>
         </div>
       )}
     </div>
