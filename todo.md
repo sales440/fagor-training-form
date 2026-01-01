@@ -526,8 +526,30 @@ Railway build failing with error: `secret OAUTH_SERVER_URL: not found`
 Railway treats OAUTH_SERVER_URL as a build-time secret, but secrets are only available at runtime, not during build process.
 
 ### Solution:
-- [ ] Modify code to defer OAUTH_SERVER_URL validation to runtime only
-- [ ] Ensure env.ts doesn't access OAUTH_SERVER_URL during TypeScript compilation
-- [ ] Test build locally with `pnpm build`
-- [ ] Deploy to Railway and verify successful build
+- [x] Identify that Railway treats OAUTH_SERVER_URL as Docker build secret
+- [x] Remove OAUTH_SERVER_URL temporarily from Railway variables
+- [ ] Wait for successful build without OAUTH_SERVER_URL
+- [ ] Re-add OAUTH_SERVER_URL as normal variable (not secret)
+- [ ] Verify deployment success
 - [ ] Test OAuth functionality in production
+
+
+## 🎯 OPTIMAL SOLUTION: Custom Dockerfile
+**Date:** Jan 1, 2026
+
+### Problem:
+Railway's Nixpacks automatically treats variables with `_KEY`, `_SECRET`, `_TOKEN` as Docker build secrets, making them unavailable during build process.
+
+### Optimal Solution:
+Create a custom Dockerfile that:
+1. Uses standard ENV instructions instead of Docker secrets
+2. Properly separates build-time and runtime environment variables
+3. Bypasses Nixpacks automatic secret detection
+
+### Implementation:
+- [x] Create Dockerfile in project root
+- [x] Configure multi-stage build (builder + runtime)
+- [x] Create .dockerignore for optimized builds
+- [ ] Deploy to Railway (will auto-detect Dockerfile)
+- [ ] Restore all environment variables in Railway
+- [ ] Verify production deployment

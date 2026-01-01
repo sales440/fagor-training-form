@@ -6,7 +6,6 @@ cmds = ['pnpm install']
 
 [phases.build]
 cmds = ['pnpm build']
-availableAtBuildtime = ['OAUTH_SERVER_URL', 'VITE_APP_ID', 'VITE_APP_TITLE', 'VITE_APP_LOGO', 'VITE_OAUTH_PORTAL_URL']
 
 [start]
 cmd = 'node dist/index.js'
