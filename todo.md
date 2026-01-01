@@ -466,3 +466,20 @@
 - [ ] EMAIL: Send quotation to service@fagor-automation.com (fixed)
 - [ ] DEPLOY: Push all changes to GitHub
 - [ ] TEST: Verify complete flow works in Railway production end-to-end
+
+
+## CURRENT ISSUE (Jan 1, 2026)
+
+- [ ] FIX CRITICAL: Google Sheets integration throwing blocking error "Failed to write training request to Google Sheets" when GOOGLE_SERVICE_ACCOUNT_KEY not configured - make it optional/non-blocking
+
+
+## CURRENT ISSUE (Jan 1, 2026) ✅ RESOLVED
+
+- [x] FIX CRITICAL: "Failed to write training request to Google Sheets" error blocking date selection
+- [x] Make Google Sheets integration optional (non-blocking)
+- [x] Update `getAuthClient()` to return null instead of throwing error when disabled
+- [x] Update all Google Sheets functions to handle null auth client gracefully
+- [x] Test complete flow: form submission → quotation → date selection → success
+- [x] Verify dates are saved to MySQL database even when Google Sheets is disabled
+- [x] Calendar now allows selecting multiple consecutive days based on training days input
+- [x] Fixed `savedTrainingDays` state to preserve value after form reset
