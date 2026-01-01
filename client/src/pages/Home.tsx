@@ -26,6 +26,7 @@ export default function Home() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [referenceCode, setReferenceCode] = useState<string>("");
   const [assignedTechnician, setAssignedTechnician] = useState<string>("");
+  const [savedTrainingDays, setSavedTrainingDays] = useState<number>(1);
   const [oemFieldsEnabled, setOemFieldsEnabled] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -83,6 +84,20 @@ export default function Home() {
     },
   });
 
+  const selectDatesMutation = trpc.trainingRequest.selectDates.useMutation({
+    onSuccess: () => {
+      setShowCalendar(false);
+      toast.success(
+        "Your dates will be confirmed later via email or alternative dates will be proposed.",
+        { duration: 6000 }
+      );
+    },
+    onError: (error) => {
+      console.error('Error submitting dates:', error);
+      toast.error("Failed to submit dates. Please try again.");
+    },
+  });
+
   const createRequestMutation = trpc.trainingRequest.create.useMutation({
     onSuccess: (data) => {
       // Store reference code and technician from response
@@ -95,6 +110,9 @@ export default function Home() {
       
       toast.success(t("successMessage"));
       setShowQuotation(false);
+      
+      // Save training days before resetting form
+      setSavedTrainingDays(parseInt(formData.trainingDays) || 1);
       
       // Show calendar for date selection
       setShowCalendar(true);
@@ -1013,25 +1031,14 @@ export default function Home() {
           </DialogHeader>
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
-              trainingDays={parseInt(formData.trainingDays) || 1}
-              onDateSelect={async (start, end) => {
-                try {
-                  // Submit dates to backend
-                  await trpc.trainingRequest.selectDates.mutate({
-                    referenceCode,
-                    startDate: start.toISOString().split('T')[0],
-                    endDate: end.toISOString().split('T')[0],
-                  });
-                  
-                  setShowCalendar(false);
-                  toast.success(
-                    "Your dates will be confirmed later via email or alternative dates will be proposed.",
-                    { duration: 6000 }
-                  );
-                } catch (error) {
-                  console.error('Error submitting dates:', error);
-                  toast.error("Failed to submit dates. Please try again.");
-                }
+              trainingDays={savedTrainingDays}
+              onDateSelect={(start, end) => {
+                // Submit dates to backend using mutation hook
+                selectDatesMutation.mutate({
+                  referenceCode,
+                  startDate: start.toISOString().split('T')[0],
+                  endDate: end.toISOString().split('T')[0],
+                });
               }}
             />
           )}

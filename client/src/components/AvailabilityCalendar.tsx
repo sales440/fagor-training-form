@@ -74,7 +74,18 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
         ))}
         {days.map(day => {
           const status = getDayStatus(day);
-          const isSelected = selectedStart && format(day, 'yyyy-MM-dd') === format(selectedStart, 'yyyy-MM-dd');
+          
+          // Check if this day is within the selected range
+          const isInSelectedRange = selectedStart && (() => {
+            const endDate = addDays(selectedStart, trainingDays - 1);
+            const dayTime = day.getTime();
+            const startTime = selectedStart.getTime();
+            const endTime = endDate.getTime();
+            return dayTime >= startTime && dayTime <= endTime;
+          })();
+          
+          const isStartDay = selectedStart && format(day, 'yyyy-MM-dd') === format(selectedStart, 'yyyy-MM-dd');
+          
           return (
             <button
               key={day.toString()}
@@ -85,7 +96,8 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
                 'p-2 text-sm border rounded transition-colors relative group',
                 getStatusColor(status.status),
                 !isSameMonth(day, currentMonth) && 'opacity-30',
-                isSelected && 'ring-2 ring-blue-500',
+                isInSelectedRange && 'ring-2 ring-blue-500 bg-blue-100 font-bold',
+                isStartDay && 'ring-4 ring-blue-600',
                 status.status === 'booked' && 'cursor-not-allowed opacity-50'
               )}
             >
