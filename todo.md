@@ -483,3 +483,24 @@
 - [x] Verify dates are saved to MySQL database even when Google Sheets is disabled
 - [x] Calendar now allows selecting multiple consecutive days based on training days input
 - [x] Fixed `savedTrainingDays` state to preserve value after form reset
+
+
+## 🚀 RAILWAY DEPLOYMENT CONFIGURATION (Jan 1, 2026)
+
+### Email Configuration (SendGrid)
+- [ ] Add SENDGRID_API_KEY to Railway environment variables
+- [ ] Verify fagor-automation.com domain in SendGrid dashboard
+- [ ] Test email sending in production after configuration
+- [ ] Update "from" email address if domain verification fails
+
+### Google Sheets Integration (Optional)
+- [ ] Create Google Cloud Service Account
+- [ ] Generate and download service account JSON key
+- [ ] Add GOOGLE_SERVICE_ACCOUNT_KEY to Railway environment variables
+- [ ] Test Google Sheets writing in production
+
+### Documentation
+- [x] Create Railway deployment guide
+- [x] Create SendGrid domain verification guide
+- [x] Create Google Sheets setup guide (optional feature)
+- [x] Document troubleshooting steps for common issues
