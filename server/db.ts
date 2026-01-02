@@ -13,7 +13,7 @@ export async function getDb() {
       // Create connection pool with SSL configuration for production
       const pool = mysql.createPool({
         uri: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined
       });
       _db = drizzle(pool);
     } catch (error) {
