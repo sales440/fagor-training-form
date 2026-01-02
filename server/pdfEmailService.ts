@@ -1,14 +1,26 @@
 import sgMail from '@sendgrid/mail';
 
-// Initialize SendGrid
-const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+// Initialize SendGrid - trim API key to remove any whitespace/newlines
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY?.trim();
 if (SENDGRID_API_KEY) {
-  sgMail.setApiKey(SENDGRID_API_KEY);
+  // Validate API key format (should start with SG.)
+  if (SENDGRID_API_KEY.startsWith('SG.')) {
+    sgMail.setApiKey(SENDGRID_API_KEY);
+    console.log('[Email] SendGrid initialized successfully');
+  } else {
+    console.error('[Email] Invalid SendGrid API key format - should start with SG.');
+  }
+} else {
+  console.warn('[Email] SendGrid API key not configured');
 }
 
 // Fixed notification emails
-const NOTIFICATION_EMAILS = (process.env.NOTIFICATION_EMAILS || 'jcrobledo@fagor-automation.com,service@fagor-automation.com,jcrobledolopez@gmail.com').split(',');
-const EMAIL_FROM = process.env.EMAIL_FROM || 'service@fagor-automation.com';
+const NOTIFICATION_EMAILS = (process.env.NOTIFICATION_EMAILS || 'jcrobledo@fagor-automation.com,service@fagor-automation.com,jcrobledolopez@gmail.com')
+  .split(',')
+  .map(email => email.trim())
+  .filter(email => email.length > 0);
+
+const EMAIL_FROM = (process.env.EMAIL_FROM || 'service@fagor-automation.com').trim();
 
 interface QuotationEmailParams {
   referenceCode: string;
@@ -25,6 +37,11 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     return;
   }
 
+  if (!SENDGRID_API_KEY.startsWith('SG.')) {
+    console.error('[Email] Invalid SendGrid API key format, skipping email');
+    return;
+  }
+
   // Format selected dates
   const formattedDates = selectedDates.map((dateStr, index) => {
     const date = new Date(dateStr);
@@ -33,9 +50,12 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
   // Build recipient list (fixed emails + client email)
   const recipients = [...NOTIFICATION_EMAILS];
-  if (formData.email && !recipients.includes(formData.email)) {
-    recipients.push(formData.email);
+  const clientEmail = formData.email?.trim();
+  if (clientEmail && !recipients.includes(clientEmail)) {
+    recipients.push(clientEmail);
   }
+
+  console.log(`[Email] Preparing to send quotation to ${recipients.length} recipients`);
 
   // Generate HTML email content with quotation details
   const htmlContent = `
@@ -190,9 +210,9 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
   try {
     await sgMail.send(msg);
-    console.log(`[Email] Quotation sent to: ${recipients.join(', ')}`);
+    console.log(`[Email] Quotation sent successfully to: ${recipients.length} recipients`);
   } catch (error: any) {
-    console.error('[Email] SendGrid error:', error?.response?.body || error);
+    console.error('[Email] SendGrid error:', error?.response?.body || error?.message || error);
     throw error;
   }
 }

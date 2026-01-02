@@ -10,10 +10,10 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      // Create connection pool with SSL disabled for Railway MySQL public proxy
+      // Create connection pool with SSL configuration for production
       const pool = mysql.createPool({
         uri: process.env.DATABASE_URL,
-        ssl: false
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined
       });
       _db = drizzle(pool);
     } catch (error) {

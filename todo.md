@@ -449,16 +449,37 @@
 - [ ] Test all routes work correctly
 
 
-## RAILWAY DEPLOYMENT FIX (Jan 2, 2026)
+---
 
-- [x] FIX: SSL certificate error in Railway MySQL connection
-- [x] FIX: Push code changes to GitHub repository
-- [x] FIX: Run database migrations to add missing columns (preferredDates, etc.)
+## 🎯 NEW FEATURES - KANBAN CALENDAR & MULTI-EMAIL (Jan 1, 2026) - 300 CREDITS
 
-## NEW CALENDAR DATE SELECTION FEATURE (Jan 2, 2026)
+### CRITICAL FIXES:
+- [ ] FIX: Google Maps not displaying in quotation (API key error - "Google Maps Platform rejected your request")
+- [ ] FIX: Implement route map from airport to client location with proper API key
+- [ ] FEATURE: Kanban calendar appears after clicking "ACCEPT QUOTATION" button
+- [ ] FEATURE: Calendar shows FAGOR logo in top-left corner
+- [ ] FEATURE: User can select training dates based on training days count from form
+- [ ] FEATURE: SUBMIT button in calendar sends date selection
+- [ ] FEATURE: Confirmation message: "Your training dates will be confirmed via email, or alternative dates will be proposed"
+- [ ] EMAIL: Send quotation to user email (variable from form: formData.email)
+- [ ] EMAIL: Send quotation to jcrobledo@fagor-automation.com (fixed)
+- [ ] EMAIL: Send quotation to service@fagor-automation.com (fixed)
+- [ ] DEPLOY: Push all changes to GitHub
+- [ ] TEST: Verify complete flow works in Railway production end-to-end
 
-- [ ] Show calendar after quotation acceptance for date selection
-- [ ] Allow user to select number of days based on trainingDays from form
-- [ ] Add SUBMIT button to confirm selected dates
-- [ ] Show confirmation dialog that dates will be confirmed by SERVICE office
-- [ ] Send quotation PDF to all configured emails + user email
+
+## CURRENT ISSUE (Jan 1, 2026)
+
+- [ ] FIX CRITICAL: Google Sheets integration throwing blocking error "Failed to write training request to Google Sheets" when GOOGLE_SERVICE_ACCOUNT_KEY not configured - make it optional/non-blocking
+
+
+## CURRENT ISSUE (Jan 1, 2026) ✅ RESOLVED
+
+- [x] FIX CRITICAL: "Failed to write training request to Google Sheets" error blocking date selection
+- [x] Make Google Sheets integration optional (non-blocking)
+- [x] Update `getAuthClient()` to return null instead of throwing error when disabled
+- [x] Update all Google Sheets functions to handle null auth client gracefully
+- [x] Test complete flow: form submission → quotation → date selection → success
+- [x] Verify dates are saved to MySQL database even when Google Sheets is disabled
+- [x] Calendar now allows selecting multiple consecutive days based on training days input
+- [x] Fixed `savedTrainingDays` state to preserve value after form reset
