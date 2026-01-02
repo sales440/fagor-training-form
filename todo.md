@@ -447,3 +447,18 @@
 - [ ] Ensure static files are served before SPA fallback
 - [ ] Push to GitHub and verify Railway deployment
 - [ ] Test all routes work correctly
+
+
+## RAILWAY DEPLOYMENT FIX (Jan 2, 2026)
+
+- [x] FIX: SSL certificate error in Railway MySQL connection
+- [x] FIX: Push code changes to GitHub repository
+- [x] FIX: Run database migrations to add missing columns (preferredDates, etc.)
+
+## NEW CALENDAR DATE SELECTION FEATURE (Jan 2, 2026)
+
+- [ ] Show calendar after quotation acceptance for date selection
+- [ ] Allow user to select number of days based on trainingDays from form
+- [ ] Add SUBMIT button to confirm selected dates
+- [ ] Show confirmation dialog that dates will be confirmed by SERVICE office
+- [ ] Send quotation PDF to all configured emails + user email

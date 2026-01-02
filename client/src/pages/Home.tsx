@@ -27,6 +27,12 @@ export default function Home() {
   const [referenceCode, setReferenceCode] = useState<string>("");
   const [assignedTechnician, setAssignedTechnician] = useState<string>("");
   const [oemFieldsEnabled, setOemFieldsEnabled] = useState(false);
+  const [calendarTrainingDays, setCalendarTrainingDays] = useState<number>(1);
+  const [calendarFormData, setCalendarFormData] = useState<any>(null);
+  const [calendarQuotationData, setCalendarQuotationData] = useState<any>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedTrainingDates, setSelectedTrainingDates] = useState<Date[]>([]);
+  const [isSubmittingDates, setIsSubmittingDates] = useState(false);
   
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const signaturePadRef = useRef<SignaturePad | null>(null);
@@ -93,6 +99,11 @@ export default function Home() {
         setAssignedTechnician(data.assignedTechnician);
       }
       
+      // Save form data and quotation data for calendar and PDF
+      setCalendarTrainingDays(parseInt(formData.trainingDays) || 1);
+      setCalendarFormData({ ...formData });
+      setCalendarQuotationData(quotationData);
+      
       toast.success(t("successMessage"));
       setShowQuotation(false);
       
@@ -134,6 +145,17 @@ export default function Home() {
     onError: (error) => {
       toast.error(t("errorMessage"));
       console.error("Error submitting request:", error);
+    },
+  });
+
+  // Mutation to submit selected dates and send PDF email
+  const submitDatesMutation = trpc.trainingRequest.submitDates.useMutation({
+    onSuccess: () => {
+      toast.success('Training dates submitted successfully!');
+    },
+    onError: (error) => {
+      toast.error('Error submitting dates. Please try again.');
+      console.error('Error submitting dates:', error);
     },
   });
 
@@ -1010,18 +1032,88 @@ export default function Home() {
         <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-red-600">Select Training Dates</DialogTitle>
+            <p className="text-sm text-gray-600 mt-2">
+              Reference Code: <span className="font-semibold">{referenceCode}</span>
+            </p>
           </DialogHeader>
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
-              trainingDays={parseInt(formData.trainingDays) || 1}
-              onDateSelect={(start, end) => {
-                // TODO: Submit selected dates to backend
-                console.log('Selected dates:', start, end);
-                setShowCalendar(false);
-                toast.success("Training dates submitted! You will receive a confirmation email once approved.");
+              trainingDays={calendarTrainingDays}
+              isSubmitting={isSubmittingDates}
+              onSubmit={async (selectedDates) => {
+                setIsSubmittingDates(true);
+                setSelectedTrainingDates(selectedDates);
+                try {
+                  // Submit dates to backend and send PDF email
+                  await submitDatesMutation.mutateAsync({
+                    referenceCode,
+                    selectedDates: selectedDates.map(d => d.toISOString()),
+                    formData: calendarFormData,
+                    quotationData: calendarQuotationData,
+                  });
+                  setShowCalendar(false);
+                  setShowConfirmation(true);
+                } catch (error) {
+                  console.error('Error submitting dates:', error);
+                  toast.error('Error submitting dates. Please try again.');
+                } finally {
+                  setIsSubmittingDates(false);
+                }
               }}
             />
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold text-green-600 flex items-center gap-2">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Request Submitted Successfully
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="text-gray-700 mb-4">
+              Your training request has been submitted with the following dates:
+            </p>
+            <div className="bg-gray-50 p-3 rounded-lg mb-4">
+              {selectedTrainingDates.map((date, index) => (
+                <p key={index} className="text-sm text-gray-600">
+                  Day {index + 1}: {date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              ))}
+            </div>
+            <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-lg">
+              <p className="text-sm text-yellow-800 font-medium">
+                ⚠️ Important Notice
+              </p>
+              <p className="text-sm text-yellow-700 mt-1">
+                The selected dates will be reviewed and confirmed by the SERVICE office of FAGOR Automation USA. You will receive a confirmation email with the final approved dates.
+              </p>
+            </div>
+            <p className="text-sm text-gray-600 mt-4">
+              A quotation PDF has been sent to your email address and to our service team.
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              Reference Code: <span className="font-semibold">{referenceCode}</span>
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => {
+                setShowConfirmation(false);
+                setSelectedTrainingDates([]);
+                setReferenceCode('');
+              }}
+              className="bg-[#DC241F] hover:bg-[#B01D1A]"
+            >
+              Close
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
 

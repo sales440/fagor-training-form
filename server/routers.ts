@@ -114,6 +114,53 @@ export const appRouter = router({
         return { success: true };
       }),
 
+    // Submit selected dates and send PDF quotation email
+    submitDates: publicProcedure
+      .input(z.object({
+        referenceCode: z.string(),
+        selectedDates: z.array(z.string()),
+        formData: z.any(),
+        quotationData: z.any(),
+      }))
+      .mutation(async ({ input }) => {
+        const { referenceCode, selectedDates, formData, quotationData } = input;
+        
+        // Update database with selected dates
+        const db = await getDb();
+        if (db) {
+          const startDate = new Date(selectedDates[0]);
+          const endDate = new Date(selectedDates[selectedDates.length - 1]);
+          
+          await db
+            .update(trainingRequests)
+            .set({
+              preferredDates: JSON.stringify(selectedDates),
+              requestedStartDate: startDate,
+              requestedEndDate: endDate,
+              status: 'dates_selected',
+              updatedAt: new Date(),
+            })
+            .where(eq(trainingRequests.referenceCode, referenceCode));
+        }
+        
+        // Send PDF quotation email to all recipients
+        try {
+          const { sendQuotationPdfEmail } = await import('./pdfEmailService');
+          await sendQuotationPdfEmail({
+            referenceCode,
+            selectedDates,
+            formData,
+            quotationData,
+          });
+          console.log('[Email] Quotation PDF sent successfully');
+        } catch (error) {
+          console.error('[Email] Error sending quotation PDF:', error);
+          // Don't throw - email failure shouldn't block the submission
+        }
+        
+        return { success: true };
+      }),
+
     create: publicProcedure
       .input(z.object({
         // Company Information
