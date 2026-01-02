@@ -81,11 +81,10 @@ let authClient: GoogleSheetsAuth | null = null;
 /**
  * Initialize Google Sheets API client with proper error handling
  */
-async function getAuthClient(): Promise<GoogleSheetsAuth | null> {
+async function getAuthClient(): Promise<GoogleSheetsAuth> {
   // Check if Google Sheets is enabled
   if (!GOOGLE_SHEETS_ENABLED) {
-    console.log('[GoogleSheets] Integration disabled via GOOGLE_SHEETS_ENABLED flag');
-    return null;
+    throw new Error('Google Sheets integration is disabled. Set GOOGLE_SHEETS_ENABLED=true to enable.');
   }
 
   // Return cached client if available
@@ -97,8 +96,7 @@ async function getAuthClient(): Promise<GoogleSheetsAuth | null> {
     // Get credentials from environment variable
     const credsEnv = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
     if (!credsEnv) {
-      console.warn('[GoogleSheets] GOOGLE_SERVICE_ACCOUNT_KEY not set, integration disabled');
-      return null;
+      throw new Error('GOOGLE_SERVICE_ACCOUNT_KEY environment variable not set');
     }
 
     // Parse credentials with proper error handling
@@ -158,12 +156,7 @@ export async function getTechnicianAvailability(
   }
 
   try {
-    const authClient = await getAuthClient();
-    if (!authClient) {
-      console.log('[GoogleSheets] Auth client not available, returning empty availability');
-      return [];
-    }
-    const { sheets } = authClient;
+    const { sheets } = await getAuthClient();
     
     const column = TECHNICIAN_COLUMNS[technician];
     if (!column) {
@@ -238,12 +231,7 @@ export async function writeTrainingRequest(
   }
 
   try {
-    const authClient = await getAuthClient();
-    if (!authClient) {
-      console.log('[GoogleSheets] Auth client not available, skipping write');
-      return;
-    }
-    const { sheets } = authClient;
+    const { sheets } = await getAuthClient();
     
     const column = TECHNICIAN_COLUMNS[technician];
     if (!column) {
