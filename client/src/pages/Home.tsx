@@ -8,7 +8,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Globe, Loader2, AlertCircle } from "lucide-react";
+import { Globe, Loader2, AlertCircle, Download } from "lucide-react";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import SignaturePad from "signature_pad";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
@@ -86,14 +88,24 @@ export default function Home() {
 
   const selectDatesMutation = trpc.trainingRequest.selectDates.useMutation({
     onSuccess: () => {
-      setShowCalendar(false);
-      toast.success(
-        "Your dates will be confirmed later via email or alternative dates will be proposed.",
-        { duration: 6000 }
-      );
+      // Don't close calendar here - let the calendar component handle confirmation
     },
     onError: (error) => {
       console.error('Error submitting dates:', error);
+      toast.error("Failed to submit dates. Please try again.");
+    },
+  });
+
+  // State to store form data for email
+  const [savedFormData, setSavedFormData] = useState<any>(null);
+  const [savedQuotationData, setSavedQuotationData] = useState<any>(null);
+
+  const submitDatesMutation = trpc.trainingRequest.submitDates.useMutation({
+    onSuccess: () => {
+      // Calendar component will show confirmation dialog
+    },
+    onError: (error) => {
+      console.error('Error submitting dates with email:', error);
       toast.error("Failed to submit dates. Please try again.");
     },
   });
@@ -113,6 +125,10 @@ export default function Home() {
       
       // Save training days before resetting form
       setSavedTrainingDays(parseInt(formData.trainingDays) || 1);
+      
+      // Save form data and quotation data for email
+      setSavedFormData({...formData});
+      setSavedQuotationData(quotationData);
       
       // Show calendar for date selection
       setShowCalendar(true);
@@ -175,6 +191,58 @@ export default function Home() {
   const handleClearSignature = () => {
     if (signaturePadRef.current) {
       signaturePadRef.current.clear();
+    }
+  };
+
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const quotationElement = document.getElementById('quotation-content');
+      if (!quotationElement) {
+        toast.error('Could not generate PDF');
+        return;
+      }
+
+      const canvas = await html2canvas(quotationElement, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff'
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const fileName = `FAGOR_Training_Quotation_${formData.companyName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(fileName);
+      toast.success('PDF downloaded successfully!');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -818,7 +886,7 @@ export default function Home() {
             </DialogTitle>
           </DialogHeader>
           {quotationData && (
-            <div className="space-y-4">
+            <div id="quotation-content" className="space-y-4">
               {/* Customer Information */}
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-bold text-[#DC241F] mb-2">End User Information</h3>
@@ -875,20 +943,16 @@ export default function Home() {
               </div>
 
               <div className="space-y-3">
-                {/* Training Costs */}
+                {/* Training Costs - Day by Day Breakdown */}
                 <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
                   <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Training Costs</h3>
                   <div className="space-y-2">
-                    <div className="flex justify-between items-center py-2 border-b">
-                      <span className="font-medium">First Day Training</span>
-                      <span className="font-semibold">$1,400.00</span>
-                    </div>
-                    {parseInt(formData.trainingDays) > 1 && (
-                      <div className="flex justify-between items-center py-2 border-b">
-                        <span className="font-medium">Additional Days ({parseInt(formData.trainingDays) - 1} × $1,000)</span>
-                        <span className="font-semibold">${((parseInt(formData.trainingDays) - 1) * 1000).toLocaleString()}.00</span>
+                    {Array.from({ length: parseInt(formData.trainingDays) || 1 }, (_, i) => (
+                      <div key={i} className="flex justify-between items-center py-2 border-b">
+                        <span className="font-medium">Training Day {i + 1}</span>
+                        <span className="font-semibold">${i === 0 ? '1,400.00' : '1,000.00'}</span>
                       </div>
-                    )}
+                    ))}
                     <div className="flex justify-between items-center py-2 bg-gray-50 font-bold">
                       <span>Training Subtotal</span>
                       <span>${quotationData.trainingPrice.toLocaleString()}.00</span>
@@ -1000,6 +1064,24 @@ export default function Home() {
               </div>
 
               <div className="flex justify-end gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleDownloadPdf}
+                  disabled={isGeneratingPdf}
+                  className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                >
+                  {isGeneratingPdf ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </>
+                  )}
+                </Button>
                 <Button variant="outline" onClick={() => setShowQuotation(false)}>
                   {t("calendarCancel") || "Cancel"}
                 </Button>
@@ -1032,12 +1114,23 @@ export default function Home() {
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
               trainingDays={savedTrainingDays}
-              onDateSelect={(start, end) => {
-                // Submit dates to backend using mutation hook
-                selectDatesMutation.mutate({
+              isSubmitting={submitDatesMutation.isPending}
+              onSubmitDates={(start, end) => {
+                // Generate array of selected dates
+                const selectedDates: string[] = [];
+                const currentDate = new Date(start);
+                const endDate = new Date(end);
+                while (currentDate <= endDate) {
+                  selectedDates.push(currentDate.toISOString().split('T')[0]);
+                  currentDate.setDate(currentDate.getDate() + 1);
+                }
+                
+                // Submit dates with form data for email
+                submitDatesMutation.mutate({
                   referenceCode,
-                  startDate: start.toISOString().split('T')[0],
-                  endDate: end.toISOString().split('T')[0],
+                  selectedDates,
+                  formData: savedFormData,
+                  quotationData: savedQuotationData,
                 });
               }}
             />

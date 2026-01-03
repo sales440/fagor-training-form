@@ -47,9 +47,26 @@ export const TRAINING_PRICE_ADDITIONAL_DAY = 1000; // USD - Additional days duri
 export const TRAVEL_TIME_HOURLY_RATE = 110; // USD per hour
 export const FOOD_COST_PER_DAY = 68; // GSA M&IE standard rate
 
-// FAGOR offices
-const OFFICE_ROLLING_MEADOWS = { city: 'Rolling Meadows', state: 'IL', airport: 'ORD' };
-const OFFICE_ANAHEIM = { city: 'Anaheim', state: 'CA', airport: 'LAX' };
+// FAGOR offices with coordinates for distance calculation
+const OFFICE_ROLLING_MEADOWS = { 
+  city: 'Rolling Meadows', 
+  state: 'IL', 
+  airport: 'ORD',
+  lat: 42.0742, 
+  lng: -87.9842,
+  address: '4020 Winnetta Ave, Rolling Meadows, IL 60008'
+};
+const OFFICE_ANAHEIM = { 
+  city: 'Anaheim', 
+  state: 'CA', 
+  airport: 'LAX',
+  lat: 33.8366,
+  lng: -117.9143,
+  address: 'Anaheim, CA'
+};
+
+// Distance threshold for local clients (no hotel/car rental needed)
+const LOCAL_DISTANCE_THRESHOLD_MILES = 100;
 
 // West coast states served by Anaheim office
 const WEST_COAST_STATES = ['CA', 'OR', 'WA', 'NV', 'AZ', 'ID', 'UT', 'MT', 'WY', 'CO', 'NM', 'AK', 'HI'];
@@ -302,6 +319,84 @@ function estimateFlightTime(distanceMiles: number): number {
 }
 
 /**
+ * Calculate distance between two coordinates using Haversine formula
+ * Returns distance in miles
+ */
+function calculateDistanceMiles(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLng = (lng2 - lng1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+/**
+ * Get coordinates for an address using Google Maps Geocoding API
+ */
+async function getAddressCoordinates(address: string): Promise<{ lat: number; lng: number } | null> {
+  try {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.warn('[Travel Calculator] Google Maps API key not configured for geocoding');
+      return null;
+    }
+
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&key=${apiKey}`;
+    
+    const response = await fetch(url);
+    const data = await response.json();
+    
+    if (data.status === 'OK' && data.results[0]) {
+      const location = data.results[0].geometry.location;
+      return { lat: location.lat, lng: location.lng };
+    }
+    
+    console.warn(`[Travel Calculator] Geocoding failed for address: ${address}`);
+    return null;
+  } catch (error) {
+    console.error('[Travel Calculator] Geocoding error:', error);
+    return null;
+  }
+}
+
+/**
+ * Check if client is within 100 miles of a FAGOR office
+ * Returns the office if within range, null otherwise
+ */
+async function checkLocalClient(address: string, stateCode: string): Promise<{
+  isLocal: boolean;
+  distanceToOffice: number;
+  office: typeof OFFICE_ROLLING_MEADOWS | typeof OFFICE_ANAHEIM;
+}> {
+  const isWestCoast = WEST_COAST_STATES.includes(stateCode);
+  const office = isWestCoast ? OFFICE_ANAHEIM : OFFICE_ROLLING_MEADOWS;
+  
+  const clientCoords = await getAddressCoordinates(address);
+  if (!clientCoords) {
+    // If we can't geocode, assume not local
+    return { isLocal: false, distanceToOffice: 999, office };
+  }
+  
+  const distanceToOffice = calculateDistanceMiles(
+    clientCoords.lat, clientCoords.lng,
+    office.lat, office.lng
+  );
+  
+  console.log(`[Travel Calculator] Distance from client to ${office.city} office: ${distanceToOffice.toFixed(1)} miles`);
+  
+  return {
+    isLocal: distanceToOffice <= LOCAL_DISTANCE_THRESHOLD_MILES,
+    distanceToOffice,
+    office
+  };
+}
+
+/**
  * Calculate travel expenses based on client address and training days
  */
 export async function calculateTravelExpenses(
@@ -378,10 +473,28 @@ export async function calculateTravelExpenses(
   // Total travel time: (flight + driving) × 2 for round trip
   const travelTimeHours = (flightTimeOneWay + drivingTimeOneWay) * 2;
   
+  // Check if client is within 100 miles of FAGOR office
+  const localCheck = await checkLocalClient(address, stateCode || 'IL');
+  
   // Calculate costs (flightCost already calculated above based on office)
-  const hotelCost = 130 * trainingDays; // Fixed hotel rate: $130 per night
-  const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day
-  const carRentalCost = state.midsize_dia * (trainingDays + 1); // Car rental: training days + 1 travel day
+  // If client is within 100 miles, no hotel or car rental needed
+  let hotelCost = 0;
+  let carRentalCost = 0;
+  let carRentalDays = 0;
+  
+  if (localCheck.isLocal) {
+    console.log(`[Travel Calculator] Client is within ${LOCAL_DISTANCE_THRESHOLD_MILES} miles of ${localCheck.office.city} office - NO hotel/car rental`);
+    hotelCost = 0;
+    carRentalCost = 0;
+    carRentalDays = 0;
+    flightCost = 0; // Also no flight for local clients
+  } else {
+    hotelCost = 130 * trainingDays; // Fixed hotel rate: $130 per night
+    carRentalCost = state.midsize_dia * (trainingDays + 1); // Car rental: training days + 1 travel day
+    carRentalDays = trainingDays + 1;
+  }
+  
+  const foodCost = FOOD_COST_PER_DAY * (trainingDays + 1); // Food for training days + travel day (always included)
   const travelTimeCost = Math.ceil(travelTimeHours) * TRAVEL_TIME_HOURLY_RATE;
   
   const totalTravelExpenses = flightCost + hotelCost + foodCost + carRentalCost;
@@ -392,8 +505,8 @@ export async function calculateTravelExpenses(
     hotelCost,
     foodCost,
     carRentalCost,
-    carRentalDailyRate: state.midsize_dia,
-    carRentalDays: trainingDays + 1,
+    carRentalDailyRate: localCheck.isLocal ? 0 : state.midsize_dia,
+    carRentalDays: carRentalDays,
     flightTimeOneWay: Math.round(flightTimeOneWay * 10) / 10,
     drivingTimeOneWay: Math.round(drivingTimeOneWay * 10) / 10,
     travelTimeHours: Math.ceil(travelTimeHours),

@@ -10,10 +10,11 @@ let _db: ReturnType<typeof drizzle> | null = null;
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      // Create connection pool with SSL configuration for production
+      // Create connection pool - Railway MySQL uses self-signed certificates
+      // Set rejectUnauthorized: false to accept self-signed certs
       const pool = mysql.createPool({
         uri: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : undefined
+        ssl: { rejectUnauthorized: false }
       });
       _db = drizzle(pool);
     } catch (error) {

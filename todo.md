@@ -483,3 +483,11 @@
 - [x] Verify dates are saved to MySQL database even when Google Sheets is disabled
 - [x] Calendar now allows selecting multiple consecutive days based on training days input
 - [x] Fixed `savedTrainingDays` state to preserve value after form reset
+
+
+### 🔧 FIXES REQUESTED (Jan 3, 2026)
+
+- [ ] No hotel/car rental if client within 100 miles of FAGOR Rolling Meadows, IL
+- [ ] No hotel/car rental if client within 100 miles of FAGOR Anaheim, CA
+- [ ] Ensure FAGOR logo appears in PDF quotation document
+- [ ] Fix email delivery to jcrobledo@fagor-automation.com (not receiving emails)

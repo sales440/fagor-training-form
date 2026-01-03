@@ -3,17 +3,23 @@ import { addDays, format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMon
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { APP_LOGO } from '@/const';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
+// Hardcoded Fagor logo URL
+const FAGOR_LOGO = "https://www.fagorautomation.com/images/fagor-automation-logo.svg";
 
 interface AvailabilityCalendarProps {
   trainingDays: number;
-  onDateSelect: (startDate: Date, endDate: Date) => void;
+  onSubmitDates: (startDate: Date, endDate: Date) => void;
   availability?: Array<{ date: string; status: 'available' | 'pending' | 'booked' | 'unavailable'; details?: string }>;
+  isSubmitting?: boolean;
 }
 
-export default function AvailabilityCalendar({ trainingDays, onDateSelect, availability = [] }: AvailabilityCalendarProps) {
+export default function AvailabilityCalendar({ trainingDays, onSubmitDates, availability = [], isSubmitting = false }: AvailabilityCalendarProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedStart, setSelectedStart] = useState<Date | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [submittedDates, setSubmittedDates] = useState<{ start: Date; end: Date } | null>(null);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -37,17 +43,34 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
     const dayStatus = getDayStatus(date);
     if (dayStatus.status === 'booked') return;
     
-    const endDate = addDays(date, trainingDays - 1);
+    // Just select the date, don't submit
     setSelectedStart(date);
-    onDateSelect(date, endDate);
+  };
+
+  const handleSubmit = () => {
+    if (selectedStart) {
+      const endDate = addDays(selectedStart, trainingDays - 1);
+      setSubmittedDates({ start: selectedStart, end: endDate });
+      onSubmitDates(selectedStart, endDate);
+      setShowConfirmation(true);
+    }
   };
 
   return (
     <div className="p-4">
       {/* FAGOR Logo */}
       <div className="flex justify-center mb-6">
-        <img src={APP_LOGO} alt="FAGOR Automation" className="h-16 w-auto" />
+        <img 
+          src={FAGOR_LOGO} 
+          alt="FAGOR Automation" 
+          className="h-16 w-auto"
+          onError={(e) => {
+            // Fallback to text if image fails to load
+            e.currentTarget.style.display = 'none';
+          }}
+        />
       </div>
+      
       {/* Legend */}
       <div className="mb-4 flex gap-3 text-xs flex-wrap">
         <div className="flex items-center gap-1.5"><div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div><span>Available</span></div>
@@ -120,17 +143,63 @@ export default function AvailabilityCalendar({ trainingDays, onDateSelect, avail
         </div>
       )}
 
-      {/* Submit Button */}
+      {/* Submit Button - Only shows when dates are selected */}
       {selectedStart && (
         <div className="mt-6 flex justify-center">
           <Button
-            onClick={() => onDateSelect(selectedStart, addDays(selectedStart, trainingDays - 1))}
+            onClick={handleSubmit}
+            disabled={isSubmitting}
             className="bg-[#DC241F] hover:bg-[#B01D1A] text-white px-8 py-3 text-lg font-semibold"
           >
-            SUBMIT DATES
+            {isSubmitting ? 'Submitting...' : 'SUBMIT SELECTED DATES'}
           </Button>
         </div>
       )}
+
+      {/* Confirmation Dialog */}
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <div className="flex justify-center mb-4">
+              <img src={FAGOR_LOGO} alt="FAGOR Automation" className="h-12 w-auto" />
+            </div>
+            <DialogTitle className="text-center text-xl text-green-600">
+              ✓ Dates Submitted Successfully
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {submittedDates && (
+              <div className="bg-blue-50 border border-blue-200 rounded p-4 text-center">
+                <p className="font-semibold text-blue-800">Selected Training Dates:</p>
+                <p className="text-blue-700">
+                  {format(submittedDates.start, 'MMMM dd, yyyy')} - {format(submittedDates.end, 'MMMM dd, yyyy')}
+                </p>
+                <p className="text-sm text-blue-600 mt-1">({trainingDays} day{trainingDays > 1 ? 's' : ''})</p>
+              </div>
+            )}
+            
+            <div className="bg-yellow-50 border border-yellow-300 rounded p-4">
+              <p className="text-yellow-800 font-semibold text-center mb-2">⚠️ Important Notice</p>
+              <p className="text-yellow-700 text-sm text-center">
+                The selected dates will be reviewed and confirmed by the <strong>SERVICE office of FAGOR Automation USA</strong>.
+              </p>
+              <p className="text-yellow-700 text-sm text-center mt-2">
+                You will receive a confirmation email with the final approved dates or alternative dates if necessary.
+              </p>
+            </div>
+            
+            <div className="flex justify-center mt-4">
+              <Button
+                onClick={() => setShowConfirmation(false)}
+                className="bg-[#DC241F] hover:bg-[#B01D1A] text-white px-6"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
