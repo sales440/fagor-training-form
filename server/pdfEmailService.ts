@@ -31,6 +31,9 @@ const EMAIL_FROM = (process.env.EMAIL_FROM || 'noreply@fagor-automation.com').tr
 console.log('[Email] From address:', EMAIL_FROM);
 console.log('[Email] Notification emails:', NOTIFICATION_EMAILS);
 
+// FAGOR Logo - using public CDN URL for better email client compatibility
+const FAGOR_LOGO_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310419663031167889/IukGvklFeOdVMKYo.png';
+
 interface QuotationEmailParams {
   referenceCode: string;
   selectedDates: string[];
@@ -110,7 +113,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Professional executive HTML email template
+  // Professional executive HTML email template - CENTERED ON LETTER SIZE PAGE
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -119,27 +122,31 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+      <!-- OUTER WRAPPER FOR CENTERING -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
         <tr>
           <td align="center">
-            <table width="700" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e0e0e0;">
+            <!-- MAIN CONTENT CONTAINER - 8.5" x 11" letter size (650px width for email) -->
+            <table width="650" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e0e0e0; margin: 0 auto;">
               
               <!-- HEADER WITH FAGOR LETTERHEAD -->
               <tr>
                 <td style="padding: 0;">
                   <table width="100%" cellpadding="0" cellspacing="0">
+                    <!-- Red stripe -->
                     <tr>
-                      <td style="background-color: #DC241F; height: 8px;"></td>
+                      <td style="background-color: #DC241F; height: 6px;"></td>
                     </tr>
+                    <!-- Logo and address -->
                     <tr>
-                      <td style="padding: 25px 40px; border-bottom: 2px solid #DC241F;">
+                      <td style="padding: 20px 30px; border-bottom: 2px solid #DC241F;">
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td width="200" valign="middle">
-                              <img src="cid:fagorlogo" alt="FAGOR Automation" style="width: 150px; height: auto; display: block;">
+                            <td width="100" valign="middle">
+                              <img src="${FAGOR_LOGO_URL}" alt="FAGOR Automation" style="height: 45px; width: auto; display: block;">
                             </td>
-                            <td align="right" valign="middle" style="font-size: 11px; color: #333; line-height: 1.6;">
-                              <strong style="color: #DC241F; font-size: 12px;">FAGOR AUTOMATION CORP.</strong><br>
+                            <td align="right" valign="middle" style="font-size: 10px; color: #333; line-height: 1.5;">
+                              <strong style="color: #DC241F; font-size: 11px;">FAGOR AUTOMATION CORP.</strong><br>
                               4020 Winnetta Ave, Rolling Meadows, IL 60008<br>
                               Tel: 847-981-1500 | Fax: 847-981-1311<br>
                               service@fagor-automation.com
@@ -154,13 +161,13 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- QUOTATION TITLE -->
               <tr>
-                <td style="padding: 30px 40px 20px 40px;">
+                <td style="padding: 25px 30px 15px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
                       <td>
-                        <h1 style="margin: 0; font-size: 28px; color: #DC241F; font-weight: 600; letter-spacing: -0.5px;">TRAINING QUOTATION</h1>
+                        <h1 style="margin: 0; font-size: 24px; color: #DC241F; font-weight: 600; letter-spacing: -0.5px;">TRAINING QUOTATION</h1>
                       </td>
-                      <td align="right" style="font-size: 13px; color: #666;">
+                      <td align="right" style="font-size: 12px; color: #666;">
                         <strong>Reference:</strong> ${referenceCode}<br>
                         <strong>Date:</strong> ${currentDate}
                       </td>
@@ -171,22 +178,22 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- CLIENT INFORMATION -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
+                <td style="padding: 0 30px 20px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border: 1px solid #e5e5e5; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Client Information</h3>
-                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #333;">
+                      <td style="padding: 15px;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Client Information</h3>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 12px; color: #333;">
                           <tr>
-                            <td width="50%" style="padding: 5px 0;"><strong>Company:</strong> ${formData?.companyName || 'N/A'}</td>
-                            <td width="50%" style="padding: 5px 0;"><strong>Contact:</strong> ${formData?.contactPerson || 'N/A'}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>Company:</strong> ${formData?.companyName || 'N/A'}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>Contact:</strong> ${formData?.contactPerson || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px 0;"><strong>Email:</strong> ${formData?.email || 'N/A'}</td>
-                            <td style="padding: 5px 0;"><strong>Phone:</strong> ${formData?.phone || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Email:</strong> ${formData?.email || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Phone:</strong> ${formData?.phone || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td colspan="2" style="padding: 5px 0;"><strong>Address:</strong> ${formData?.address1 || ''} ${formData?.address2 || ''}, ${formData?.city || ''}, ${formData?.state || ''} ${formData?.zipCode || ''}</td>
+                            <td colspan="2" style="padding: 4px 0;"><strong>Address:</strong> ${formData?.address1 || ''} ${formData?.address2 || ''}, ${formData?.city || ''}, ${formData?.state || ''} ${formData?.zipCode || ''}</td>
                           </tr>
                         </table>
                       </td>
@@ -197,27 +204,27 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- TRAINING DETAILS -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
+                <td style="padding: 0 30px 20px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fafafa; border: 1px solid #e5e5e5; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Training Details</h3>
-                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #333;">
+                      <td style="padding: 15px;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Training Details</h3>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 12px; color: #333;">
                           <tr>
-                            <td width="50%" style="padding: 5px 0;"><strong>CNC Model:</strong> ${formData?.controllerModel || 'N/A'}</td>
-                            <td width="50%" style="padding: 5px 0;"><strong>Machine Type:</strong> ${formData?.machineType || 'N/A'}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>CNC Model:</strong> ${formData?.controllerModel || 'N/A'}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>Machine Type:</strong> ${formData?.machineType || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px 0;"><strong>Machine Brand:</strong> ${formData?.machineBrand || 'N/A'}</td>
-                            <td style="padding: 5px 0;"><strong>Machine Model:</strong> ${formData?.machineModel || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Machine Brand:</strong> ${formData?.machineBrand || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Machine Model:</strong> ${formData?.machineModel || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px 0;"><strong>Programming:</strong> ${formData?.programmingType || 'N/A'}</td>
-                            <td style="padding: 5px 0;"><strong>Knowledge Level:</strong> ${formData?.knowledgeLevel || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Programming:</strong> ${formData?.programmingType || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Knowledge Level:</strong> ${formData?.knowledgeLevel || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px 0;"><strong>Training Days:</strong> ${trainingDays}</td>
-                            <td style="padding: 5px 0;"><strong>Trainees:</strong> ${formData?.trainees || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Training Days:</strong> ${trainingDays}</td>
+                            <td style="padding: 4px 0;"><strong>Trainees:</strong> ${formData?.trainees || 'N/A'}</td>
                           </tr>
                         </table>
                       </td>
@@ -229,19 +236,19 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
               ${formData?.oemName ? `
               <!-- OEM INFORMATION -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
+                <td style="padding: 0 30px 20px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0f7ff; border: 1px solid #c5ddf5; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">OEM Information</h3>
-                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #333;">
+                      <td style="padding: 15px;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">OEM Information</h3>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 12px; color: #333;">
                           <tr>
-                            <td width="50%" style="padding: 5px 0;"><strong>OEM Name:</strong> ${formData.oemName}</td>
-                            <td width="50%" style="padding: 5px 0;"><strong>Contact:</strong> ${formData.oemContact || 'N/A'}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>OEM Name:</strong> ${formData.oemName}</td>
+                            <td width="50%" style="padding: 4px 0;"><strong>Contact:</strong> ${formData.oemContact || 'N/A'}</td>
                           </tr>
                           <tr>
-                            <td style="padding: 5px 0;"><strong>Email:</strong> ${formData.oemEmail || 'N/A'}</td>
-                            <td style="padding: 5px 0;"><strong>Phone:</strong> ${formData.oemPhone || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Email:</strong> ${formData.oemEmail || 'N/A'}</td>
+                            <td style="padding: 4px 0;"><strong>Phone:</strong> ${formData.oemPhone || 'N/A'}</td>
                           </tr>
                         </table>
                       </td>
@@ -253,62 +260,62 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- QUOTATION BREAKDOWN -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
-                  <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Quotation Breakdown</h3>
-                  <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e5e5; border-radius: 4px; font-size: 13px;">
+                <td style="padding: 0 30px 20px 30px;">
+                  <h3 style="margin: 0 0 12px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Quotation Breakdown</h3>
+                  <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #e5e5e5; border-radius: 4px; font-size: 12px;">
                     <tr style="background-color: #f5f5f5;">
-                      <th style="padding: 12px 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #DC241F;">Description</th>
-                      <th style="padding: 12px 15px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #DC241F; width: 120px;">Amount</th>
+                      <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #DC241F;">Description</th>
+                      <th style="padding: 10px 12px; text-align: right; font-weight: 600; color: #333; border-bottom: 2px solid #DC241F; width: 100px;">Amount</th>
                     </tr>
                     
                     <!-- Training Costs -->
                     <tr>
-                      <td colspan="2" style="padding: 10px 15px; background-color: #fef9f9; font-weight: 600; color: #DC241F; border-bottom: 1px solid #e5e5e5;">Training Services</td>
+                      <td colspan="2" style="padding: 8px 12px; background-color: #fef9f9; font-weight: 600; color: #DC241F; border-bottom: 1px solid #e5e5e5;">Training Services</td>
                     </tr>
                     ${trainingBreakdown}
                     <tr style="background-color: #fafafa;">
-                      <td style="padding: 10px 15px; font-weight: 600; border-bottom: 2px solid #e5e5e5;">Training Subtotal</td>
-                      <td style="padding: 10px 15px; text-align: right; font-weight: 600; border-bottom: 2px solid #e5e5e5;">$${trainingTotal.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; font-weight: 600; border-bottom: 2px solid #e5e5e5;">Training Subtotal</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight: 600; border-bottom: 2px solid #e5e5e5;">$${trainingTotal.toFixed(2)}</td>
                     </tr>
 
                     ${travelSubtotal > 0 ? `
                     <!-- Travel Expenses -->
                     <tr>
-                      <td colspan="2" style="padding: 10px 15px; background-color: #fef9f9; font-weight: 600; color: #DC241F; border-bottom: 1px solid #e5e5e5;">Travel Expenses (Estimated)</td>
+                      <td colspan="2" style="padding: 8px 12px; background-color: #fef9f9; font-weight: 600; color: #DC241F; border-bottom: 1px solid #e5e5e5;">Travel Expenses (Estimated)</td>
                     </tr>
                     ${flightCost > 0 ? `
                     <tr>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5;">Round Trip Flight (${travelExpenses.nearestAirport || 'N/A'})</td>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${flightCost.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5;">Round Trip Flight (${travelExpenses.nearestAirport || 'N/A'})</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${flightCost.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                     ${carRentalCost > 0 ? `
                     <tr>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5;">Car Rental</td>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${carRentalCost.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5;">Car Rental</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${carRentalCost.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                     ${hotelCost > 0 ? `
                     <tr>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5;">Hotel Accommodation</td>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${hotelCost.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5;">Hotel Accommodation</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${hotelCost.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                     ${foodCost > 0 ? `
                     <tr>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5;">Meals & Incidentals</td>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${foodCost.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5;">Meals & Incidentals</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${foodCost.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                     ${travelTimeCost > 0 ? `
                     <tr>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5;">Travel Time (${travelExpenses.travelTimeHours?.toFixed(1) || '0'} hours @ $110/hr)</td>
-                      <td style="padding: 10px 15px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${travelTimeCost.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5;">Travel Time (${travelExpenses.travelTimeHours?.toFixed(1) || '0'} hours @ $110/hr)</td>
+                      <td style="padding: 8px 12px; border-bottom: 1px solid #e5e5e5; text-align: right;">$${travelTimeCost.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                     <tr style="background-color: #fafafa;">
-                      <td style="padding: 10px 15px; font-weight: 600; border-bottom: 2px solid #e5e5e5;">Travel Subtotal</td>
-                      <td style="padding: 10px 15px; text-align: right; font-weight: 600; border-bottom: 2px solid #e5e5e5;">$${travelSubtotal.toFixed(2)}</td>
+                      <td style="padding: 8px 12px; font-weight: 600; border-bottom: 2px solid #e5e5e5;">Travel Subtotal</td>
+                      <td style="padding: 8px 12px; text-align: right; font-weight: 600; border-bottom: 2px solid #e5e5e5;">$${travelSubtotal.toFixed(2)}</td>
                     </tr>
                     ` : ''}
                   </table>
@@ -317,14 +324,14 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- GRAND TOTAL -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
+                <td style="padding: 0 30px 20px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #DC241F; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px 25px;">
+                      <td style="padding: 15px 20px;">
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
-                            <td style="color: #ffffff; font-size: 18px; font-weight: 600;">GRAND TOTAL</td>
-                            <td align="right" style="color: #ffffff; font-size: 28px; font-weight: 700;">$${grandTotal.toFixed(2)}</td>
+                            <td style="color: #ffffff; font-size: 16px; font-weight: 600;">GRAND TOTAL</td>
+                            <td align="right" style="color: #ffffff; font-size: 24px; font-weight: 700;">$${grandTotal.toFixed(2)}</td>
                           </tr>
                         </table>
                       </td>
@@ -335,12 +342,12 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- SELECTED DATES -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
+                <td style="padding: 0 30px 20px 30px;">
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f0f9ff; border: 1px solid #0ea5e9; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px;">
-                        <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px;">Selected Training Dates</h3>
-                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #333;">
+                      <td style="padding: 15px;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 13px; color: #0369a1; text-transform: uppercase; letter-spacing: 0.5px;">Selected Training Dates</h3>
+                        <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 12px; color: #333;">
                           ${formattedDates}
                         </table>
                       </td>
@@ -351,13 +358,11 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- IMPORTANT NOTICE -->
               <tr>
-                <td style="padding: 0 40px 25px 40px;">
-                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef3c7; border: 1px solid #f59e0b; border-radius: 4px;">
+                <td style="padding: 0 30px 20px 30px;">
+                  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff8e1; border: 1px solid #ffc107; border-radius: 4px;">
                     <tr>
-                      <td style="padding: 20px;">
-                        <p style="margin: 0; font-size: 13px; color: #92400e;">
-                          <strong>⚠️ Important Notice:</strong> The selected dates will be reviewed and confirmed by the SERVICE office of FAGOR Automation USA. You will receive a confirmation email with the final approved dates.
-                        </p>
+                      <td style="padding: 12px 15px; font-size: 11px; color: #856404;">
+                        <strong>⚠️ Important Notice:</strong> The selected dates will be reviewed and confirmed by the SERVICE office of FAGOR Automation USA. You will receive a confirmation email with the final approved dates.
                       </td>
                     </tr>
                   </table>
@@ -366,31 +371,31 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
               <!-- TERMS AND CONDITIONS -->
               <tr>
-                <td style="padding: 0 40px 30px 40px;">
-                  <h3 style="margin: 0 0 15px 0; font-size: 14px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Terms and Conditions</h3>
-                  <ul style="margin: 0; padding-left: 20px; font-size: 12px; color: #666; line-height: 1.8;">
-                    <li>Prices in USD without taxes</li>
-                    <li>Training Day 1: $1,400.00 USD | Additional Days: $1,000.00 USD each</li>
-                    <li>This offer includes 6 hours of on-site training for a maximum of 4 participants per day</li>
-                    <li>Travel expenses are estimated and subject to change based on actual costs incurred</li>
-                    <li>The FAGOR application engineer will not carry out any mechanical and/or electrical assembly work</li>
-                    <li>Payment must be received before the training date unless NET30 terms are agreed</li>
-                    <li>Any cancellation must be made at least 7 days before the scheduled training date</li>
-                  </ul>
+                <td style="padding: 0 30px 20px 30px;">
+                  <h3 style="margin: 0 0 10px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Terms and Conditions</h3>
+                  <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 11px; color: #555; line-height: 1.6;">
+                    <tr><td style="padding: 3px 0;">• Prices in USD without taxes</td></tr>
+                    <tr><td style="padding: 3px 0;">• Training Day 1: $1,400.00 USD | Additional Days: $1,000.00 USD each</td></tr>
+                    <tr><td style="padding: 3px 0;">• This offer includes 6 hours of on-site training for a maximum of 4 participants per day</td></tr>
+                    <tr><td style="padding: 3px 0;">• Travel expenses are estimated and subject to change based on actual costs incurred</td></tr>
+                    <tr><td style="padding: 3px 0;">• The FAGOR application engineer will not carry out any mechanical and/or electrical assembly work</td></tr>
+                    <tr><td style="padding: 3px 0;">• Payment must be received before the training date unless NET30 terms are agreed</td></tr>
+                    <tr><td style="padding: 3px 0;">• Any cancellation must be made at least 7 days before the scheduled training date</td></tr>
+                  </table>
                 </td>
               </tr>
 
               <!-- FOOTER -->
               <tr>
-                <td style="background-color: #333; padding: 25px 40px;">
+                <td style="padding: 15px 30px; background-color: #2d2d2d; border-top: 3px solid #DC241F;">
                   <table width="100%" cellpadding="0" cellspacing="0">
                     <tr>
-                      <td style="color: #ffffff; font-size: 12px; line-height: 1.6;">
+                      <td style="font-size: 10px; color: #ffffff; line-height: 1.5;">
                         <strong style="color: #DC241F;">FAGOR AUTOMATION CORP.</strong><br>
                         4020 Winnetta Ave, Rolling Meadows, IL 60008<br>
                         Tel: 847-981-1500 | Fax: 847-981-1311
                       </td>
-                      <td align="right" style="color: #999; font-size: 11px;">
+                      <td align="right" style="font-size: 9px; color: #999;">
                         © ${new Date().getFullYear()} Fagor Automation Corp.<br>
                         All rights reserved.
                       </td>
@@ -407,14 +412,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     </html>
   `;
 
-  // Read logo file
-  const fs = require('fs');
-  const path = require('path');
-  const logoPath = path.join(__dirname, 'fagor-logo.png');
-  const logoBuffer = fs.readFileSync(logoPath);
-  const logoBase64 = logoBuffer.toString('base64');
-
-  // Send email to all recipients
+  // Send email to all recipients - NO LOGO ATTACHMENT, using public URL instead
   const msg = {
     to: recipients,
     from: {
@@ -422,16 +420,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
       name: 'FAGOR Automation Training'
     },
     subject: `Training Quotation - ${referenceCode} - ${formData?.companyName || 'New Request'}`,
-    html: htmlContent,
-    attachments: [
-      {
-        content: logoBase64,
-        filename: 'fagor-logo.png',
-        type: 'image/png',
-        disposition: 'inline',
-        content_id: 'fagorlogo'
-      }
-    ]
+    html: htmlContent
   };
 
   console.log('[Email] Sending email with config:', {

@@ -499,3 +499,11 @@
 - [ ] Reduce FAGOR logo size in email to professional letterhead dimensions (max 150-200px width)
 - [ ] Test email rendering in Gmail to verify no AI summary appears
 - [ ] Test email rendering in Outlook to verify logo displays at correct size
+
+
+- [x] FIX: Adjust FAGOR logo size in email templates to standard letterhead dimensions for proper display in Outlook
+
+- [x] FIX CRITICAL: Logo showing as huge broken "FA" letters instead of actual FAGOR logo image in email
+- [x] FIX: Center quotation email content on letter-size page (currently left-aligned)
+- [x] FIX: Ensure all prices/amounts display correctly in quotation breakdown table
+- [x] FIX: Improve overall email layout and professional appearance
