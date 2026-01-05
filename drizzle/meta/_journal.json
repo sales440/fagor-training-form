@@ -57,6 +57,13 @@
       "when": 1766299079605,
       "tag": "0007_nice_fallen_one",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1767580532462,
+      "tag": "0008_bent_kulan_gath",
+      "breakpoints": true
     }
   ]
 }

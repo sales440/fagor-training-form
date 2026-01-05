@@ -330,3 +330,151 @@ export async function sendDateRejectionEmail(data: { clientEmail: string; compan
     console.error('Error sending date rejection email:', error);
   }
 }
+
+
+/**
+ * Send reminder email 7 days before training
+ * Sends to client email + all active notification emails
+ */
+export async function sendTrainingReminderEmail(data: {
+  email: string;
+  companyName: string;
+  contactPerson: string;
+  referenceCode: string;
+  trainingDates: string[];
+  assignedTechnician?: string;
+  address: string;
+  trainingDays: number;
+  machineType?: string;
+  controllerModel?: string;
+}): Promise<boolean> {
+  try {
+    if (!process.env.SENDGRID_API_KEY) {
+      console.warn("[Email] SENDGRID_API_KEY not configured - skipping reminder email");
+      return false;
+    }
+
+    // Get fixed recipients from database
+    const fixedRecipients = await getActiveNotificationEmails();
+    
+    // Validate client email
+    if (!isValidEmail(data.email)) {
+      console.error(`[Email] Invalid client email: ${data.email}`);
+      return false;
+    }
+
+    // Combine client email + fixed recipients
+    const allRecipients = [data.email, ...fixedRecipients.map(r => r.email.trim())];
+    const validRecipients = allRecipients.filter(email => isValidEmail(email));
+
+    if (validRecipients.length === 0) {
+      console.error("[Email] No valid recipients for reminder email");
+      return false;
+    }
+
+    const firstDate = new Date(data.trainingDates[0]).toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #DC241F; color: white; padding: 20px; text-align: center; }
+          .content { background-color: #f9f9f9; padding: 30px; }
+          .info-box { background-color: white; border-left: 4px solid #DC241F; padding: 15px; margin: 20px 0; }
+          .checklist { background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; margin: 20px 0; }
+          .checklist ul { margin: 10px 0; padding-left: 20px; }
+          .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
+          h2 { color: #DC241F; margin-top: 0; }
+          .button { display: inline-block; padding: 12px 24px; background-color: #DC241F; color: white; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>🔔 Training Reminder - 7 Days Notice</h1>
+          </div>
+          
+          <div class="content">
+            <p>Dear ${data.contactPerson},</p>
+            
+            <p>This is a friendly reminder that your FAGOR training is scheduled to begin in <strong>7 days</strong>.</p>
+            
+            <div class="info-box">
+              <h2>Training Details</h2>
+              <p><strong>Reference Code:</strong> ${data.referenceCode}</p>
+              <p><strong>Company:</strong> ${data.companyName}</p>
+              <p><strong>Start Date:</strong> ${firstDate}</p>
+              <p><strong>Duration:</strong> ${data.trainingDays} day${data.trainingDays > 1 ? 's' : ''}</p>
+              ${data.assignedTechnician ? `<p><strong>Assigned Technician:</strong> ${data.assignedTechnician}</p>` : ''}
+              <p><strong>Location:</strong> ${data.address}</p>
+              ${data.machineType ? `<p><strong>Machine Type:</strong> ${data.machineType}</p>` : ''}
+              ${data.controllerModel ? `<p><strong>CNC Model:</strong> ${data.controllerModel}</p>` : ''}
+            </div>
+
+            <div class="info-box">
+              <h2>📅 Training Schedule</h2>
+              <ul>
+                ${data.trainingDates.map((date, index) => 
+                  `<li><strong>Day ${index + 1}:</strong> ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</li>`
+                ).join('')}
+              </ul>
+            </div>
+
+            <div class="checklist">
+              <h3>✅ Preparation Checklist</h3>
+              <p>Please ensure the following before the training session:</p>
+              <ul>
+                <li>Machine is operational and accessible</li>
+                <li>Training area is prepared and ready</li>
+                <li>All trainees are confirmed and available</li>
+                <li>Safety equipment is available</li>
+                <li>Network/internet connection is working (if needed)</li>
+                <li>Any specific software or documentation is ready</li>
+              </ul>
+            </div>
+
+            <p><strong>Need to make changes?</strong> Please contact our SERVICE office as soon as possible:</p>
+            <ul>
+              <li>📧 Email: service@fagor-automation.com</li>
+              <li>📞 Phone: [SERVICE PHONE NUMBER]</li>
+            </ul>
+
+            <p>We look forward to providing you with excellent training!</p>
+            
+            <p>Best regards,<br/>
+            <strong>FAGOR Automation SERVICE Team</strong></p>
+          </div>
+          
+          <div class="footer">
+            <p>FAGOR Automation | Professional CNC Training Services</p>
+            <p>This is an automated reminder. Please do not reply to this email.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    const msg = {
+      to: validRecipients,
+      from: process.env.SENDGRID_FROM_EMAIL?.trim() || 'noreply@fagor-automation.com',
+      subject: `🔔 Training Reminder: ${data.companyName} - ${firstDate}`,
+      html: htmlContent,
+    };
+
+    await sgMail.send(msg);
+    console.log(`[Email] Training reminder sent successfully to ${validRecipients.length} recipients`);
+    return true;
+  } catch (error: any) {
+    console.error('[Email] Error sending training reminder:', error?.response?.body || error);
+    return false;
+  }
+}

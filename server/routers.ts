@@ -467,6 +467,67 @@ export const appRouter = router({
         return { data: Buffer.from(buffer).toString('base64') };
       }),
   }),
+
+  admin: router({
+    listRequests: protectedProcedure.query(async () => {
+      const db = await getDb();
+      if (!db) return [];
+      return db.select().from(trainingRequests).orderBy(trainingRequests.createdAt);
+    }),
+
+    approveRequest: protectedProcedure
+      .input(z.object({ id: z.number(), notes: z.string().optional() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.update(trainingRequests)
+          .set({ status: "approved", technicianNotes: input.notes })
+          .where(eq(trainingRequests.id, input.id));
+        
+        const request = await db.select().from(trainingRequests).where(eq(trainingRequests.id, input.id)).limit(1);
+        if (request[0]) {
+          await sendDateApprovalEmail({
+            email: request[0].email,
+            companyName: request[0].companyName,
+            contactPerson: request[0].contactPerson,
+            referenceCode: request[0].referenceCode!,
+            approvedDates: JSON.parse(request[0].preferredDates || "[]"),
+            notes: input.notes
+          });
+        }
+        return { success: true };
+      }),
+
+    rejectRequest: protectedProcedure
+      .input(z.object({ id: z.number(), reason: z.string() }))
+      .mutation(async ({ input }) => {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        
+        await db.update(trainingRequests)
+          .set({ status: "rejected", rejectionReason: input.reason })
+          .where(eq(trainingRequests.id, input.id));
+        
+        const request = await db.select().from(trainingRequests).where(eq(trainingRequests.id, input.id)).limit(1);
+        if (request[0]) {
+          await sendDateRejectionEmail({
+            email: request[0].email,
+            companyName: request[0].companyName,
+            contactPerson: request[0].contactPerson,
+            referenceCode: request[0].referenceCode!,
+            reason: input.reason
+          });
+        }
+        return { success: true };
+      }),
+
+    triggerReminders: protectedProcedure.mutation(async () => {
+      const { triggerReminderCheck } = await import('./reminderScheduler');
+      await triggerReminderCheck();
+      return { success: true, message: 'Reminder check triggered' };
+    }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

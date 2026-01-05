@@ -12,9 +12,10 @@ import { CalendarView } from '@/components/CalendarView';
 import { KanbanBoard } from '@/components/KanbanBoard';
 import { ExportSettings } from '@/components/ExportSettings';
 import { MetricsDashboard } from '@/components/MetricsDashboard';
+import { ReminderManagement } from '@/components/ReminderManagement';
 import { Card } from '@/components/ui/card';
 import { trpc } from '@/lib/trpc';
-import { Loader2, Calendar, LayoutGrid, TrendingUp, Users, Clock, CheckCircle, Download } from 'lucide-react';
+import { Loader2, Calendar, LayoutGrid, TrendingUp, Users, Clock, CheckCircle, Download, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
@@ -177,7 +178,7 @@ export default function AdminDashboard() {
 
         {/* Main Content - Tabs */}
         <Tabs defaultValue="kanban" className="w-full">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4 mb-6">
+          <TabsList className="grid w-full max-w-2xl grid-cols-5 mb-6">
             <TabsTrigger value="kanban" className="flex items-center gap-2">
               <LayoutGrid className="h-4 w-4" />
               Kanban Board
@@ -193,6 +194,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="metrics" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Métricas
+            </TabsTrigger>
+            <TabsTrigger value="reminders" className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Reminders
             </TabsTrigger>
           </TabsList>
 
@@ -222,6 +227,11 @@ export default function AdminDashboard() {
             <Card className="p-6">
               <MetricsDashboard />
             </Card>
+          </TabsContent>
+
+          {/* Reminders Tab */}
+          <TabsContent value="reminders" className="mt-0">
+            <ReminderManagement />
           </TabsContent>
         </Tabs>
       </div>

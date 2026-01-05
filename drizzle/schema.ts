@@ -102,6 +102,11 @@ export const trainingRequests = mysqlTable("training_requests", {
   tokenExpiresAt: timestamp("tokenExpiresAt"),
   
   status: mysqlEnum("status", ["pending", "awaiting_client_confirmation", "dates_selected", "approved", "rejected", "completed"]).default("pending").notNull(),
+  
+  // Reminder tracking
+  reminderSent: boolean("reminderSent").default(false),
+  reminderSentAt: timestamp("reminderSentAt"),
+  
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
