@@ -136,7 +136,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
                             <td width="200" valign="middle">
-                              <img src="https://manus-pub.s3.us-east-1.amazonaws.com/mACKzn5zlhSW.png" alt="FAGOR Automation" style="width: 150px; height: auto; display: block;">
+                              <img src="cid:fagorlogo" alt="FAGOR Automation" style="width: 150px; height: auto; display: block;">
                             </td>
                             <td align="right" valign="middle" style="font-size: 11px; color: #333; line-height: 1.6;">
                               <strong style="color: #DC241F; font-size: 12px;">FAGOR AUTOMATION CORP.</strong><br>
@@ -407,6 +407,13 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     </html>
   `;
 
+  // Read logo file
+  const fs = require('fs');
+  const path = require('path');
+  const logoPath = path.join(__dirname, 'fagor-logo.png');
+  const logoBuffer = fs.readFileSync(logoPath);
+  const logoBase64 = logoBuffer.toString('base64');
+
   // Send email to all recipients
   const msg = {
     to: recipients,
@@ -416,6 +423,15 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     },
     subject: `Training Quotation - ${referenceCode} - ${formData?.companyName || 'New Request'}`,
     html: htmlContent,
+    attachments: [
+      {
+        content: logoBase64,
+        filename: 'fagor-logo.png',
+        type: 'image/png',
+        disposition: 'inline',
+        content_id: 'fagorlogo'
+      }
+    ]
   };
 
   console.log('[Email] Sending email with config:', {
