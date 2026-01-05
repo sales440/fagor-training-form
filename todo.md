@@ -491,3 +491,11 @@
 - [ ] No hotel/car rental if client within 100 miles of FAGOR Anaheim, CA
 - [ ] Ensure FAGOR logo appears in PDF quotation document
 - [ ] Fix email delivery to jcrobledo@fagor-automation.com (not receiving emails)
+
+
+### 🔧 EMAIL TEMPLATE FIXES (Jan 3, 2026)
+
+- [ ] Remove AI summary content that triggers Gmail's "Visión general creada por IA" message
+- [ ] Reduce FAGOR logo size in email to professional letterhead dimensions (max 150-200px width)
+- [ ] Test email rendering in Gmail to verify no AI summary appears
+- [ ] Test email rendering in Outlook to verify logo displays at correct size

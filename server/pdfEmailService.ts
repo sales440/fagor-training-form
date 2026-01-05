@@ -136,7 +136,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
                         <table width="100%" cellpadding="0" cellspacing="0">
                           <tr>
                             <td width="200" valign="middle">
-                              <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310419663031167889/IukGvklFeOdVMKYo.png" alt="FAGOR Automation" style="height: 50px; width: auto;">
+                              <img src="https://manus-pub.s3.us-east-1.amazonaws.com/mACKzn5zlhSW.png" alt="FAGOR Automation" style="width: 150px; height: auto; display: block;">
                             </td>
                             <td align="right" valign="middle" style="font-size: 11px; color: #333; line-height: 1.6;">
                               <strong style="color: #DC241F; font-size: 12px;">FAGOR AUTOMATION CORP.</strong><br>
