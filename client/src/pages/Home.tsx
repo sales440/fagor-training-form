@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { SimpleModal, SimpleModalHeader, SimpleModalTitle } from "@/components/ui/simple-modal";
 import { Globe, Loader2, AlertCircle, Download } from "lucide-react";
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -47,33 +47,79 @@ export default function Home() {
     },
   });
 
-  const [formData, setFormData] = useState({
-    companyName: "",
-    contactPerson: "",
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    phone: "",
-    email: "",
-    machineBrand: "",
-    machineModel: "",
-    oemName: "",
-    oemAddress: "",
-    oemContact: "",
-    oemEmail: "",
-    oemPhone: "",
-    controllerModel: "",
-    machineType: "",
-    programmingType: "",
-    trainingDays: "",
-    trainees: "",
-    knowledgeLevel: "",
-    trainingDetails: "",
-    applicantName: "",
-    applicationDate: new Date().toISOString().split('T')[0],
-  });
+  // Load saved form data from localStorage on initial render
+  const getInitialFormData = () => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fagor-training-form-data');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          return {
+            ...parsed,
+            applicationDate: new Date().toISOString().split('T')[0], // Always use current date
+          };
+        } catch (e) {
+          console.error('Error parsing saved form data:', e);
+        }
+      }
+    }
+    return {
+      companyName: "",
+      contactPerson: "",
+      address1: "",
+      address2: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      phone: "",
+      email: "",
+      machineBrand: "",
+      machineModel: "",
+      oemName: "",
+      oemAddress: "",
+      oemContact: "",
+      oemEmail: "",
+      oemPhone: "",
+      controllerModel: "",
+      machineType: "",
+      programmingType: "",
+      trainingDays: "",
+      trainees: "",
+      knowledgeLevel: "",
+      trainingDetails: "",
+      applicantName: "",
+      applicationDate: new Date().toISOString().split('T')[0],
+    };
+  };
+
+  const [formData, setFormData] = useState(getInitialFormData);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Only save contact/company info fields (not training-specific fields)
+      const dataToSave = {
+        companyName: formData.companyName,
+        contactPerson: formData.contactPerson,
+        address1: formData.address1,
+        address2: formData.address2,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode,
+        phone: formData.phone,
+        email: formData.email,
+        machineBrand: formData.machineBrand,
+        machineModel: formData.machineModel,
+        oemName: formData.oemName,
+        oemAddress: formData.oemAddress,
+        oemContact: formData.oemContact,
+        oemEmail: formData.oemEmail,
+        oemPhone: formData.oemPhone,
+        applicantName: formData.applicantName,
+      };
+      localStorage.setItem('fagor-training-form-data', JSON.stringify(dataToSave));
+    }
+  }, [formData.companyName, formData.contactPerson, formData.address1, formData.address2, formData.city, formData.state, formData.zipCode, formData.phone, formData.email, formData.machineBrand, formData.machineModel, formData.oemName, formData.oemAddress, formData.oemContact, formData.oemEmail, formData.oemPhone, formData.applicantName]);
 
   const calculateQuotationMutation = trpc.trainingRequest.calculateQuotation.useMutation({
     onSuccess: (data) => {
@@ -870,42 +916,39 @@ export default function Home() {
         </div>
       </main>
 
-      {/* Warning Dialog */}
-      <Dialog open={showWarning} onOpenChange={setShowWarning}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-red-600">
-              <AlertCircle className="h-5 w-5" />
-              {t("warningTitle")}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="text-gray-700">{warningMessage}</p>
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={() => setShowWarning(false)}>OK</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Warning Modal */}
+      <SimpleModal open={showWarning} onClose={() => setShowWarning(false)} className="sm:max-w-md p-6">
+        <SimpleModalHeader>
+          <SimpleModalTitle className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="h-5 w-5" />
+            {t("warningTitle")}
+          </SimpleModalTitle>
+        </SimpleModalHeader>
+        <div className="py-4">
+          <p className="text-gray-700">{warningMessage}</p>
+        </div>
+        <div className="flex justify-end">
+          <Button onClick={() => setShowWarning(false)}>OK</Button>
+        </div>
+      </SimpleModal>
 
-      {/* Quotation Dialog */}
-      <Dialog open={showQuotation} onOpenChange={setShowQuotation}>
-        <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            {/* Fagor Header in Quotation */}
-            <div className="flex justify-between items-start mb-4 pb-4 border-b-2">
-              <img src="/fagor-logo-official.jpg" alt="Fagor Automation" className="h-12 object-contain" />
-              <div className="text-xs text-gray-700 text-right">
-                <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
-                <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
-                <p>{t("footerPhone")}: 847-981-1500 | {t("footerFax")}: 847-981-1311</p>
-                <p>service@fagor-automation.com</p>
-              </div>
+      {/* Quotation Modal */}
+      <SimpleModal open={showQuotation} onClose={() => setShowQuotation(false)} className="sm:max-w-3xl max-h-[90vh] overflow-y-auto p-6">
+        <SimpleModalHeader>
+          {/* Fagor Header in Quotation */}
+          <div className="flex justify-between items-start mb-4 pb-4 border-b-2">
+            <img src="/fagor-logo-official.jpg" alt="Fagor Automation" className="h-12 object-contain" />
+            <div className="text-xs text-gray-700 text-right">
+              <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
+              <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
+              <p>{t("footerPhone")}: 847-981-1500 | {t("footerFax")}: 847-981-1311</p>
+              <p>service@fagor-automation.com</p>
             </div>
-            <DialogTitle className="text-2xl text-[#DC241F] text-center mb-4">
-              {t("quotationTitle") || "TRAINING QUOTATION"}
-            </DialogTitle>
-          </DialogHeader>
+          </div>
+          <SimpleModalTitle className="text-2xl text-[#DC241F] text-center mb-4">
+            {t("quotationTitle") || "TRAINING QUOTATION"}
+          </SimpleModalTitle>
+        </SimpleModalHeader>
           {quotationData && (
             <div id="quotation-content" className="space-y-4">
               {/* Customer Information */}
@@ -1126,15 +1169,13 @@ export default function Home() {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+      </SimpleModal>
 
-      {/* Calendar Dialog */}
-      <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
-        <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-red-600">{t("selectTrainingDates")}</DialogTitle>
-          </DialogHeader>
+      {/* Calendar Modal */}
+      <SimpleModal open={showCalendar} onClose={() => setShowCalendar(false)} className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <SimpleModalHeader>
+          <SimpleModalTitle className="text-2xl font-bold text-red-600">{t("selectTrainingDates")}</SimpleModalTitle>
+        </SimpleModalHeader>
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
               trainingDays={savedTrainingDays}
@@ -1159,8 +1200,7 @@ export default function Home() {
               }}
             />
           )}
-        </DialogContent>
-      </Dialog>
+      </SimpleModal>
 
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-6">
