@@ -1,22 +1,17 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
-// Initialize SendGrid - trim API key to remove any whitespace/newlines
-const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY?.trim();
+// Initialize Resend
+const RESEND_API_KEY = process.env.RESEND_API_KEY?.trim();
 
-// Log initialization status
-console.log('[Email] Initializing SendGrid...');
-console.log('[Email] API Key present:', !!SENDGRID_API_KEY);
-console.log('[Email] API Key starts with SG.:', SENDGRID_API_KEY?.startsWith('SG.'));
+console.log('[Email] Initializing Resend...');
+console.log('[Email] API Key present:', !!RESEND_API_KEY);
 
-if (SENDGRID_API_KEY) {
-  if (SENDGRID_API_KEY.startsWith('SG.')) {
-    sgMail.setApiKey(SENDGRID_API_KEY);
-    console.log('[Email] SendGrid initialized successfully');
-  } else {
-    console.error('[Email] Invalid SendGrid API key format - should start with SG.');
-  }
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+if (resend) {
+  console.log('[Email] Resend initialized successfully');
 } else {
-  console.warn('[Email] SendGrid API key not configured');
+  console.warn('[Email] Resend API key not configured');
 }
 
 // Fixed notification emails
@@ -25,8 +20,8 @@ const NOTIFICATION_EMAILS = (process.env.NOTIFICATION_EMAILS || 'jcrobledo@fagor
   .map(email => email.trim())
   .filter(email => email.length > 0);
 
-// Email from address - MUST be verified in SendGrid
-const EMAIL_FROM = (process.env.EMAIL_FROM || 'noreply@fagor-automation.com').trim();
+// Email from address - MUST be verified in Resend
+const EMAIL_FROM = 'FAGOR Training <onboarding@resend.dev>';
 
 console.log('[Email] From address:', EMAIL_FROM);
 console.log('[Email] Notification emails:', NOTIFICATION_EMAILS);
@@ -72,13 +67,8 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     hasQuotationData: !!quotationData
   });
 
-  if (!SENDGRID_API_KEY) {
-    console.warn('[Email] SendGrid API key not configured, skipping email');
-    return;
-  }
-
-  if (!SENDGRID_API_KEY.startsWith('SG.')) {
-    console.error('[Email] Invalid SendGrid API key format, skipping email');
+  if (!resend) {
+    console.warn('[Email] Resend not configured, skipping email');
     return;
   }
 
@@ -113,7 +103,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
 
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  // Professional executive HTML email template - CENTERED ON LETTER SIZE PAGE
+  // Professional executive HTML email template
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -122,22 +112,18 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
-      <!-- OUTER WRAPPER FOR CENTERING -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 20px 0;">
         <tr>
           <td align="center">
-            <!-- MAIN CONTENT CONTAINER - 8.5" x 11" letter size (650px width for email) -->
             <table width="650" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border: 1px solid #e0e0e0; margin: 0 auto;">
               
               <!-- HEADER WITH FAGOR LETTERHEAD -->
               <tr>
                 <td style="padding: 0;">
                   <table width="100%" cellpadding="0" cellspacing="0">
-                    <!-- Red stripe -->
                     <tr>
                       <td style="background-color: #DC241F; height: 6px;"></td>
                     </tr>
-                    <!-- Logo and address -->
                     <tr>
                       <td style="padding: 20px 30px; border-bottom: 2px solid #DC241F;">
                         <table width="100%" cellpadding="0" cellspacing="0">
@@ -362,7 +348,7 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
                   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fff8e1; border: 1px solid #ffc107; border-radius: 4px;">
                     <tr>
                       <td style="padding: 12px 15px; font-size: 11px; color: #856404;">
-                        <strong>⚠️ Important Notice:</strong> The selected dates will be reviewed and confirmed by the SERVICE office of FAGOR Automation USA. You will receive a confirmation email with the final approved dates.
+                        <strong>Important Notice:</strong> The selected dates will be reviewed and confirmed by the SERVICE office of FAGOR Automation USA. You will receive a confirmation email with the final approved dates.
                       </td>
                     </tr>
                   </table>
@@ -374,13 +360,13 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
                 <td style="padding: 0 30px 20px 30px;">
                   <h3 style="margin: 0 0 10px 0; font-size: 13px; color: #DC241F; text-transform: uppercase; letter-spacing: 0.5px;">Terms and Conditions</h3>
                   <table width="100%" cellpadding="0" cellspacing="0" style="font-size: 11px; color: #555; line-height: 1.6;">
-                    <tr><td style="padding: 3px 0;">• Prices in USD without taxes</td></tr>
-                    <tr><td style="padding: 3px 0;">• Training Day 1: $1,400.00 USD | Additional Days: $1,000.00 USD each</td></tr>
-                    <tr><td style="padding: 3px 0;">• This offer includes 6 hours of on-site training for a maximum of 4 participants per day</td></tr>
-                    <tr><td style="padding: 3px 0;">• Travel expenses are estimated and subject to change based on actual costs incurred</td></tr>
-                    <tr><td style="padding: 3px 0;">• The FAGOR application engineer will not carry out any mechanical and/or electrical assembly work</td></tr>
-                    <tr><td style="padding: 3px 0;">• Payment must be received before the training date unless NET30 terms are agreed</td></tr>
-                    <tr><td style="padding: 3px 0;">• Any cancellation must be made at least 7 days before the scheduled training date</td></tr>
+                    <tr><td style="padding: 3px 0;">Prices in USD without taxes</td></tr>
+                    <tr><td style="padding: 3px 0;">Training Day 1: $1,400.00 USD | Additional Days: $1,000.00 USD each</td></tr>
+                    <tr><td style="padding: 3px 0;">This offer includes 6 hours of on-site training for a maximum of 4 participants per day</td></tr>
+                    <tr><td style="padding: 3px 0;">Travel expenses are estimated and subject to change based on actual costs incurred</td></tr>
+                    <tr><td style="padding: 3px 0;">The FAGOR application engineer will not carry out any mechanical and/or electrical assembly work</td></tr>
+                    <tr><td style="padding: 3px 0;">Payment must be received before the training date unless NET30 terms are agreed</td></tr>
+                    <tr><td style="padding: 3px 0;">Any cancellation must be made at least 7 days before the scheduled training date</td></tr>
                   </table>
                 </td>
               </tr>
@@ -412,35 +398,25 @@ export async function sendQuotationPdfEmail(params: QuotationEmailParams): Promi
     </html>
   `;
 
-  // Send email to all recipients - NO LOGO ATTACHMENT, using public URL instead
-  const msg = {
-    to: recipients,
-    from: {
-      email: EMAIL_FROM,
-      name: 'FAGOR Automation Training'
-    },
-    subject: `Training Quotation - ${referenceCode} - ${formData?.companyName || 'New Request'}`,
-    html: htmlContent
-  };
-
-  console.log('[Email] Sending email with config:', {
-    to: recipients,
-    from: EMAIL_FROM,
-    subject: msg.subject
-  });
+  console.log('[Email] Sending email with Resend to:', recipients);
 
   try {
-    const response = await sgMail.send(msg);
-    console.log(`[Email] Quotation sent successfully to: ${recipients.length} recipients`);
-    console.log('[Email] SendGrid response:', response[0]?.statusCode);
-  } catch (error: any) {
-    console.error('[Email] SendGrid error details:');
-    console.error('[Email] Error message:', error?.message);
-    console.error('[Email] Error code:', error?.code);
-    if (error?.response) {
-      console.error('[Email] Response status:', error.response.statusCode);
-      console.error('[Email] Response body:', JSON.stringify(error.response.body, null, 2));
+    const { data, error } = await resend.emails.send({
+      from: EMAIL_FROM,
+      to: recipients,
+      subject: `Training Quotation - ${referenceCode} - ${formData?.companyName || 'New Request'}`,
+      html: htmlContent
+    });
+
+    if (error) {
+      console.error('[Email] Resend error:', error);
+      throw new Error(error.message);
     }
+
+    console.log(`[Email] Quotation sent successfully to: ${recipients.length} recipients`);
+    console.log('[Email] Resend response:', data);
+  } catch (error: any) {
+    console.error('[Email] Error sending email:', error?.message);
     throw error;
   }
 }

@@ -518,3 +518,20 @@
 - [ ] FIX CRITICAL: "Error submitting request. Please try again." when clicking ACCEPT QUOTATION button
 - [x] FIX CRITICAL: "Failed to generate PDF" when clicking Download PDF button (improved error handling and DOM readiness check)
 - [x] FIX: TypeScript errors in routers.ts (email vs clientEmail property mismatch)
+
+
+---
+
+## 🌐 TRANSLATION FIXES (Jan 14, 2026)
+
+- [ ] FIX CRITICAL: All dropdown options (CNC Model, Machine Type, Programming Type, Knowledge Level) must be fully translated
+- [ ] FIX: Native select options are hardcoded in English instead of using t() translation function
+- [ ] FIX: Ensure 100% translation coverage for ES, PT, FR, DE, IT languages
+
+
+## Bug Fixes - January 14, 2026
+
+- [x] FIX CRITICAL: PDF generation error "Attempting to parse an unsupported color function 'oklch'" - Converted all OKLCH colors to RGB/HEX format in index.css
+- [x] FIX CRITICAL: Form submission error "Error submitting request" - Migrated from SendGrid to Resend API (RESEND_API_KEY is available in Manus environment)
+- [x] FIX CRITICAL: pdfEmailService.ts also migrated from SendGrid to Resend API
+- [x] VERIFY: All 8 language translations working correctly without mixing languages (ES, EN, FR, IT, DE, PT, ZH, EU)

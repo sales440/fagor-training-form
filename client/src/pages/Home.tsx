@@ -268,10 +268,10 @@ export default function Home() {
     const requiredFields = [
       { field: formData.companyName, name: t("companyNameLabel") },
       { field: formData.contactPerson, name: t("contactPersonLabel") },
-      { field: formData.address1, name: "Address 1" },
-      { field: formData.city, name: "City" },
-      { field: formData.state, name: "State" },
-      { field: formData.zipCode, name: "Zip Code" },
+      { field: formData.address1, name: t("address1Label") },
+      { field: formData.city, name: t("cityLabel") },
+      { field: formData.state, name: t("stateLabel") },
+      { field: formData.zipCode, name: t("zipCodeLabel") },
       { field: formData.phone, name: t("phoneLabel") },
       { field: formData.email, name: t("emailLabel") },
       { field: formData.trainingDays, name: t("trainingDaysLabel") },
@@ -378,7 +378,7 @@ export default function Home() {
             <div className="text-sm text-gray-700 text-right mr-4">
               <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
               <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
-              <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+              <p>{t("footerPhone")}: 847-981-1500 | {t("footerFax")}: 847-981-1311</p>
               <p>service@fagor-automation.com</p>
             </div>
           </div>
@@ -467,27 +467,27 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="address1" className="required">
-                      Address 1
+                      {t("address1Label")}
                     </Label>
                     <Input
                       ref={addressInputRef}
                       id="address1"
                       value={formData.address1}
                       onChange={(e) => handleInputChange("address1", e.target.value)}
-                      placeholder="Street address"
+                      placeholder={t("address1Placeholder")}
                       autoComplete="off"
                       required
                     />
                   </div>
                   <div>
                     <Label htmlFor="address2">
-                      Address 2
+                      {t("address2Label")}
                     </Label>
                     <Input
                       id="address2"
                       value={formData.address2}
                       onChange={(e) => handleInputChange("address2", e.target.value)}
-                      placeholder="Apt, suite, unit, etc. (optional)"
+                      placeholder={t("address2Placeholder")}
                     />
                   </div>
                 </div>
@@ -495,7 +495,7 @@ export default function Home() {
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="city" className="required">
-                      City
+                      {t("cityLabel")}
                     </Label>
                     <Input
                       id="city"
@@ -506,7 +506,7 @@ export default function Home() {
                   </div>
                   <div>
                     <Label htmlFor="state" className="required">
-                      State
+                      {t("stateLabel")}
                     </Label>
                     <Input
                       id="state"
@@ -519,7 +519,7 @@ export default function Home() {
                   </div>
                   <div>
                     <Label htmlFor="zipCode" className="required">
-                      Zip Code
+                      {t("zipCodeLabel")}
                     </Label>
                     <Input
                       id="zipCode"
@@ -662,7 +662,7 @@ export default function Home() {
                       onChange={(e) => handleInputChange("controllerModel", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
                     >
-                      <option value="">Select CNC Model</option>
+                      <option value="">{t("selectCncModel")}</option>
                       <option value="8055">8055</option>
                       <option value="8058">8058</option>
                       <option value="8060">8060</option>
@@ -678,7 +678,7 @@ export default function Home() {
                       onChange={(e) => handleInputChange("machineType", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
                     >
-                      <option value="">Select Machine Type</option>
+                      <option value="">{t("selectMachineType")}</option>
                       <option value="mill">{t("mill")}</option>
                       <option value="lathe">{t("lathe")}</option>
                     </select>
@@ -686,13 +686,13 @@ export default function Home() {
                 </div>
 
                 <div>
-                  <Label htmlFor="trainingDetails">Training Details / Special Requirements</Label>
+                  <Label htmlFor="trainingDetails">{t("trainingDetailsLabel")}</Label>
                   <textarea
                     id="trainingDetails"
                     value={formData.trainingDetails}
                     onChange={(e) => handleInputChange("trainingDetails", e.target.value)}
                     className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F]"
-                    placeholder="Please describe the type of training you would like to receive in detail..."
+                    placeholder={t("trainingDetailsPlaceholder")}
                   />
                 </div>
 
@@ -705,7 +705,7 @@ export default function Home() {
                       onChange={(e) => handleInputChange("programmingType", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
                     >
-                      <option value="">Select Programming Type</option>
+                      <option value="">{t("selectProgrammingType")}</option>
                       <option value="conversational">{t("conversational")}</option>
                       <option value="gcode">G-Code</option>
                     </select>
@@ -743,7 +743,7 @@ export default function Home() {
                       onChange={(e) => handleInputChange("knowledgeLevel", e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
                     >
-                      <option value="">Select Knowledge Level</option>
+                      <option value="">{t("selectKnowledgeLevel")}</option>
                       <option value="beginner">{t("beginner")}</option>
                       <option value="intermediate">{t("intermediate")}</option>
                       <option value="advanced">{t("advanced")}</option>
@@ -898,7 +898,7 @@ export default function Home() {
               <div className="text-xs text-gray-700 text-right">
                 <p className="font-semibold"><span className="text-[#DC241F]">FAGOR AUTOMATION</span> Corp.</p>
                 <p>4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
-                <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+                <p>{t("footerPhone")}: 847-981-1500 | {t("footerFax")}: 847-981-1311</p>
                 <p>service@fagor-automation.com</p>
               </div>
             </div>
@@ -910,7 +910,7 @@ export default function Home() {
             <div id="quotation-content" className="space-y-4">
               {/* Customer Information */}
               <div className="bg-gray-50 p-4 rounded-lg">
-                <h3 className="font-bold text-[#DC241F] mb-2">End User Information</h3>
+                <h3 className="font-bold text-[#DC241F] mb-2">{t("endUserInfo")}</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div><strong>{t("quotationDate") || "Date"}:</strong></div>
                   <div>{new Date().toLocaleDateString()}</div>
@@ -930,17 +930,17 @@ export default function Home() {
               {/* OEM Information (if provided) */}
               {formData.oemName && (
                 <div className="bg-blue-50 p-4 rounded-lg">
-                  <h3 className="font-bold text-[#DC241F] mb-2">OEM Information</h3>
+                  <h3 className="font-bold text-[#DC241F] mb-2">{t("oemInfo")}</h3>
                   <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div><strong>OEM Name:</strong></div>
+                    <div><strong>{t("oemNameLabel")}:</strong></div>
                     <div>{formData.oemName}</div>
-                    <div><strong>OEM Contact:</strong></div>
+                    <div><strong>{t("oemContactLabel")}:</strong></div>
                     <div>{formData.oemContact}</div>
-                    <div><strong>OEM Address:</strong></div>
+                    <div><strong>{t("oemAddressLabel")}:</strong></div>
                     <div>{formData.oemAddress}</div>
-                    <div><strong>OEM Phone:</strong></div>
+                    <div><strong>{t("oemPhoneLabel")}:</strong></div>
                     <div>{formData.oemPhone}</div>
-                    <div><strong>OEM Email:</strong></div>
+                    <div><strong>{t("oemEmailLabel")}:</strong></div>
                     <div>{formData.oemEmail}</div>
                   </div>
                 </div>
@@ -948,17 +948,17 @@ export default function Home() {
 
               {/* Machine Information */}
               <div className="bg-green-50 p-4 rounded-lg">
-                <h3 className="font-bold text-[#DC241F] mb-2">Machine & CNC Information</h3>
+                <h3 className="font-bold text-[#DC241F] mb-2">{t("machineAndCncInfo")}</h3>
                 <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div><strong>CNC Model:</strong></div>
+                  <div><strong>{t("cncModel")}:</strong></div>
                   <div>{formData.controllerModel}</div>
-                  <div><strong>Machine Brand:</strong></div>
+                  <div><strong>{t("machineBrandLabel")}:</strong></div>
                   <div>{formData.machineBrand}</div>
-                  <div><strong>Machine Model:</strong></div>
+                  <div><strong>{t("machineModelLabel")}:</strong></div>
                   <div>{formData.machineModel}</div>
-                  <div><strong>Machine Type:</strong></div>
+                  <div><strong>{t("machineTypeLabel")}:</strong></div>
                   <div>{formData.machineType}</div>
-                  <div><strong>Programming Type:</strong></div>
+                  <div><strong>{t("programmingTypeLabel")}:</strong></div>
                   <div>{formData.programmingType}</div>
                 </div>
               </div>
@@ -1099,7 +1099,7 @@ export default function Home() {
                   ) : (
                     <>
                       <Download className="mr-2 h-4 w-4" />
-                      Download PDF
+                      {t("downloadPdf")}
                     </>
                   )}
                 </Button>
@@ -1130,7 +1130,7 @@ export default function Home() {
       <Dialog open={showCalendar} onOpenChange={setShowCalendar}>
         <DialogContent className="max-w-[95vw] sm:max-w-2xl md:max-w-3xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-red-600">Select Training Dates</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-red-600">{t("selectTrainingDates")}</DialogTitle>
           </DialogHeader>
           {showCalendar && referenceCode && (
             <AvailabilityCalendar
@@ -1162,9 +1162,9 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-white border-t border-gray-200 mt-12 py-6">
         <div className="container text-center text-gray-600 text-sm">
-          <p>© 2025 Fagor Automation Corp. All rights reserved.</p>
+          <p>{t("footerCopyright")}</p>
           <p className="mt-1">4020 Winnetta Ave, Rolling Meadows, IL 60008</p>
-          <p>Tel: 847-981-1500 | Fax: 847-981-1311</p>
+          <p>{t("footerPhone")}: 847-981-1500 | {t("footerFax")}: 847-981-1311</p>
         </div>
       </footer>
     </div>
