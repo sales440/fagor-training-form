@@ -1078,24 +1078,25 @@ export default function Home() {
                 </div>
 
                 {/* Route Map - wrapped to prevent removeChild DOM errors */}
+                {/* Travel Route - Using Static Map Image instead of iframe to prevent DOM errors on mobile */}
                 {showQuotation && quotationData?.travelExpenses?.nearestAirport && (
                   <div className="bg-white border-2 border-gray-200 rounded-lg p-4">
                     <h3 className="font-bold text-lg mb-3 text-[#DC241F]">Travel Route</h3>
                     <p className="text-sm text-gray-600 mb-3">
                       Route from {quotationData.travelExpenses.nearestAirport} Airport to your location
                     </p>
-                    <div className="w-full h-64 rounded-lg overflow-hidden border border-gray-300">
-                      <iframe
-                        key={`map-${formData.zipCode}-${quotationData.travelExpenses.nearestAirport}`}
-                        title="Travel Route Map"
-                        width="100%"
-                        height="100%"
-                        style={{ border: 0 }}
+                    <div className="w-full rounded-lg overflow-hidden border border-gray-300">
+                      {/* Static Map Image - No iframe to avoid removeChild DOM errors */}
+                      <img
+                        src={`https://maps.googleapis.com/maps/api/staticmap?size=600x300&maptype=roadmap&markers=color:green%7Clabel:A%7C${encodeURIComponent(quotationData.travelExpenses.nearestAirport + ' Airport')}&markers=color:red%7Clabel:B%7C${encodeURIComponent(`${formData.address1}, ${formData.city}, ${formData.state} ${formData.zipCode}`)}&path=color:0x0000ff%7Cweight:3%7C${encodeURIComponent(quotationData.travelExpenses.nearestAirport + ' Airport')}%7C${encodeURIComponent(`${formData.address1}, ${formData.city}, ${formData.state} ${formData.zipCode}`)}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}`}
+                        alt={`Route from ${quotationData.travelExpenses.nearestAirport} Airport to ${formData.city}`}
+                        className="w-full h-auto"
                         loading="lazy"
-                        allowFullScreen
-                        referrerPolicy="no-referrer-when-downgrade"
-                        src={`https://www.google.com/maps/embed/v1/directions?key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}&origin=${encodeURIComponent(quotationData.travelExpenses.nearestAirport + ' Airport')}&destination=${encodeURIComponent(`${formData.address1}${formData.address2 ? ', ' + formData.address2 : ''}, ${formData.city}, ${formData.state} ${formData.zipCode}`)}&mode=driving`}
                       />
+                    </div>
+                    <div className="mt-2 text-xs text-gray-500 flex justify-between">
+                      <span>🟢 A: {quotationData.travelExpenses.nearestAirport} Airport</span>
+                      <span>🔴 B: {formData.city}, {formData.state}</span>
                     </div>
                   </div>
                 )}

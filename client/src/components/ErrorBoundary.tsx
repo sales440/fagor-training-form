@@ -18,7 +18,36 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   static getDerivedStateFromError(error: Error): State {
+    // Check if this is a DOM manipulation error that we can safely ignore
+    const isDOMError = error.message?.includes('removeChild') || 
+                       error.message?.includes('insertBefore') ||
+                       error.message?.includes('appendChild') ||
+                       error.name === 'NotFoundError';
+    
+    // For DOM errors, try to recover without showing error UI
+    if (isDOMError) {
+      console.warn('[ErrorBoundary] Caught DOM manipulation error, attempting recovery:', error.message);
+      return { hasError: false, error: null };
+    }
+    
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    // Log error for debugging
+    console.error('[ErrorBoundary] Error caught:', error);
+    console.error('[ErrorBoundary] Error info:', errorInfo);
+    
+    // Check if this is a recoverable DOM error
+    const isDOMError = error.message?.includes('removeChild') || 
+                       error.message?.includes('insertBefore') ||
+                       error.message?.includes('appendChild') ||
+                       error.name === 'NotFoundError';
+    
+    if (isDOMError) {
+      // Reset the error state to allow re-render
+      this.setState({ hasError: false, error: null });
+    }
   }
 
   render() {
