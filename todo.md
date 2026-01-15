@@ -507,3 +507,14 @@
 - [x] FIX: Center quotation email content on letter-size page (currently left-aligned)
 - [x] FIX: Ensure all prices/amounts display correctly in quotation breakdown table
 - [x] FIX: Improve overall email layout and professional appearance
+
+
+---
+
+## 🚨 CRITICAL PRODUCTION BUGS (Jan 5, 2026) - IMMEDIATE FIX REQUIRED
+
+- [x] FIX CRITICAL: removeChild DOM error when changing Machine Type from Mill to Lathe (replaced shadcn Select with native HTML select)
+- [x] FIX CRITICAL: removeChild DOM error when selecting CNC model (replaced all Select components with native selects)
+- [ ] FIX CRITICAL: "Error submitting request. Please try again." when clicking ACCEPT QUOTATION button
+- [x] FIX CRITICAL: "Failed to generate PDF" when clicking Download PDF button (improved error handling and DOM readiness check)
+- [x] FIX: TypeScript errors in routers.ts (email vs clientEmail property mismatch)

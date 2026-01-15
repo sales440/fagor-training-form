@@ -197,11 +197,24 @@ export default function Home() {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
+    if (isGeneratingPdf) return; // Prevent double-click
+    
     setIsGeneratingPdf(true);
     try {
+      // Wait for DOM to be fully ready
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const quotationElement = document.getElementById('quotation-content');
       if (!quotationElement) {
-        toast.error('Could not generate PDF');
+        console.error('Quotation element not found in DOM');
+        toast.error('Could not generate PDF. Please try again.');
+        return;
+      }
+
+      // Ensure element is visible and has content
+      if (quotationElement.offsetHeight === 0) {
+        console.error('Quotation element has no height');
+        toast.error('Could not generate PDF. Please try again.');
         return;
       }
 
@@ -209,7 +222,10 @@ export default function Home() {
         scale: 2,
         useCORS: true,
         logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        removeContainer: true, // Clean up after rendering
+        windowWidth: quotationElement.scrollWidth,
+        windowHeight: quotationElement.scrollHeight
       });
 
       const imgData = canvas.toDataURL('image/png');
@@ -240,7 +256,8 @@ export default function Home() {
       toast.success('PDF downloaded successfully!');
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Failed to generate PDF');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to generate PDF: ${errorMessage}`);
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -639,30 +656,32 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="controllerModel">{t("controllerModelLabel")}</Label>
-                    <Select value={formData.controllerModel} onValueChange={(value) => handleInputChange("controllerModel", value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select CNC Model" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="8055">8055</SelectItem>
-                        <SelectItem value="8058">8058</SelectItem>
-                        <SelectItem value="8060">8060</SelectItem>
-                        <SelectItem value="8065">8065</SelectItem>
-                        <SelectItem value="8070">8070</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="controllerModel"
+                      value={formData.controllerModel}
+                      onChange={(e) => handleInputChange("controllerModel", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
+                    >
+                      <option value="">Select CNC Model</option>
+                      <option value="8055">8055</option>
+                      <option value="8058">8058</option>
+                      <option value="8060">8060</option>
+                      <option value="8065">8065</option>
+                      <option value="8070">8070</option>
+                    </select>
                   </div>
                   <div>
                     <Label htmlFor="machineType">{t("machineTypeLabel")}</Label>
-                    <Select value={formData.machineType} onValueChange={(value) => handleInputChange("machineType", value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="mill">{t("mill")}</SelectItem>
-                        <SelectItem value="lathe">{t("lathe")}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="machineType"
+                      value={formData.machineType}
+                      onChange={(e) => handleInputChange("machineType", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
+                    >
+                      <option value="">Select Machine Type</option>
+                      <option value="mill">{t("mill")}</option>
+                      <option value="lathe">{t("lathe")}</option>
+                    </select>
                   </div>
                 </div>
 
@@ -680,15 +699,16 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="programmingType">{t("programmingTypeLabel")}</Label>
-                    <Select value={formData.programmingType} onValueChange={(value) => handleInputChange("programmingType", value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="conversational">{t("conversational")}</SelectItem>
-                        <SelectItem value="gcode">G-Code</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="programmingType"
+                      value={formData.programmingType}
+                      onChange={(e) => handleInputChange("programmingType", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
+                    >
+                      <option value="">Select Programming Type</option>
+                      <option value="conversational">{t("conversational")}</option>
+                      <option value="gcode">G-Code</option>
+                    </select>
                   </div>
                   <div>
                     <Label htmlFor="trainingDays" className="required">{t("trainingDaysLabel")}</Label>
@@ -717,16 +737,17 @@ export default function Home() {
                   </div>
                   <div>
                     <Label htmlFor="knowledgeLevel">{t("knowledgeLevelLabel")}</Label>
-                    <Select value={formData.knowledgeLevel} onValueChange={(value) => handleInputChange("knowledgeLevel", value)}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="beginner">{t("beginner")}</SelectItem>
-                        <SelectItem value="intermediate">{t("intermediate")}</SelectItem>
-                        <SelectItem value="advanced">{t("advanced")}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <select
+                      id="knowledgeLevel"
+                      value={formData.knowledgeLevel}
+                      onChange={(e) => handleInputChange("knowledgeLevel", e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#DC241F] bg-white"
+                    >
+                      <option value="">Select Knowledge Level</option>
+                      <option value="beginner">{t("beginner")}</option>
+                      <option value="intermediate">{t("intermediate")}</option>
+                      <option value="advanced">{t("advanced")}</option>
+                    </select>
                   </div>
                 </div>
               </CardContent>

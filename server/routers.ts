@@ -488,12 +488,11 @@ export const appRouter = router({
         const request = await db.select().from(trainingRequests).where(eq(trainingRequests.id, input.id)).limit(1);
         if (request[0]) {
           await sendDateApprovalEmail({
-            email: request[0].email,
+            clientEmail: request[0].email,
             companyName: request[0].companyName,
             contactPerson: request[0].contactPerson,
             referenceCode: request[0].referenceCode!,
-            approvedDates: JSON.parse(request[0].preferredDates || "[]"),
-            notes: input.notes
+            approvedDates: JSON.parse(request[0].preferredDates || "[]")
           });
         }
         return { success: true };
@@ -512,11 +511,11 @@ export const appRouter = router({
         const request = await db.select().from(trainingRequests).where(eq(trainingRequests.id, input.id)).limit(1);
         if (request[0]) {
           await sendDateRejectionEmail({
-            email: request[0].email,
+            clientEmail: request[0].email,
             companyName: request[0].companyName,
             contactPerson: request[0].contactPerson,
             referenceCode: request[0].referenceCode!,
-            reason: input.reason
+            rejectionReason: input.reason
           });
         }
         return { success: true };
